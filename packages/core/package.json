@@ -1,0 +1,21 @@
+{
+  "name": "@ayatori/core",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "./dist/ayatori-core.umd.cjs",
+  "module": "./dist/ayatori-core.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/ayatori-core.js",
+      "require": "./dist/ayatori-core.umd.cjs"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "dev": "vite build --watch",
+    "build": "tsc && vite build",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  }
+}
