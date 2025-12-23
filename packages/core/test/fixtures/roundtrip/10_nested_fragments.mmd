@@ -1,0 +1,10 @@
+sequenceDiagram
+    participant A
+    participant B
+    loop Retry
+        alt Network OK
+            A->>B: Send Data
+        else Network Error
+            A->>A: Wait
+        end
+    end

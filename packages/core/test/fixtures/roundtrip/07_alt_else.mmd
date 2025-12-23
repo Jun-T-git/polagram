@@ -1,0 +1,10 @@
+sequenceDiagram
+    participant A
+    participant B
+    alt Successful
+        A->>B: Login
+        B->>A: OK
+    else Failed
+        A->>B: Login
+        B->>A: Error
+    end

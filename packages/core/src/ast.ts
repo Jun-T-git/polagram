@@ -2,7 +2,12 @@
 
 /**
  * Ayatori Abstract Syntax Tree (AST) Definitions
- * Mermaidのテキストを解析し、この構造に変換します。
+ *
+ * Designed to be a lossless representation of Sequence Diagrams from:
+ * - Mermaid
+ * - PlantUML
+ *
+ * It captures structure, semantics (lifecycle, grouping), and necessary visual hints.
  */
 
 // ------------------------------------------------------------------
@@ -11,85 +16,186 @@
 
 export interface AyatoriRoot {
   kind: 'root';
-  meta: {
-    version: string;   // ex: "1.0.0"
-    source: string;    // ex: "mermaid"
-  };
+  meta: MetaData;
   participants: Participant[];
-  events: EventNode[]; // トップレベルのイベント（メッセージやブロック）
+  groups: ParticipantGroup[]; // Support for Box/Group
+  events: EventNode[];
+}
+
+export interface MetaData {
+  version: string;
+  source: 'mermaid' | 'plantuml' | 'unknown';
+  title?: string;
+  theme?: Record<string, string>; // Global theme/style configs
 }
 
 // ------------------------------------------------------------------
-// 2. Participants (登場人物)
+// 2. Participants & Grouping
 // ------------------------------------------------------------------
 
 export interface Participant {
-  id: string;          // 内部的なユニークID (ex: "p_1")
-  name: string;        // 表示名 (ex: "User")
-  alias?: string;      // Mermaid上のエイリアス (ex: "U")
+  id: string;
+  name: string;        // Display name
+  alias?: string;      // Code alias (e.g., "A" for "Alice")
   type: ParticipantType;
+  stereotype?: string; // <<Service>> etc.
+  style?: StyleProps;  // Specific color/style overrides
 }
 
-export type ParticipantType = 'actor' | 'participant' | 'database' | 'boundary' | 'control' | 'entity';
+export type ParticipantType =
+  | 'participant'
+  | 'actor'
+  | 'boundary'
+  | 'control'
+  | 'entity'
+  | 'database'
+  | 'collections' // PlantUML collections
+  | 'queue';      // PlantUML queue
+
+export interface ParticipantGroup {
+  kind: 'group';
+  id: string;
+  name?: string;       // Label for the box (e.g., "AWS Cloud")
+  type?: string;       // "box", "package", etc.
+  participantIds: string[]; // Participants inside this group
+  style?: StyleProps;  // Background color (e.g., box "Green")
+}
 
 // ------------------------------------------------------------------
-// 3. Events (シーケンスの中身)
+// 3. Events (The Sequence)
 // ------------------------------------------------------------------
 
-// 全てのイベントノードの直和型 (Discriminated Union)
-export type EventNode = 
-  | MessageNode 
-  | FragmentNode 
-  | NoteNode 
-  | DividerNode;
+export type EventNode =
+  | MessageNode
+  | FragmentNode
+  | NoteNode
+  | DividerNode
+  | ActivationNode
+  | ReferenceNode
+  | SpacerNode;
 
-// --- A. Message (矢印) ---
+// --- A. Message (Communication & Lifecycle) ---
+
+export type MessageEndpoint = string | null; // null = Found/Lost (Gate)
+
+/**
+ * Represents a directional interaction.
+ * Includes standard sync/async calls, returns, and object creation/deletion.
+ */
 export interface MessageNode {
   kind: 'message';
   id: string;
-  from: string;        // Participant ID
-  to: string;          // Participant ID
-  text: string;        // メッセージ本文
+  from: MessageEndpoint;
+  to: MessageEndpoint;
+  text: string;
+  
+  // Semantic Type
+  // - sync: Solid line, standard call
+  // - async: Open arrow, async message
+  // - reply: Dotted line, return message
+  // - create: "new", points to object head (Participant should be placed here)
+  // - destroy: Points to object X (Participant ends here)
+  type: 'sync' | 'async' | 'reply' | 'create' | 'destroy';
+
   style: {
-    line: 'solid' | 'dotted';             // 実線 | 点線
-    head: 'arrow' | 'async' | 'open';     // -> | ->> | --
-    cross: boolean;                       // x付き (->x) かどうか
+    line: 'solid' | 'dotted';
+    head: 'arrow' | 'async' | 'open' | 'cross'; // cross for lost messages sometimes
+    color?: string;
   };
+  
+  // Lifecycle effects attached to this message (Syntactic sugar)
+  // e.g., mermaid "User->>+System: Call" implies activateTarget
   lifecycle?: {
-    activateTarget?: boolean;  // 受信側をactivateするか (+)
-    deactivateSource?: boolean; // 送信側をdeactivateするか (-)
+    activateTarget?: boolean;
+    deactivateSource?: boolean;
   };
 }
 
-// --- B. Fragment (構造化ブロック: alt, loop, etc) ---
-// これが「折りたたみ」の単位になります
+// --- B. Fragment (Structured Control Flow) ---
+
 export interface FragmentNode {
   kind: 'fragment';
   id: string;
   operator: FragmentOperator;
-  branches: FragmentBranch[]; // 分岐のリスト
+  branches: FragmentBranch[];
 }
 
-export type FragmentOperator = 'alt' | 'loop' | 'opt' | 'par' | 'critical' | 'break' | 'rect';
+export type FragmentOperator = 
+  | 'alt' 
+  | 'opt' 
+  | 'loop' 
+  | 'par' 
+  | 'break' 
+  | 'critical' 
+  | 'rect'    // Visual grouping often used in Mermaid
+  | 'group';  // Generic group in PlantUML
 
 export interface FragmentBranch {
   id: string;
-  condition: string;    // 分岐条件 (ex: "成功時", "x > 0")
-  events: EventNode[];  // 【再帰構造】この分岐の中にあるイベント
+  condition?: string;   // e.g., "Success", "[x > 5]"
+  events: EventNode[];
 }
 
-// --- C. Note (ノート) ---
+// --- C. Note (Annotation) ---
+
 export interface NoteNode {
   kind: 'note';
   id: string;
   text: string;
   position: 'left' | 'right' | 'over';
-  participantIds: string[]; // どの参加者に対するノートか
+  participantIds: string[]; // 1 ID for left/right, 1+ for over
+  style?: StyleProps;
 }
 
-// --- D. Divider (区切り線) ---
+// --- D. Activation (Independent Lifecycle) ---
+
+/**
+ * Independent activation/deactivation not tied to a specific message line.
+ * e.g., Mermaid "activate A", PlantUML "activate A"
+ */
+export interface ActivationNode {
+  kind: 'activation';
+  participantId: string;
+  action: 'activate' | 'deactivate';
+  style?: StyleProps; // Specific color for the activation bar
+}
+
+// --- E. Reference (Interaction Use) ---
+
+/**
+ * Refers to another sequence diagram or a frame covering participants.
+ * e.g., PlantUML "ref over A, B : Init"
+ */
+export interface ReferenceNode {
+  kind: 'ref';
+  id: string;
+  text: string;
+  participantIds: string[];
+  link?: string; // Optional link to another file/document
+}
+
+// --- F. Visual Spacers & Dividers ---
+
 export interface DividerNode {
   kind: 'divider';
   id: string;
-  text?: string;        // "== 準備フェーズ ==" などのテキスト
+  text?: string; // "== Title =="
+}
+
+export interface SpacerNode {
+  kind: 'spacer';
+  id: string;
+  height?: number; // Pixel hint (PlantUML "|||")
+  text?: string;   // Delay text (Mermaid "...")
+}
+
+// ------------------------------------------------------------------
+// 4. Common Types
+// ------------------------------------------------------------------
+
+export interface StyleProps {
+  color?: string;
+  backgroundColor?: string;
+  shape?: string; // For notes (hexagon, box, etc.)
+  // Expandable for other CSS-like properties
 }
