@@ -1,26 +1,22 @@
-import { ActivationNode, AyatoriRoot, EventNode, FragmentOperator, MessageNode, NoteNode } from './ast';
+
+import { ActivationNode, AyatoriRoot, EventNode, FragmentOperator, MessageNode, NoteNode, ParticipantGroup } from '../../../ast';
+import { BaseParser } from '../../base/parser';
 import { ARROW_MAPPING } from './constants';
 import { Lexer } from './lexer';
 import { Token, TokenType } from './tokens';
 
-export class Parser {
-  private currToken!: Token;
-  private peekToken!: Token;
+export class Parser extends BaseParser {
+  private currentGroup: ParticipantGroup | null = null;
   private idCounters = {
     evt: 0,
     frag: 0,
     br: 0,
     note: 0,
+    group: 0,
   };
 
-  constructor(private lexer: Lexer) {
-    this.nextToken();
-    this.nextToken();
-  }
-
-  private nextToken() {
-    this.currToken = this.peekToken;
-    this.peekToken = this.lexer.nextToken();
+  constructor(lexer: Lexer) {
+    super(lexer);
   }
 
   parse(): AyatoriRoot {
@@ -48,19 +44,25 @@ export class Parser {
       }
 
       if (type === 'NEWLINE') {
-        this.nextToken();
+        this.advance();
         continue;
       }
 
       if (type === 'SEQUENCE_DIAGRAM') {
         root.meta.source = 'mermaid';
-        this.nextToken();
+        this.advance();
         continue;
       }
 
       if (type === 'TITLE') {
-        this.nextToken(); // eat TITLE
+        this.advance(); // eat TITLE
         root.meta.title = this.readRestOfLine();
+        continue;
+      }
+
+      if (type === 'BOX') {
+        const groupEvents = this.parseGroup(root);
+        events.push(...groupEvents);
         continue;
       }
 
@@ -84,15 +86,7 @@ export class Parser {
         continue;
       }
 
-      // Check for Message start: Identifier (or String) followed by Arrow or special tokens
-      // But lexer returns STRING token for quote string.
       if (this.isParticipantToken(this.currToken)) {
-          // Look ahead to see if it's a message
-          // A -> B
-          // "Alice" -> "Bob"
-          // We need to be careful.
-          // If parseMessage fails, we might just consume tokens?
-          // For now assume if it starts with ID/String it's a message if arrow follows.
           const msg = this.parseMessage(root);
           if (msg) {
              events.push(msg);
@@ -101,7 +95,7 @@ export class Parser {
       }
 
       // Skip unknown or unhandled
-      this.nextToken();
+      this.advance();
     }
     return events;
   }
@@ -110,13 +104,58 @@ export class Parser {
       return tok.type === 'IDENTIFIER' || tok.type === 'STRING';
   }
 
+  private parseGroup(root: AyatoriRoot): EventNode[] {
+    this.advance(); // eat 'box'
+
+    const rawAttrs = this.readRestOfLine().trim();
+    let name = rawAttrs;
+    let color: string | undefined;
+
+    const parts = rawAttrs.split(/\s+/);
+    if (parts.length > 0) {
+        const first = parts[0];
+        if (first.startsWith('#') || ['rgb', 'rgba', 'transparent', 'aqua', 'grey', 'gray', 'purple', 'red', 'blue', 'green'].includes(first.toLowerCase())) {
+            color = first;
+            name = parts.slice(1).join(' ');
+        }
+    }
+    if (!name) name = `Group ${this.idCounters.group + 1}`;
+
+    const group: ParticipantGroup = {
+        kind: 'group',
+        id: this.generateId('group'),
+        name: name,
+        type: 'box',
+        participantIds: [],
+        style: color ? { backgroundColor: color } : undefined
+    };
+
+    root.groups.push(group);
+    
+    // Set current group context
+    const previousGroup = this.currentGroup;
+    this.currentGroup = group;
+
+    // Parse content until 'end'
+    const events = this.parseBlock(root, ['END']);
+
+    // Restore context
+    this.currentGroup = previousGroup;
+
+    if (this.currToken.type === 'END') {
+        this.advance(); // eat 'end'
+    }
+
+    return events;
+  }
+
   private parseFragment(root: AyatoriRoot): EventNode {
     const type = this.currToken.type as TokenType;
     let operator: FragmentOperator = 'loop';
     if (type === 'ALT') operator = 'alt';
     if (type === 'OPT') operator = 'opt';
 
-    this.nextToken(); // eat operator
+    this.advance(); // eat operator
 
     const condition = this.readRestOfLine();
 
@@ -130,7 +169,7 @@ export class Parser {
     });
 
     while ((this.currToken.type as TokenType) === 'ELSE') {
-      this.nextToken();
+      this.advance();
       const elseCond = this.readRestOfLine();
       const elseEvents = this.parseBlock(root, ['END', 'ELSE']);
       branches.push({
@@ -141,7 +180,7 @@ export class Parser {
     }
 
     if ((this.currToken.type as TokenType) === 'END') {
-      this.nextToken();
+      this.advance();
     }
 
     return {
@@ -154,7 +193,7 @@ export class Parser {
 
   private parseParticipant(root: AyatoriRoot) {
     const isActor = this.currToken.type === 'ACTOR';
-    this.nextToken(); // eat 'participant' or 'actor'
+    this.advance(); // eat 'participant' or 'actor'
 
     let id = '';
     let name = '';
@@ -162,21 +201,18 @@ export class Parser {
     if (this.isParticipantToken(this.currToken)) {
       id = this.currToken.literal;
       name = id;
-      this.nextToken();
+      this.advance();
     }
 
     // Check for 'as'
     if (this.currToken.type === 'AS') {
-      this.nextToken(); // eat 'as'
+      this.advance(); // eat 'as'
       if (this.isParticipantToken(this.currToken)) {
         name = this.currToken.literal;
-        this.nextToken();
+        this.advance();
       }
     }
     
-    // Register if not exists (or update if flexible?)
-    // In Mermaid, re-declaration updates props usually.
-    // For now simple push if check fails is ok, but we should probably check ID.
     const existing = root.participants.find(p => p.id === id);
     if (!existing) {
         root.participants.push({
@@ -185,23 +221,29 @@ export class Parser {
             type: isActor ? 'actor' : 'participant'
         });
     } else {
-        // Update name if alias defined later
         if (name !== id) existing.name = name;
         if (isActor) existing.type = 'actor';
+    }
+
+    // Assign to current group if exists
+    if (this.currentGroup) {
+        if (!this.currentGroup.participantIds.includes(id)) {
+            this.currentGroup.participantIds.push(id);
+        }
     }
   }
 
   private parseNote(root: AyatoriRoot): NoteNode {
-    this.nextToken(); // eat 'note'
+    this.advance(); // eat 'note'
     
     let position: 'left' | 'right' | 'over' = 'over'; // default
-    if (this.currToken.type === 'LEFT') { position = 'left'; this.nextToken(); }
-    else if (this.currToken.type === 'RIGHT') { position = 'right'; this.nextToken(); }
-    else if (this.currToken.type === 'OVER') { position = 'over'; this.nextToken(); }
+    if (this.currToken.type === 'LEFT') { position = 'left'; this.advance(); }
+    else if (this.currToken.type === 'RIGHT') { position = 'right'; this.advance(); }
+    else if (this.currToken.type === 'OVER') { position = 'over'; this.advance(); }
     
     // consume 'of' if present (optional in some cases but usually note right of A)
     if (this.currToken.type === 'OF') {
-      this.nextToken();
+      this.advance();
     }
     
     const participantIds: string[] = [];
@@ -209,10 +251,10 @@ export class Parser {
     while (this.isParticipantToken(this.currToken)) {
       participantIds.push(this.currToken.literal);
       this.ensureParticipant(root, this.currToken.literal);
-      this.nextToken();
+      this.advance();
       
       if (this.currToken.type === 'COMMA') {
-        this.nextToken();
+        this.advance();
       } else {
         break;
       }
@@ -220,7 +262,7 @@ export class Parser {
     
     let text = '';
     if (this.currToken.type === 'COLON') {
-      this.nextToken();
+      this.advance();
       text = this.readRestOfLine();
     }
     
@@ -235,13 +277,13 @@ export class Parser {
 
   private parseActivation(root: AyatoriRoot): ActivationNode {
      const action = this.currToken.type === 'ACTIVATE' ? 'activate' : 'deactivate';
-     this.nextToken(); // eat command
+     this.advance(); // eat command
      
      let participantId = '';
      if (this.isParticipantToken(this.currToken)) {
          participantId = this.currToken.literal;
          this.ensureParticipant(root, participantId);
-         this.nextToken();
+         this.advance();
      }
      
      return {
@@ -252,52 +294,41 @@ export class Parser {
   }
 
   private parseMessage(root: AyatoriRoot): MessageNode | null {
-    // Check if next token is an arrow to confirm it's a message before side-effects
     if (this.peekToken.type !== 'ARROW') {
         return null; 
     }
 
     const fromId = this.currToken.literal;
     this.ensureParticipant(root, fromId);
-    this.nextToken(); // eat from
+    this.advance(); // eat from
 
-    // Current token is now ARROW (guaranteed by peek check)
     if (this.currToken.type !== 'ARROW') {
-       // Should not happen
        return null;
     }
     
     const arrowLiteral = this.currToken.literal;
-    this.nextToken(); // eat arrow
-    
-    // Check for lifecycle suffixes (+/-) on TARGET side or SOURCE side?
-    // Mermaid: A->>+B (activate B)
-    // A-->>-B (deactivate A)
-    // The suffix is attached to the arrow in syntax but lexer splits it?
-    // Lexer splits `->>+` into `ARROW(->>)` and `PLUS(+)` if we implemented it right.
-    // Wait, my lexer `readArrow` consumes `->>` then returns. 
-    // The next char is `+`. `nextToken` will pick `PLUS`.
+    this.advance(); // eat arrow
     
     let activateTarget = false;
     let deactivateSource = false;
     
     if ((this.currToken.type as TokenType) === 'PLUS') {
         activateTarget = true;
-        this.nextToken();
+        this.advance();
     }
     if ((this.currToken.type as TokenType) === 'MINUS') {
         deactivateSource = true;
-        this.nextToken();
+        this.advance();
     }
 
     if (!this.isParticipantToken(this.currToken)) return null;
     const toId = this.currToken.literal;
     this.ensureParticipant(root, toId);
-    this.nextToken(); // eat to
+    this.advance(); // eat to
 
     let text = '';
     if ((this.currToken.type as TokenType) === 'COLON') {
-      this.nextToken(); // eat colon
+      this.advance();
       text = this.readRestOfLine();
     }
     
@@ -320,7 +351,6 @@ export class Parser {
     if (mapping) {
         return mapping;
     }
-    // Fallback
     return { type: 'sync', style: { line: 'solid', head: 'arrow' } };
   }
 
@@ -339,17 +369,10 @@ export class Parser {
     
     while ((this.currToken.type as TokenType) !== 'NEWLINE' && (this.currToken.type as TokenType) !== 'EOF') {
       end = this.currToken.end;
-      this.nextToken();
+      this.advance();
     }
     
-    // Trim? Mermaid messages usually trim leading/trailing whitespace semantics but preserve internal
-    // Lexer skips whitespace between tokens?
-    // Lexer skips whitespace in nextToken(). So getInput().slice(start, end) will include whitespace BETWEEN tokens.
-    // It will NOT include leading whitespace before the first token because start is from currToken.start.
-    // It will NOT include trailing whitespace after the last token because end is from lastToken.end.
-    // Perfect.
-    
-    return this.lexer.getInput().slice(start, end);
+    return (this.lexer as Lexer).getInput().slice(start, end);
   }
 
   private ensureParticipant(root: AyatoriRoot, id: string) {

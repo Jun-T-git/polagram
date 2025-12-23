@@ -25,7 +25,8 @@ export type TokenType =
   | 'DEACTIVATE'
   | 'PLUS'
   | 'MINUS'
-  | 'COMMA';
+  | 'COMMA'
+  | 'BOX';
 
 export interface Token {
   type: TokenType;

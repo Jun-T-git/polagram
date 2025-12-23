@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import type { AyatoriRoot } from '../src/ast';
-import { Lexer } from '../src/lexer';
-import { Parser } from '../src/parser';
+import type { AyatoriRoot } from '../../../ast';
+import { Lexer } from './lexer';
+import { Parser } from './parser';
 
 describe('Mermaid Parser', () => {
   const parse = (input: string): AyatoriRoot => {
@@ -99,6 +99,56 @@ end
       expect(fragment.branches[0].condition).toBe('Every minute');
       expect(fragment.branches[0].events).toHaveLength(1);
       expect(fragment.branches[0].events[0].kind).toBe('message');
+    });
+  });
+
+  describe('Box/Group Definitions', () => {
+    it('should parse box definition with color and name', () => {
+      const code = `
+  sequenceDiagram
+  box "Frontend" #eef
+      participant A
+      participant B
+  end
+  box Backend
+      participant C
+  end
+  A->>C: Request
+  C-->>A: Response
+      `;
+  
+      const ast = parse(code);
+  
+      // Verify participants
+      expect(ast.participants).toHaveLength(3);
+      expect(ast.participants.map(p => p.id)).toEqual(['A', 'B', 'C']);
+  
+      // Verify groups
+      expect(ast.groups).toHaveLength(2);
+  
+      const group1 = ast.groups[0];
+      expect(group1.name).toContain('Frontend'); 
+      
+      expect(group1.participantIds).toEqual(['A', 'B']);
+  
+      const group2 = ast.groups[1];
+      expect(group2.name).toBe('Backend');
+      expect(group2.participantIds).toEqual(['C']);
+    });
+  
+    it('should handle messages inside box block', () => {
+      const code = `
+  sequenceDiagram
+  participant U
+  box App
+      participant A
+      U->>A: inside box
+  end
+      `;
+      const ast = parse(code);
+      expect(ast.events).toHaveLength(1);
+      expect(ast.events[0].kind).toBe('message');
+      expect(ast.groups[0].participantIds).toEqual(['A']);
     });
   });
 });

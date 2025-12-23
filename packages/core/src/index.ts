@@ -1,20 +1,19 @@
 
-import type { AyatoriRoot } from './ast';
-import { Lexer } from './lexer';
-import { Parser } from './parser';
+// Public API Exports
 
+// AST
 export * from './ast';
-export * from './generators/mermaid';
-export * from './lexer';
-export * from './parser';
 
-/**
- * Parses Mermaid code into an Ayatori AST.
- * @param code The Mermaid code to parse (string).
- * @returns The generated AST.
- */
-export function parseMermaid(code: string): AyatoriRoot {
-  const lexer = new Lexer(code);
-  const parser = new Parser(lexer);
-  return parser.parse();
-}
+// Parsers (Factory & Strategy)
+export { ParserFactory } from './parser';
+export { DiagramParser } from './parser/interface';
+
+// Generators / Visitors
+export { Traverser } from './visitor/base/walker';
+export { AyatoriVisitor } from './visitor/interface';
+
+// Default Implementations (Optional, or force users to use Factory)
+// We export Mermaid Generator specifically as it might be used directly or via a future Factory
+export { MermaidGeneratorVisitor } from './visitor/generators/mermaid';
+
+// Legacy compatibility or convenience helpers could go here if needed.

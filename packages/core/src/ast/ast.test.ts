@@ -1,6 +1,6 @@
 // packages/core/test/complex_ast_example.test.ts
 import { describe, expect, it } from 'vitest';
-import type { AyatoriRoot } from '../src/ast';
+import type { AyatoriRoot } from './index';
 
 describe('Ayatori AST Definition', () => {
   it('should support a complex lossless scenario', () => {
