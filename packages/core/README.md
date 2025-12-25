@@ -1,11 +1,11 @@
-# @ayatori/core
+# @polagram/core
 
-`@ayatori/core` is the core parsing and AST manipulation library for the Ayatori project. It provides functionality to parse diagram languages (currently focusing on Mermaid Sequence Diagrams) into a generic Ayatori Abstract Syntax Tree (AST).
+`@polagram/core` is the core parsing and AST manipulation library for the Polagram project. It provides functionality to parse diagram languages (currently focusing on Mermaid Sequence Diagrams) into a generic Polagram Abstract Syntax Tree (AST).
 
 ## Installation
 
 ```bash
-npm install @ayatori/core
+npm install @polagram/core
 ```
 
 ## Usage
@@ -13,7 +13,7 @@ npm install @ayatori/core
 The library provides a `ParserFactory` to get the parser for a specific language.
 
 ```typescript
-import { ParserFactory, AyatoriRoot } from '@ayatori/core';
+import { ParserFactory, PolagramRoot } from '@polagram/core';
 
 const mermaidCode = `
 sequenceDiagram
@@ -26,7 +26,7 @@ try {
   const parser = ParserFactory.getParser('mermaid');
 
   // 2. Parse the code into an AST
-  const ast: AyatoriRoot = parser.parse(mermaidCode);
+  const ast: PolagramRoot = parser.parse(mermaidCode);
 
   console.log(JSON.stringify(ast, null, 2));
 } catch (error) {
@@ -39,7 +39,7 @@ try {
 You can traverse the AST using the provided types:
 
 ```typescript
-import { ParserFactory, MessageNode } from '@ayatori/core';
+import { ParserFactory, MessageNode } from '@polagram/core';
 
 // ... obtain ast as above
 

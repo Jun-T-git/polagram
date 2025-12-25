@@ -34,7 +34,7 @@ importers:
 
   packages/playground:
     dependencies:
-      '@ayatori/core':
+      '@polagram/core':
         specifier: workspace:*
         version: link:../core
     devDependencies:

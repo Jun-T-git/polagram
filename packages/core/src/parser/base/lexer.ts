@@ -1,5 +1,5 @@
 
-import { Token } from '../parsers/mermaid/tokens'; // Note: Should eventually move TokenType to common if shared
+import { Token } from '../languages/mermaid/tokens'; // Note: Should eventually move TokenType to common if shared
 
 export abstract class BaseLexer {
   protected position = 0;

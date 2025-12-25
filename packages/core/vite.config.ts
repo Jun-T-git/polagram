@@ -6,8 +6,8 @@ export default defineConfig({
   build: {
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
-      name: 'AyatoriCore',
-      fileName: 'ayatori-core',
+      name: 'PolagramCore',
+      fileName: 'polagram-core',
     },
   },
   plugins: [dts({ rollupTypes: true })],

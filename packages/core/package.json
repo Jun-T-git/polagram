@@ -1,14 +1,14 @@
 {
-  "name": "@ayatori/core",
+  "name": "@polagram/core",
   "version": "0.0.1",
   "type": "module",
-  "main": "./dist/ayatori-core.umd.cjs",
-  "module": "./dist/ayatori-core.js",
+  "main": "./dist/polagram-core.umd.cjs",
+  "module": "./dist/polagram-core.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/ayatori-core.js",
-      "require": "./dist/ayatori-core.umd.cjs"
+      "import": "./dist/polagram-core.js",
+      "require": "./dist/polagram-core.umd.cjs"
     }
   },
   "files": ["dist"],

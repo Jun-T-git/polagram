@@ -1,23 +1,23 @@
 
 import {
     ActivationNode,
-    AyatoriRoot,
     DividerNode,
     FragmentNode,
     MessageNode,
     NoteNode,
     Participant,
     ParticipantGroup,
+    PolagramRoot,
     ReferenceNode,
     SpacerNode,
-} from '../../ast';
+} from '../ast';
 
 /**
- * Visitor interface for traversing the Ayatori AST.
+ * Visitor interface for traversing the Polagram AST.
  * Implement this interface to create code generators, validators, etc.
  */
-export interface AyatoriVisitor {
-  visitRoot(node: AyatoriRoot): void;
+export interface PolagramVisitor {
+  visitRoot(node: PolagramRoot): void;
   
   visitParticipant(node: Participant): void;
   visitParticipantGroup(node: ParticipantGroup): void;

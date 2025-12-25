@@ -1,4 +1,4 @@
-# Ayatori (あやとり)
+# Polagram
 
 > **Unraveling Logic.**
 > 複雑に絡み合ったロジックを、解きほぐす。
@@ -7,7 +7,7 @@
 ![Language](https://img.shields.io/badge/language-TypeScript-3178C6.svg)
 ![Status](https://img.shields.io/badge/status-Alpha-orange.svg)
 
-Ayatori は、Mermaid や PlantUML などのシーケンス図コードを解析し、静的な画像ではなく **「インタラクティブな構造（DOM）」** としてレンダリングするための次世代エンジンです。
+Polagram は、Mermaid や PlantUML などのシーケンス図コードを解析し、静的な画像ではなく **「インタラクティブな構造（DOM）」** としてレンダリングするための次世代エンジンです。
 
 ## 📖 Philosophy (哲学)
 
@@ -15,7 +15,7 @@ Ayatori は、Mermaid や PlantUML などのシーケンス図コードを解析
 
 従来のシーケンス図ツールは「全ての分岐を一枚の画像に収める」ことに特化していました。しかし、実際の開発現場における複雑な仕様書は、巨大すぎて誰も全体像を把握できません。
 
-Ayatori は、**「読む人の思考に合わせて情報を段階的に開示する（Progressive Disclosure）」** という思想で作られています。
+Polagram は、**「読む人の思考に合わせて情報を段階的に開示する（Progressive Disclosure）」** という思想で作られています。
 
 ## ✨ Features (特徴)
 
@@ -28,24 +28,24 @@ Ayatori は、**「読む人の思考に合わせて情報を段階的に開示�
 
 ## 🏗 Architecture
 
-Ayatori はモノレポ（Monorepo）構成を採用しており、以下のパッケージで構成されています。
+Polagram はモノレポ（Monorepo）構成を採用しており、以下のパッケージで構成されています。
 
-### 📦 `@ayatori/core` (Current Focus)
-Mermaid 形式のテキストを受け取り、独自の **Ayatori AST (Abstract Syntax Tree)** に変換するコアライブラリ。
+### 📦 `@polagram/core` (Current Focus)
+Mermaid 形式のテキストを受け取り、独自の **Polagram AST (Abstract Syntax Tree)** に変換するコアライブラリ。
 UIフレームワークに依存しないため、CLIツールやVS Code拡張機能など、あらゆる環境で利用可能です。
 
-### 📦 `@ayatori/ui` (Planned)
-Ayatori AST を読み込み、React ベースでインタラクティブな図を描画する Web UI コンポーネント。
+### 📦 `@polagram/ui` (Planned)
+Polagram AST を読み込み、React ベースでインタラクティブな図を描画する Web UI コンポーネント。
 
-### 📦 `@ayatori/cli` (Planned)
-Ayatori AST を読み込み、HTML/DOM として出力する CLI ツール。
+### 📦 `@polagram/cli` (Planned)
+Polagram AST を読み込み、HTML/DOM として出力する CLI ツール。
 
-### 📦 `@ayatori/vscode` (Planned)
-Ayatori AST を読み込み、VS Code でインタラクティブな図を描画する VS Code 拡張機能。
+### 📦 `@polagram/vscode` (Planned)
+Polagram AST を読み込み、VS Code でインタラクティブな図を描画する VS Code 拡張機能。
 
 ## 🚀 Getting Started (Development)
 
-現在は **Phase 1: `@ayatori/core`** の開発フェーズです。
+現在は **Phase 1: `@polagram/core`** の開発フェーズです。
 
 ### Prerequisites
 * Node.js (LTS recommended)
@@ -55,8 +55,8 @@ Ayatori AST を読み込み、VS Code でインタラクティブな図を描画
 
 ```bash
 # Clone the repository
-git clone [https://github.com/your-username/ayatori.git](https://github.com/your-username/ayatori.git)
-cd ayatori
+git clone [https://github.com/your-username/polagram.git](https://github.com/your-username/polagram.git)
+cd polagram
 
 # Install dependencies (from root)
 pnpm install
@@ -65,8 +65,8 @@ pnpm install
 ### Development
 `packages/core` ディレクトリで開発を行います。
 
-## 🧩 Ayatori AST Schema
-Ayatori は、シーケンス図を以下のような木構造（Tree）として扱います。
+## 🧩 Polagram AST Schema
+Polagram は、シーケンス図を以下のような木構造（Tree）として扱います。
 
 ```typescript
 // Example: Fragment Node (alt/loop) structure
@@ -88,23 +88,23 @@ Ayatori は、シーケンス図を以下のような木構造（Tree）とし�
 
 ## 🗺 Roadmap
 
-### Phase 1: `@ayatori/core` - Core Parsing Logic
+### Phase 1: `@polagram/core` - Core Parsing Logic
 * [ ] Lexer: Mermaid/PlantUML Text to Tokens
-* [ ] Parser: Tokens to Ayatori ASTEvent Node (sequence)
+* [ ] Parser: Tokens to Polagram ASTEvent Node (sequence)
 * [ ] Transformation: Stack-based structure building
 
-### Phase 2: `@ayatori/ui` - Web UI Component
-* [ ] React Component for Ayatori AST rendering
+### Phase 2: `@polagram/ui` - Web UI Component
+* [ ] React Component for Polagram AST rendering
 * [ ] Interactive Event Handling
 
 ### Phase 3: Web Viewer Application
-* [ ] Web Application for viewing Ayatori AST
+* [ ] Web Application for viewing Polagram AST
 
 ### Phase 5: CLI Tool
 * [ ] CLI Tool for parsing and rendering
 
 ### Phase 4: VS Code Extension
-* [ ] VS Code Extension for Ayatori
+* [ ] VS Code Extension for Polagram
 
 ## 🤝 Contribution
 アイデアやプルリクエストは歓迎します。現在は初期開発段階（Alpha）のため、まずは Issue でディスカッションすることをお勧めします。

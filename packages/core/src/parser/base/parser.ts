@@ -1,7 +1,7 @@
 
-import { AyatoriRoot } from '../ast';
-import { Token, TokenType } from '../parsers/mermaid/tokens'; // Should generalize
-import { BaseLexer } from './base-lexer';
+import { PolagramRoot } from '../../ast';
+import { Token, TokenType } from '../languages/mermaid/tokens'; // Should generalize
+import { BaseLexer } from './lexer';
 
 export abstract class BaseParser {
   protected currToken!: Token;
@@ -17,7 +17,7 @@ export abstract class BaseParser {
     this.peekToken = this.lexer.nextToken();
   }
 
-  public abstract parse(): AyatoriRoot;
+  public abstract parse(): PolagramRoot;
 
   protected curTokenIs(t: TokenType): boolean {
     return this.currToken.type === t;

@@ -1,4 +1,4 @@
-import { generateMermaid, parseMermaid } from '@ayatori/core';
+import { generateMermaid, parseMermaid } from '@polagram/core';
 import { mkdirSync, readFileSync, readdirSync, writeFileSync } from 'fs';
 import { dirname, join, parse } from 'path';
 import { fileURLToPath } from 'url';

@@ -1,11 +1,11 @@
 
 import { describe, expect, it } from 'vitest';
-import { AyatoriRoot, MessageNode } from '../../ast';
+import { MessageNode, PolagramRoot } from '../../ast';
 import { MermaidGeneratorVisitor } from './mermaid';
 
 describe('MermaidGeneratorVisitor', () => {
     it('should generate sequence diagram header', () => {
-        const root: AyatoriRoot = { kind: 'root', meta: { version: '1.0.0', source: 'mermaid' }, participants: [], groups: [], events: [] };
+        const root: PolagramRoot = { kind: 'root', meta: { version: '1.0.0', source: 'mermaid' }, participants: [], groups: [], events: [] };
         const visitor = new MermaidGeneratorVisitor();
         const output = visitor.generate(root);
         
@@ -13,7 +13,7 @@ describe('MermaidGeneratorVisitor', () => {
     });
 
     it('should generate title if present', () => {
-        const root: AyatoriRoot = { kind: 'root', meta: { version: '1.0.0', source: 'mermaid', title: 'My Diagram' }, participants: [], groups: [], events: [] };
+        const root: PolagramRoot = { kind: 'root', meta: { version: '1.0.0', source: 'mermaid', title: 'My Diagram' }, participants: [], groups: [], events: [] };
         const visitor = new MermaidGeneratorVisitor();
         const output = visitor.generate(root);
         
@@ -21,7 +21,7 @@ describe('MermaidGeneratorVisitor', () => {
     });
 
     it('should generate participants', () => {
-        const root: AyatoriRoot = { 
+        const root: PolagramRoot = { 
             kind: 'root', 
             meta: { version: '1.0.0', source: 'mermaid' }, 
             participants: [
@@ -48,7 +48,7 @@ describe('MermaidGeneratorVisitor', () => {
             type: 'sync', 
             style: { line: 'solid', head: 'arrow' } 
         };
-        const root: AyatoriRoot = { 
+        const root: PolagramRoot = { 
             kind: 'root', 
             meta: { version: '1.0.0', source: 'mermaid' }, 
             participants: [], 

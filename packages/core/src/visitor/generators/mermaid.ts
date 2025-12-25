@@ -1,24 +1,24 @@
 
 import {
     ActivationNode,
-    AyatoriRoot,
     DividerNode,
     FragmentNode,
     MessageNode,
     NoteNode,
     Participant,
     ParticipantGroup,
+    PolagramRoot,
     ReferenceNode,
     SpacerNode,
 } from '../../ast';
 import { getArrowString } from '../../parser/languages/mermaid/constants';
 import { Traverser } from '../base/walker';
-import { AyatoriVisitor } from '../interface';
+import { PolagramVisitor } from '../interface';
 
 /**
  * Visitor implementation that generates Mermaid code.
  */
-export class MermaidGeneratorVisitor implements AyatoriVisitor {
+export class MermaidGeneratorVisitor implements PolagramVisitor {
   private lines: string[] = [];
   private indentLevel = 0;
   private traverser: Traverser;
@@ -27,14 +27,14 @@ export class MermaidGeneratorVisitor implements AyatoriVisitor {
     this.traverser = new Traverser(this);
   }
 
-  public generate(ast: AyatoriRoot): string {
+  public generate(ast: PolagramRoot): string {
     this.lines = [];
     this.indentLevel = 0;
     this.traverser.traverse(ast);
     return this.lines.join('\n');
   }
 
-  visitRoot(node: AyatoriRoot): void {
+  visitRoot(node: PolagramRoot): void {
     this.lines.push('sequenceDiagram');
     this.indentLevel++;
 
