@@ -1,5 +1,5 @@
 
-import { MessageNode } from './ast';
+import { MessageNode } from '../../../ast';
 
 export const ARROW_MAPPING: Record<string, { type: MessageNode['type']; style: MessageNode['style'] }> = {
   '->': { type: 'sync', style: { line: 'solid', head: 'open' } },
