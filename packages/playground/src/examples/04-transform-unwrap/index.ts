@@ -22,14 +22,14 @@ async function main() {
   // Scenario 1: Unwrap "Retry" Loop
   console.log('Processing Scenario 1: Unwrap "Retry" Loop...');
   const unwrapLoop = Polagram.init(mmdContent)
-    .unwrap(/Retry/)
+    .focusFragment(/Retry/)
     .toMermaid();
   fs.writeFileSync(path.join(outputDir, `${inputBaseName}.01-unwrap-loop.mmd`), unwrapLoop);
 
   // Scenario 2: Unwrap "Stock Available"
   console.log('Processing Scenario 2: Unwrap "Stock Available" case...');
   const unwrapStock = Polagram.init(mmdContent)
-    .unwrap('Stock Available')
+    .focusFragment('Stock Available')
     .toMermaid();
   fs.writeFileSync(path.join(outputDir, `${inputBaseName}.02-unwrap-stock.mmd`), unwrapStock);
 

@@ -8,7 +8,12 @@ describe('FocusFilter', () => {
     const createAst = (events: any[]): PolagramRoot => ({
         kind: 'root',
         meta: { version: '1', source: 'unknown' },
-        participants: [],
+        participants: [
+            { id: 'A', name: 'A', type: 'participant' },
+            { id: 'B', name: 'B', type: 'participant' },
+            { id: 'C', name: 'C', type: 'participant' },
+            { id: 'D', name: 'D', type: 'participant' }
+        ],
         groups: [],
         events
     });

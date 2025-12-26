@@ -82,38 +82,7 @@ export class PolagramBuilder {
 
 
 
-    // -- Legacy API (Deprecated) --
-
-    /**
-     * Focus on specific participants. Keeps only interactions involving the matched participants.
-     * @param selector String (partial match), RegExp, or detailed selector object
-     * @deprecated Use focusParticipant instead
-     */
-    focus(selector: string | RegExp | Partial<ParticipantSelector>): this {
-        return this.focusParticipant(selector);
-    }
-
-    /**
-     * Remove specific participants and their interactions.
-     * @param selector String (partial match), RegExp, or detailed selector object
-     * @deprecated Use hideParticipant instead
-     */
-    remove(selector: string | RegExp | Partial<ParticipantSelector>): this {
-        this.rules.push({
-            action: 'remove',
-            selector: this.normalizeParticipantSelector(selector)
-        });
-        return this;
-    }
-
-    /**
-     * Unwrap fragments (e.g., opt, alt) matching the condition.
-     * @param selector String (partial match), RegExp, or detailed selector object
-     * @deprecated Use focusFragment instead
-     */
-    unwrap(selector: string | RegExp | Partial<BranchSelector>): this {
-        return this.focusFragment(selector);
-    }
+    // -- Legacy API (Deprecated) -- Removed
 
     /**
      * Apply a custom transformation rule.

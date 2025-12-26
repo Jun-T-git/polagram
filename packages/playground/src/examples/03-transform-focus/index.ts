@@ -26,21 +26,21 @@ async function main() {
   // Scenario 1: Focus on Payment
   console.log('Processing Scenario 1: Focus on "PaymentService"...');
   const payment = Polagram.init(mmdContent)
-    .focus('PaymentService')
+    .focusParticipant('PaymentService')
     .toMermaid();
   fs.writeFileSync(path.join(outputDir, `${inputBaseName}.01-focus-payment.mmd`), payment);
 
   // Scenario 2: Focus on Inventory
   console.log('Processing Scenario 2: Focus on "InventoryService"...');
   const inventory = Polagram.init(mmdContent)
-    .focus('InventoryService')
+    .focusParticipant('InventoryService')
     .toMermaid();
   fs.writeFileSync(path.join(outputDir, `${inputBaseName}.02-focus-inventory.mmd`), inventory);
 
   // Scenario 3: Focus on Frontend
   console.log('Processing Scenario 3: Focus on "Frontend"...');
   const frontend = Polagram.init(mmdContent)
-    .focus('Frontend')
+    .focusParticipant('Frontend')
     .toMermaid();
   fs.writeFileSync(path.join(outputDir, `${inputBaseName}.03-focus-frontend.mmd`), frontend);
 

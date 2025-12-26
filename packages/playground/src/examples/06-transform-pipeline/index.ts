@@ -23,8 +23,8 @@ async function main() {
   // This demonstrates the power of method chaining!
   console.log('Processing Scenario 1: Focus Inventory + Unwrap Stock...');
   const pipeline = Polagram.init(mmdContent)
-    .focus('InventoryService')
-    .unwrap('Stock Available')
+    .focusParticipant('InventoryService')
+    .focusFragment('Stock Available')
     .toMermaid();
   
   fs.writeFileSync(path.join(outputDir, `${inputBaseName}.01-pipeline.mmd`), pipeline);
