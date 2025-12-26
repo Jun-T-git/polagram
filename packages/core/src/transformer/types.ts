@@ -25,7 +25,9 @@ export interface MessageSelector {
 
 export interface BranchSelector {
   kind: 'branch';
-  text: TextMatcher;
+  text?: TextMatcher;
+  id?: string;
+  class?: TextMatcher;
 }
 
 export interface GroupSelector {

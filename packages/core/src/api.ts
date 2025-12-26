@@ -42,11 +42,13 @@ export class PolagramBuilder {
         this.ast = ast;
     }
 
+    // -- New Intuitive API --
+
     /**
      * Focus on specific participants. Keeps only interactions involving the matched participants.
-     * @param selector String (partial match), RegExp, or detailed selector object
+     * @param selector String (partial match), RegExp, or detailed selector object with id/class
      */
-    focus(selector: string | RegExp | Partial<ParticipantSelector>): this {
+    focusParticipant(selector: string | RegExp | Partial<ParticipantSelector>): this {
         this.rules.push({
             action: 'focus',
             selector: this.normalizeParticipantSelector(selector)
@@ -55,8 +57,46 @@ export class PolagramBuilder {
     }
 
     /**
+     * Hide specific participants and their interactions.
+     * @param selector String (partial match), RegExp, or detailed selector object with id/class
+     */
+    hideParticipant(selector: string | RegExp | Partial<ParticipantSelector>): this {
+        this.rules.push({
+            action: 'remove',
+            selector: this.normalizeParticipantSelector(selector)
+        });
+        return this;
+    }
+
+    /**
+     * Focus on specific fragments (unwrap). Expands the fragment and shows only its content.
+     * @param selector String (partial match), RegExp, or detailed selector object with id/class
+     */
+    focusFragment(selector: string | RegExp | Partial<BranchSelector>): this {
+        this.rules.push({
+            action: 'unwrap',
+            selector: this.normalizeBranchSelector(selector)
+        });
+        return this;
+    }
+
+
+
+    // -- Legacy API (Deprecated) --
+
+    /**
+     * Focus on specific participants. Keeps only interactions involving the matched participants.
+     * @param selector String (partial match), RegExp, or detailed selector object
+     * @deprecated Use focusParticipant instead
+     */
+    focus(selector: string | RegExp | Partial<ParticipantSelector>): this {
+        return this.focusParticipant(selector);
+    }
+
+    /**
      * Remove specific participants and their interactions.
      * @param selector String (partial match), RegExp, or detailed selector object
+     * @deprecated Use hideParticipant instead
      */
     remove(selector: string | RegExp | Partial<ParticipantSelector>): this {
         this.rules.push({
@@ -69,13 +109,10 @@ export class PolagramBuilder {
     /**
      * Unwrap fragments (e.g., opt, alt) matching the condition.
      * @param selector String (partial match), RegExp, or detailed selector object
+     * @deprecated Use focusFragment instead
      */
     unwrap(selector: string | RegExp | Partial<BranchSelector>): this {
-        this.rules.push({
-            action: 'unwrap',
-            selector: this.normalizeBranchSelector(selector)
-        });
-        return this;
+        return this.focusFragment(selector);
     }
 
     /**
@@ -133,7 +170,7 @@ export class PolagramBuilder {
         }
         return {
             kind: 'branch',
-            text: selector.text || ''
+            ...selector
         };
     }
 }

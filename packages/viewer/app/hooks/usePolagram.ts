@@ -2,7 +2,7 @@ import { Polagram } from '@polagram/core';
 import { useEffect, useState } from 'react';
 
 export interface TransformOperation {
-  operation: 'focus' | 'unwrap' | 'remove';
+  operation: 'focusParticipant' | 'hideParticipant' | 'focusFragment';
   target: string;
   enabled: boolean;
 }
@@ -12,11 +12,12 @@ interface UsePolagramReturn {
   transformedCode: string;
   error: string | null;
   pipeline: TransformOperation[];
-  addTransform: (operation: 'focus' | 'unwrap' | 'remove', target: string) => void;
+  addTransform: (operation: 'focusParticipant' | 'hideParticipant' | 'focusFragment', target: string) => void;
   removeTransform: (index: number) => void;
   toggleTransform: (index: number) => void;
   toggleAll: () => void;
   getPipelineCode: () => string;
+  getSuggestions: (operationType: 'participant' | 'fragment') => string[];
 }
 
 export function usePolagram(code: string): UsePolagramReturn {
@@ -64,14 +65,14 @@ export function usePolagram(code: string): UsePolagramReturn {
       const enabledOps = operations.filter(op => op.enabled);
       for (const op of enabledOps) {
         switch (op.operation) {
-          case 'focus':
-            builder = builder.focus(op.target);
+          case 'focusParticipant':
+            builder = builder.focusParticipant(op.target);
             break;
-          case 'unwrap':
-            builder = builder.unwrap(op.target);
+          case 'hideParticipant':
+            builder = builder.hideParticipant(op.target);
             break;
-          case 'remove':
-            builder = builder.remove(op.target);
+          case 'focusFragment':
+            builder = builder.focusFragment(op.target);
             break;
         }
       }
@@ -88,7 +89,7 @@ export function usePolagram(code: string): UsePolagramReturn {
   };
 
   // Add a new transformation to the pipeline
-  const addTransform = (operation: 'focus' | 'unwrap' | 'remove', target: string) => {
+  const addTransform = (operation: 'focusParticipant' | 'hideParticipant' | 'focusFragment', target: string) => {
     const newPipeline = [...pipeline, { operation, target, enabled: true }];
     setPipeline(newPipeline);
     applyPipeline(newPipeline);
@@ -134,6 +135,43 @@ export function usePolagram(code: string): UsePolagramReturn {
     return `Polagram.init(code)${operations}.toMermaid()`;
   };
 
+  // Get autocomplete suggestions based on operation type
+  const getSuggestions = (operationType: 'participant' | 'fragment'): string[] => {
+    if (!ast) return [];
+    
+    if (operationType === 'participant') {
+      // Extract participant names (labels) from AST
+      // If alias exists, name holds the alias. If not, name holds the ID.
+      // We only show the name to keep the list clean.
+      const suggestions: string[] = [];
+      ast.participants?.forEach((p: any) => {
+        if (p.name) {
+          suggestions.push(p.name);
+        } else if (p.id) {
+          suggestions.push(p.id);
+        }
+      });
+      return [...new Set(suggestions)]; // Remove duplicates
+    } else {
+      // Extract fragment labels from AST events
+      const fragments: string[] = [];
+      const extractFragments = (events: any[]) => {
+        events?.forEach((event: any) => {
+          if (event.kind === 'fragment') {
+            event.branches?.forEach((branch: any) => {
+              if (branch.condition) {
+                fragments.push(branch.condition);
+              }
+              extractFragments(branch.events);
+            });
+          }
+        });
+      };
+      extractFragments(ast.events);
+      return [...new Set(fragments)]; // Remove duplicates
+    }
+  };
+
   return { 
     ast, 
     transformedCode, 
@@ -143,6 +181,7 @@ export function usePolagram(code: string): UsePolagramReturn {
     removeTransform,
     toggleTransform,
     toggleAll,
-    getPipelineCode
+    getPipelineCode,
+    getSuggestions
   };
 }

@@ -5,10 +5,11 @@ import styles from './TransformControls.module.css';
 interface TransformControlsProps {
   pipeline: TransformOperation[];
   pipelineCode: string;
-  onAddTransform: (operation: 'focus' | 'unwrap' | 'remove', target: string) => void;
+  onAddTransform: (operation: 'focusParticipant' | 'hideParticipant' | 'focusFragment', target: string) => void;
   onRemoveTransform: (index: number) => void;
   onToggleTransform: (index: number) => void;
   onToggleAll: () => void;
+  getSuggestions: (operationType: 'participant' | 'fragment') => string[];
 }
 
 export default function TransformControls({ 
@@ -17,10 +18,46 @@ export default function TransformControls({
   onAddTransform, 
   onRemoveTransform,
   onToggleTransform,
-  onToggleAll 
+  onToggleAll,
+  getSuggestions
 }: TransformControlsProps) {
-  const [selectedOperation, setSelectedOperation] = useState<'focus' | 'unwrap' | 'remove'>('focus');
+  const [selectedOperation, setSelectedOperation] = useState<'focusParticipant' | 'hideParticipant' | 'focusFragment'>('focusParticipant');
   const [target, setTarget] = useState('');
+
+  // Get suggestions based on selected operation
+  const suggestions = getSuggestions(
+    selectedOperation === 'focusParticipant' || selectedOperation === 'hideParticipant' 
+      ? 'participant' 
+      : 'fragment'
+  );
+
+  const getOperationLabel = (operation: string): string => {
+    switch (operation) {
+      case 'focusParticipant': return 'Focus Participant';
+      case 'hideParticipant': return 'Hide Participant';
+      case 'focusFragment': return 'Focus Fragment';
+      default: return operation;
+    }
+  };
+
+  const getPlaceholder = () => {
+    if (selectedOperation === 'focusParticipant' || selectedOperation === 'hideParticipant') {
+      return 'Participant name (e.g., Auth, API Server, Database)';
+    } else {
+      return 'Fragment label (e.g., Success, Cache Miss, Retry)';
+    }
+  };
+
+  const getDescription = () => {
+    switch (selectedOperation) {
+      case 'focusParticipant':
+        return 'Show only messages sent or received by the specified participant';
+      case 'hideParticipant':
+        return 'Remove the specified participant from the diagram';
+      case 'focusFragment':
+        return 'Unwrap the specified fragment and show only its contents';
+    }
+  };
 
   const handleApply = () => {
     if (target.trim()) {
@@ -73,7 +110,7 @@ export default function TransformControls({
                   {op.enabled ? '👁️' : '👁️‍🗨️'}
                 </button>
                 <span className={styles.pipelineOperation}>
-                  {index + 1}. {op.operation}
+                  {index + 1}. {getOperationLabel(op.operation)}
                 </span>
                 <span className={styles.pipelineTarget}>"{op.target}"</span>
                 <button 
@@ -91,39 +128,36 @@ export default function TransformControls({
       
       {/* Add New Transformation */}
       <div className={styles.controls}>
-        <div className={styles.operationButtons}>
-          <button
-            className={`${styles.operationButton} ${selectedOperation === 'focus' ? styles.active : ''}`}
-            onClick={() => setSelectedOperation('focus')}
-          >
-            🎯 Focus
-          </button>
-          <button
-            className={`${styles.operationButton} ${selectedOperation === 'unwrap' ? styles.active : ''}`}
-            onClick={() => setSelectedOperation('unwrap')}
-          >
-            📦 Unwrap
-          </button>
-          <button
-            className={`${styles.operationButton} ${selectedOperation === 'remove' ? styles.active : ''}`}
-            onClick={() => setSelectedOperation('remove')}
-          >
-            🗑️ Remove
-          </button>
-        </div>
-
         <div className={styles.inputGroup}>
-          <input
-            type="text"
-            className={styles.input}
-            value={target}
-            onChange={(e) => setTarget(e.target.value)}
-            onKeyPress={handleKeyPress}
-            placeholder={`Enter ${selectedOperation === 'focus' ? 'participant name' : 'target'}`}
-          />
-          <button className={styles.applyButton} onClick={handleApply}>
-            + Add
-          </button>
+          <label className={styles.label}>Select Operation</label>
+          <select 
+            className={styles.select}
+            value={selectedOperation}
+            onChange={(e) => setSelectedOperation(e.target.value as 'focusParticipant' | 'hideParticipant' | 'focusFragment')}
+          >
+            <option value="focusParticipant">Focus Participant</option>
+            <option value="hideParticipant">Hide Participant</option>
+            <option value="focusFragment">Focus Fragment</option>
+          </select>
+          
+          <p className={styles.description}>{getDescription()}</p>
+          <div className={styles.inputRow}>
+            <input
+              type="text"
+              className={styles.input}
+              value={target}
+              onChange={(e) => setTarget(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder={getPlaceholder()}
+              list="suggestions"
+            />
+            <datalist id="suggestions">
+              {suggestions.map((s, i) => <option key={i} value={s} />)}
+            </datalist>
+            <button className={styles.applyButton} onClick={handleApply}>
+              + Add
+            </button>
+          </div>
         </div>
       </div>
     </div>

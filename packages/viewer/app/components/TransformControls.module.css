@@ -147,31 +147,43 @@
   gap: var(--spacing-md);
 }
 
-.operationButtons {
+.selectionGroup {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.selectionLabel {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.selectionButtons {
   display: flex;
   gap: var(--spacing-sm);
 }
 
-.operationButton {
+.selectionButton {
   flex: 1;
   padding: var(--spacing-sm) var(--spacing-md);
   background: var(--color-bg-secondary);
   color: var(--color-text-secondary);
   border: 1px solid var(--glass-border);
   border-radius: 8px;
-  font-size: 0.85rem;
+  font-size: 0.9rem;
   font-weight: 500;
   transition: all var(--transition-fast);
 }
 
-.operationButton:hover {
+.selectionButton:hover {
   background: var(--color-bg-primary);
   border-color: var(--color-primary);
   color: var(--color-text-primary);
   transform: translateY(-1px);
 }
 
-.operationButton.active {
+.selectionButton.active {
   background: var(--color-primary);
   color: white;
   border-color: var(--color-primary);
@@ -180,7 +192,38 @@
 
 .inputGroup {
   display: flex;
+  flex-direction: column;
   gap: var(--spacing-sm);
+}
+
+.label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.select {
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.select:hover {
+  border-color: var(--color-primary);
+  background: var(--color-bg-primary);
+}
+
+.select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(138, 92, 246, 0.1);
 }
 
 .input {

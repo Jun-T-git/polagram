@@ -51,7 +51,8 @@ export default function ViewerPage() {
     removeTransform,
     toggleTransform,
     toggleAll,
-    getPipelineCode
+    getPipelineCode,
+    getSuggestions
   } = usePolagram(code);
 
   return (
@@ -77,6 +78,7 @@ export default function ViewerPage() {
             onRemoveTransform={removeTransform}
             onToggleTransform={toggleTransform}
             onToggleAll={toggleAll}
+            getSuggestions={getSuggestions}
           />
         </div>
 

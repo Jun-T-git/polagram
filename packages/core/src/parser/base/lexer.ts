@@ -56,7 +56,21 @@ export abstract class BaseLexer {
   }
 
   protected isLetter(ch: string): boolean {
-    return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch === '_';
+    // Support ASCII letters and underscore
+    if (('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z') || ch === '_') {
+      return true;
+    }
+    
+    // Support Unicode letters (including Japanese, Chinese, Korean, etc.)
+    // This uses a simple check: if the character code is > 127 (non-ASCII)
+    // and it's not a digit or whitespace, treat it as a letter
+    const code = ch.charCodeAt(0);
+    if (code > 127) {
+      // Exclude Unicode digits and whitespace
+      return !/[\s\d]/.test(ch);
+    }
+    
+    return false;
   }
 
   protected isDigit(ch: string): boolean {

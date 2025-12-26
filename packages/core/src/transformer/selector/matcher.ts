@@ -36,15 +36,32 @@ export class Matcher {
 
     public matchBranch(branch: FragmentBranch, selector: Selector): boolean {
         if (selector.kind !== 'branch') return false;
-        if (!branch.condition) return false;
-        return this.matchText(branch.condition, selector.text);
+        
+        // Match by id (most specific)
+        if (selector.id && branch.id !== selector.id) return false;
+        
+        // Match by text
+        if (selector.text && branch.condition && !this.matchText(branch.condition, selector.text)) return false;
+        
+        // Match by class (if implemented in AST)
+        // if (selector.class && ...) return false;
+        
+        return true;
     }
 
     // -- Specific Matchers --
 
     private matchParticipant(node: Participant, selector: ParticipantSelector): boolean {
-        if (selector.text && !this.matchText(node.name, selector.text)) return false;
+        // Match by explicit id selector
         if (selector.id && node.id !== selector.id) return false;
+        
+        // Match by text selector (should match either id or name for flexibility)
+        if (selector.text) {
+            const matchesId = this.matchText(node.id, selector.text);
+            const matchesName = this.matchText(node.name, selector.text);
+            if (!matchesId && !matchesName) return false;
+        }
+        
         // if (selector.class && ...) // Class/Stereotype not yet strictly defined in AST but reserved
         return true;
     }
