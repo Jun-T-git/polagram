@@ -23,7 +23,7 @@ async function main() {
   console.log('Processing Scenario 1: Remove "Error" messages...');
   const removeErrors = Polagram.init(mmdContent)
     .transform({
-      action: 'remove',
+      action: 'hideParticipant',
       selector: { kind: 'message', text: /Error/ }
     })
     .toMermaid();

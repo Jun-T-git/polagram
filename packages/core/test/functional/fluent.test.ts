@@ -110,8 +110,8 @@ describe('Fluent API Tests', () => {
     });
   });
 
-  describe('Unwrap', () => {
-    it('should unwrap fragments', () => {
+  describe('FocusFragment', () => {
+    it('should focus on fragments', () => {
       const code = `sequenceDiagram
     participant A
     participant B

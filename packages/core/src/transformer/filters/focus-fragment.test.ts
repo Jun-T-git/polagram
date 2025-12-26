@@ -2,9 +2,9 @@
 import { describe, expect, it } from 'vitest';
 import { FragmentNode, MessageNode, PolagramRoot } from '../../ast';
 import { TransformRule } from '../types';
-import { UnwrapFilter } from './unwrap';
+import { FocusFragmentFilter } from './focus-fragment';
 
-describe('UnwrapFilter', () => {
+describe('FocusFragmentFilter', () => {
     const createAst = (events: any[]): PolagramRoot => ({
         kind: 'root',
         meta: { version: '1', source: 'unknown' },
@@ -27,11 +27,11 @@ describe('UnwrapFilter', () => {
         
         // Unwrap branches with condition 'target'
         const rule: TransformRule = {
-            action: 'unwrap',
+            action: 'focusFragment',
             selector: { kind: 'branch', text: 'target' }
         };
 
-        const result = new UnwrapFilter(rule).transform(root);
+        const result = new FocusFragmentFilter(rule).transform(root);
         
         // Should trigger unwrap: return content of b1
         expect(result.events).toHaveLength(1);
@@ -48,11 +48,11 @@ describe('UnwrapFilter', () => {
         const root = createAst([fragment]);
         
         const rule: TransformRule = {
-            action: 'unwrap',
+            action: 'focusFragment',
             selector: { kind: 'branch', text: 'nomatch' }
         };
 
-        const result = new UnwrapFilter(rule).transform(root);
+        const result = new FocusFragmentFilter(rule).transform(root);
         
         // Should keep fragment
         expect(result.events).toHaveLength(1);

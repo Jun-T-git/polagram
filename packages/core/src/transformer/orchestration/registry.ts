@@ -1,7 +1,7 @@
 
-import { FocusFilter } from '../filters/focus';
-import { RemoveFilter } from '../filters/remove';
-import { UnwrapFilter } from '../filters/unwrap';
+import { FocusFragmentFilter } from '../filters/focus-fragment';
+import { FocusParticipantFilter } from '../filters/focus-participant';
+import { HideParticipantFilter } from '../filters/hide-participant';
 import { TransformRule, Transformer } from '../types';
 
 type TransformerFactory = (rule: TransformRule) => Transformer;
@@ -11,9 +11,9 @@ class TransformerRegistry {
 
     constructor() {
         // Register defaults
-        this.register('unwrap', (rule) => new UnwrapFilter(rule));
-        this.register('remove', (rule) => new RemoveFilter(rule));
-        this.register('focus', (rule) => new FocusFilter(rule));
+        this.register('focusFragment', (rule) => new FocusFragmentFilter(rule));
+        this.register('hideParticipant', (rule) => new HideParticipantFilter(rule));
+        this.register('focusParticipant', (rule) => new FocusParticipantFilter(rule));
     }
 
     public register(action: string, factory: TransformerFactory) {

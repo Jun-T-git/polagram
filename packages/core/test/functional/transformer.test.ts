@@ -47,31 +47,29 @@ function runTest(subDir: string, fileName: string, rules: TransformRule[]) {
   expect(normGenerated).toBe(normExpected);
 }
 
-describe('Transformer Functional Tests', () => {
-  describe('Focus', () => {
+  describe('FocusParticipant', () => {
     it('should focus on participant B', () => {
-      runTest('focus', '01_simple', [{
-        action: 'focus',
+      runTest('focus-participant', '01_simple', [{
+        action: 'focusParticipant',
         selector: { kind: 'participant', text: 'B' }
       }]);
     });
   });
 
-  describe('Remove', () => {
+  describe('HideParticipant', () => {
     it('should remove participant B', () => {
-      runTest('remove', '01_simple', [{
-        action: 'remove',
+      runTest('hide-participant', '01_simple', [{
+        action: 'hideParticipant',
         selector: { kind: 'participant', text: 'B' }
       }]);
     });
   });
 
-  describe('Unwrap', () => {
+  describe('FocusFragment', () => {
     it('should unwrap option blocks', () => {
-      runTest('unwrap', '01_opt', [{
-        action: 'unwrap',
+      runTest('focus-fragment', '01_opt', [{
+        action: 'focusFragment',
         selector: { kind: 'branch', text: 'Option' }
       }]);
     });
   });
-});

@@ -22,7 +22,7 @@ describe('TransformationEngine (Pipeline Integration)', () => {
     const pC = { id: 'C0', name: 'C', type: 'participant' as const };
     const pD = { id: 'D0', name: 'D', type: 'participant' as const };
 
-    it('runs Focus -> StructureCleaner pipeline correctly', () => {
+    it('runs FocusParticipant -> StructureCleaner pipeline correctly', () => {
         const fragment: FragmentNode = {
             kind: 'fragment', id: 'f1', operator: 'alt',
             branches: [
@@ -35,7 +35,7 @@ describe('TransformationEngine (Pipeline Integration)', () => {
         
         // Rule: Focus A. (Should keep msgAB, remove msgCD)
         const rule: TransformRule = {
-            action: 'focus',
+            action: 'focusParticipant',
             selector: { kind: 'participant', text: 'A' }
         };
 

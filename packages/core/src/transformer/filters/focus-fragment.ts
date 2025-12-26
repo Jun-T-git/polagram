@@ -4,7 +4,7 @@ import { Matcher } from '../selector/matcher';
 import { Walker } from '../traverse/walker';
 import { TransformRule } from '../types';
 
-export class UnwrapFilter extends Walker {
+export class FocusFragmentFilter extends Walker {
     private matcher = new Matcher();
 
     constructor(private rule: TransformRule) {
@@ -19,10 +19,10 @@ export class UnwrapFilter extends Walker {
         );
 
         if (matchedBranch) {
-            // UNWRAP ACTION:
+            // FOCUS FRAGMENT ACTION (UNWRAP):
             // Instead of returning the fragment, we return the contents of the matched branch.
             // Crucial: We must also recursively map those events!
-            // (e.g. if there is a nested unwrap rule)
+            // (e.g. if there is a nested focusFragment rule)
             return this.mapEvents(matchedBranch.events);
         }
 

@@ -14,8 +14,8 @@ import {
  * 
  * @example
  * const result = Polagram.init(mermaidCode)
- *   .focus('PaymentService')
- *   .remove('DebugLogger')
+ *   .focusParticipant('PaymentService')
+ *   .hideParticipant('DebugLogger')
  *   .toMermaid();
  */
 export class Polagram {
@@ -50,7 +50,7 @@ export class PolagramBuilder {
      */
     focusParticipant(selector: string | RegExp | Partial<ParticipantSelector>): this {
         this.rules.push({
-            action: 'focus',
+            action: 'focusParticipant',
             selector: this.normalizeParticipantSelector(selector)
         });
         return this;
@@ -62,19 +62,19 @@ export class PolagramBuilder {
      */
     hideParticipant(selector: string | RegExp | Partial<ParticipantSelector>): this {
         this.rules.push({
-            action: 'remove',
+            action: 'hideParticipant',
             selector: this.normalizeParticipantSelector(selector)
         });
         return this;
     }
 
     /**
-     * Focus on specific fragments (unwrap). Expands the fragment and shows only its content.
+     * Focus on specific fragments. Expands the fragment and shows only its content.
      * @param selector String (partial match), RegExp, or detailed selector object with id/class
      */
     focusFragment(selector: string | RegExp | Partial<BranchSelector>): this {
         this.rules.push({
-            action: 'unwrap',
+            action: 'focusFragment',
             selector: this.normalizeBranchSelector(selector)
         });
         return this;

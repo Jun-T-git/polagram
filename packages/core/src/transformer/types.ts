@@ -38,7 +38,7 @@ export interface GroupSelector {
 // -- Rules --
 
 export interface TransformRule {
-  action: 'unwrap' | 'remove' | 'focus';
+  action: 'focusFragment' | 'hideParticipant' | 'focusParticipant';
   selector: Selector;
 }
 

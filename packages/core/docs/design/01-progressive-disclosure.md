@@ -25,7 +25,7 @@ flowchart LR
             Decision{Match Selector?}
             
             Pass --> Decision
-            Decision -- Yes --> Action[Apply Action\n(Remove/Unwrap)]
+            Decision -- Yes --> Action[Apply Action\n(Hide/FocusFragment)]
             Decision -- No --> Keep[Keep Node]
             
             Action --> NewTree
@@ -42,7 +42,7 @@ flowchart LR
 
 ```typescript
 export interface TransformRule {
-  action: 'unwrap' | 'remove' | 'focus';
+  action: 'focusFragment' | 'hideParticipant' | 'focusParticipant';
   selector: Selector;
 }
 ```
@@ -149,14 +149,14 @@ abstract class TreeMapper {
 
 ### 5.2 Concrete Logic
 
-#### `UnwrapTransformer`
+#### `FocusFragmentTransformer`
 Splicing Logic via `flatMap`.
 - Visit Fragment.
 - Find matching Branch.
 - If match found: Return `match.events` (Hoisting).
 - **Crucial**: The returned events are then *implicitly* merged into the parent array by `flatMap`.
 
-#### `FocusTransformer`
+#### `FocusParticipantTransformer`
 Implements Bubble-Up.
 - `visitEvent(message)`: Check relevance. Return `[]` if irrelevant.
 - `visitEvent(fragment)`: Call `super.visitEvent` (which handles the bubble-up cleaning).

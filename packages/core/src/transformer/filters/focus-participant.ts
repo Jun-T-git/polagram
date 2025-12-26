@@ -1,10 +1,10 @@
 
-import { EventNode, MessageNode, PolagramRoot } from '../../ast';
+import { ActivationNode, EventNode, MessageNode, NoteNode, PolagramRoot } from '../../ast';
 import { Matcher } from '../selector/matcher';
 import { Walker } from '../traverse/walker';
 import { TransformRule } from '../types';
 
-export class RemoveFilter extends Walker {
+export class FocusParticipantFilter extends Walker {
     private matcher = new Matcher();
     private targetParticipantIds = new Set<string>();
 
@@ -22,7 +22,8 @@ export class RemoveFilter extends Walker {
         const selector = this.rule.selector;
         
         if (selector.kind === 'participant') {
-             root.participants.forEach(p => {
+            root.participants.forEach(p => {
+                // Matcher now handles both ID and Name checks
                 if (this.matcher.match(p, selector)) {
                     this.targetParticipantIds.add(p.id);
                 }
@@ -33,24 +34,31 @@ export class RemoveFilter extends Walker {
     protected visitEvent(node: EventNode): EventNode[] {
         const selector = this.rule.selector;
 
-        // Straightforward: If match, return empty array.
-        if (this.matcher.match(node, selector)) {
-            return [];
-        }
+        if (selector.kind === 'participant') {
+            if (node.kind === 'message') {
+                const msg = node as MessageNode;
+                if (!this.isRelatedToParticipant(msg)) {
+                    return []; // Drop irrelevant message
+                }
+            }
+            
+            if (node.kind === 'note') {
+                const note = node as NoteNode;
+                const isRelated = note.participantIds.some(pid => this.targetParticipantIds.has(pid));
+                if (!isRelated) return [];
+            }
 
-        // Logic for "Removing Participant":
-        // If selector is participant, we must also remove messages involving them.
-        if (selector.kind === 'participant' && node.kind === 'message') {
-            const msg = node as MessageNode;
-            if (this.isRelatedToParticipant(msg)) {
-                return [];
+            if (node.kind === 'activation') {
+                const activation = node as ActivationNode;
+                if (!this.targetParticipantIds.has(activation.participantId)) {
+                    return [];
+                }
             }
         }
-
-        // Delegate to super (which handles recursion)
+        
         return super.visitEvent(node);
     }
-    
+
     // Helper to check if message involves the participant from selector
     private isRelatedToParticipant(msg: MessageNode): boolean {
         // Check if from or to matches any targeted participant ID

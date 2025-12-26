@@ -55,7 +55,7 @@ export default function TransformControls({
       case 'hideParticipant':
         return 'Remove the specified participant from the diagram';
       case 'focusFragment':
-        return 'Unwrap the specified fragment and show only its contents';
+        return 'Focus on the specified fragment and show only its contents';
     }
   };
 

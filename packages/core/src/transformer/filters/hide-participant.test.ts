@@ -2,9 +2,9 @@
 import { describe, expect, it } from 'vitest';
 import { MessageNode, PolagramRoot } from '../../ast';
 import { TransformRule } from '../types';
-import { RemoveFilter } from './remove';
+import { HideParticipantFilter } from './hide-participant';
 
-describe('RemoveFilter', () => {
+describe('HideParticipantFilter', () => {
     const createAst = (events: any[]): PolagramRoot => ({
         kind: 'root',
         meta: { version: '1', source: 'unknown' },
@@ -23,10 +23,10 @@ describe('RemoveFilter', () => {
     it('removes message by direct selector', () => {
         const root = createAst([msgA, msgB]);
         const rule: TransformRule = {
-            action: 'remove',
+            action: 'hideParticipant',
             selector: { kind: 'message', text: 'Hello' }
         };
-        const result = new RemoveFilter(rule).transform(root);
+        const result = new HideParticipantFilter(rule).transform(root);
         
         expect(result.events).toHaveLength(1);
         expect((result.events[0] as MessageNode).text).toBe('World');
@@ -36,10 +36,10 @@ describe('RemoveFilter', () => {
         const root = createAst([msgA, msgB]);
         // Remove 'C'. msgB involves C (to: C).
         const rule: TransformRule = {
-            action: 'remove',
+            action: 'hideParticipant',
             selector: { kind: 'participant', text: 'C' }
         };
-        const result = new RemoveFilter(rule).transform(root);
+        const result = new HideParticipantFilter(rule).transform(root);
         
         expect(result.events).toHaveLength(1);
         expect((result.events[0] as MessageNode).id).toBe('m1');
