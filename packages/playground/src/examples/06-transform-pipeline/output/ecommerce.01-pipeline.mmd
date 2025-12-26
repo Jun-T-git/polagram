@@ -1,0 +1,7 @@
+sequenceDiagram
+    participant OrderService
+    participant InventoryService
+    OrderService->>InventoryService: Reserve Stock
+    activate InventoryService
+    InventoryService-->>OrderService: Reserved
+    deactivate InventoryService

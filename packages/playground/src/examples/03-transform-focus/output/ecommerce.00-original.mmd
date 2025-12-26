@@ -1,0 +1,29 @@
+sequenceDiagram
+    participant User
+    participant Frontend
+    participant OrderService
+    participant PaymentService
+    participant InventoryService
+    User->>Frontend: Click Checkout
+    Frontend->>OrderService: Create Order
+    activate OrderService
+    note right of OrderService: Backend Processing
+    note right of OrderService: Step 1: Check Inventory
+    OrderService->>InventoryService: Reserve Stock
+    activate InventoryService
+    alt Stock Available
+        InventoryService-->>OrderService: Reserved
+    else Out of Stock
+        InventoryService-->>OrderService: Error
+    end
+    deactivate InventoryService
+    note right of OrderService: Step 2: Process Payment
+    loop Retry up to 3 times
+        OrderService->>PaymentService: Charge Credit Card
+        activate PaymentService
+        PaymentService-->>OrderService: Payment OK
+        deactivate PaymentService
+    end
+    OrderService-->>Frontend: Order Confirmed
+    deactivate OrderService
+    Frontend-->>User: Show Receipt

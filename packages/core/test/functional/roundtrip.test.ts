@@ -2,8 +2,8 @@
 import { readFileSync, readdirSync } from 'fs';
 import { join } from 'path';
 import { describe, expect, it } from 'vitest';
+import { MermaidGeneratorVisitor } from '../../src/generator/generators/mermaid';
 import { ParserFactory } from '../../src/parser';
-import { MermaidGeneratorVisitor } from '../../src/visitor/generators/mermaid';
 
 const FIXTURES_DIR = join(__dirname, '../fixtures/roundtrip');
 

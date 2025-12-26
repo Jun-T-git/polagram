@@ -89,9 +89,9 @@ Polagram は、シーケンス図を以下のような木構造（Tree）とし�
 ## 🗺 Roadmap
 
 ### Phase 1: `@polagram/core` - Core Parsing Logic
-* [ ] Lexer: Mermaid/PlantUML Text to Tokens
-* [ ] Parser: Tokens to Polagram ASTEvent Node (sequence)
-* [ ] Transformation: Stack-based structure building
+* [x] Lexer: Mermaid/PlantUML Text to Tokens (Mermaid Implemented)
+* [x] Parser: Tokens to Polagram ASTEvent Node (Mermaid Implemented) (sequence)
+* [x] Transformation: Stack-based structure building (Already implemented in Parser)
 
 ### Phase 2: `@polagram/ui` - Web UI Component
 * [ ] React Component for Polagram AST rendering

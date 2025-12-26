@@ -1,0 +1,40 @@
+flowchart TD
+    %% クラス・ファイル定義
+    Engine[("engine/engine.ts<br>(Command/Context)")]
+    Registry[("engine/registry.ts<br>(Factory)")]
+    
+    subgraph FeatureLayer [Features]
+        FeatureBase[("features/common/pruning-walker.ts<br>(Base Feature Logic)")]
+        Focus[("features/focus.ts<br>(Focus Logic)")]
+        Remove[("features/remove.ts<br>(Remove Logic)")]
+        Unwrap[("features/unwrap.ts<br>(Unwrap Logic)")]
+    end
+
+    subgraph AstUtilsLayer [AST Utils]
+        Walker[("ast-utils/walker.ts<br>(Base Traverser)")]
+        Matcher[("ast-utils/matcher.ts<br>(Condition Checker)")]
+        Analyzer[("ast-utils/analyzer.ts<br>(Usage Analyzer)")]
+    end
+
+    %% 依存関係（呼び出しフロー）
+    
+    %% 1. 初期化・構成
+    Engine --> |1. Get Action| Registry
+    Registry -.-> |Create| Focus
+    Registry -.-> |Create| Remove
+    Registry -.-> |Create| Unwrap
+
+    %% 2. 実行時（継承と利用）
+    FeatureBase -- extends --> Walker
+    Focus -- extends --> FeatureBase
+    Remove -- extends --> FeatureBase
+    Unwrap -- extends --> Walker
+
+    %% 3. 処理中（Delegation）
+    Engine --> |2. Execute Transform| Focus
+    Focus --> |3. Check Condition| Matcher
+    Remove --> |Check Condition| Matcher
+    Unwrap --> |Check Condition| Matcher
+
+    %% 4. クリーンアップ
+    Engine --> |4. Analyze & Cleanup| Analyzer

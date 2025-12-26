@@ -16,7 +16,7 @@ The internal structure is organized by domain and responsibility:
     - `base/`: Abstract base classes (`BaseLexer`, `BaseParser`) for code sharing.
     - `languages/`: Implementations for specific languages.
         - `mermaid/`: Mermaid-specific Lexer and Parser.
-- **`src/visitor/`**: Handles Output and Traversal.
+- **`src/generator/`**: Handles Output and Traversal.
     - `interface.ts`: **Visitor** Interface (`PolagramVisitor`).
     - `base/`: Traversal logic (`Traverser`/Walker).
     - `generators/`: Visitor implementations for code generation.
@@ -90,6 +90,6 @@ classDiagram
 4. Register it in `src/parser/index.ts`.
 
 ### To Add a New Generator (Output)
-1. Create a file `src/visitor/generators/<new-format>.ts`.
+1. Create a file `src/generator/generators/<new-format>.ts`.
 2. Implement `PolagramVisitor`.
 3. Use `Traverser` to help walk the AST if needed.

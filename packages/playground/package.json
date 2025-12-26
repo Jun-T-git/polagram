@@ -4,7 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "tsx src/index.ts"
+    "example:parse": "tsx src/examples/01-parse/index.ts",
+    "example:generate": "tsx src/examples/02-generate/index.ts",
+    "example:transform:focus": "tsx src/examples/03-transform-focus/index.ts",
+    "example:transform:unwrap": "tsx src/examples/04-transform-unwrap/index.ts",
+    "example:transform:remove": "tsx src/examples/05-transform-remove/index.ts",
+    "example:transform:pipeline": "tsx src/examples/06-transform-pipeline/index.ts"
   },
   "dependencies": {
     "@polagram/core": "workspace:*"
