@@ -25,7 +25,7 @@ describe('FocusParticipantFilter', () => {
     it('removes messages not related to focused participant', () => {
         const root = createAst([msgAB, msgBC, msgCD]);
         const rule: TransformRule = {
-            action: 'focusParticipant',
+            action: 'focus',
             selector: { kind: 'participant', text: 'A' }
         };
         // Expect: msgAB (involves A), others removed
@@ -48,7 +48,7 @@ describe('FocusParticipantFilter', () => {
         };
         const root = createAst([fragment]);
         const rule: TransformRule = {
-            action: 'focusParticipant',
+            action: 'focus',
             selector: { kind: 'participant', text: 'A' }
         };
 

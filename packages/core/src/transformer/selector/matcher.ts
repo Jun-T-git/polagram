@@ -27,7 +27,7 @@ export class Matcher {
                     return this.matchGroup(node as ParticipantGroup, selector);
                 }
                 break;
-            case 'branch':
+            case 'fragment':
                 // Branch is usually checked specifically inside fragments
                 break;
         }
@@ -35,7 +35,7 @@ export class Matcher {
     }
 
     public matchBranch(branch: FragmentBranch, selector: Selector): boolean {
-        if (selector.kind !== 'branch') return false;
+        if (selector.kind !== 'fragment') return false;
         
         // Match by id (most specific)
         if (selector.id && branch.id !== selector.id) return false;

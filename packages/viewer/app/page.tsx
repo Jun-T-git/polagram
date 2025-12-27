@@ -47,6 +47,8 @@ export default function ViewerPage() {
     transformedCode, 
     error, 
     pipeline,
+    lensYaml,
+    updateLensYaml,
     addTransform,
     removeTransform,
     toggleTransform,
@@ -71,6 +73,12 @@ export default function ViewerPage() {
             <h2>Mermaid Code</h2>
           </div>
           <CodeEditor value={code} onChange={setCode} error={error} />
+          
+          <div className={styles.panelHeader} style={{ marginTop: '20px' }}>
+             <h2>Lens Configuration (YAML)</h2>
+          </div>
+          <CodeEditor value={lensYaml} onChange={updateLensYaml} error={null} />
+
           <TransformControls 
             pipeline={pipeline}
             pipelineCode={getPipelineCode()}

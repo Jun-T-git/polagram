@@ -23,7 +23,7 @@ describe('HideParticipantFilter', () => {
     it('removes message by direct selector', () => {
         const root = createAst([msgA, msgB]);
         const rule: TransformRule = {
-            action: 'hideParticipant',
+            action: 'hide',
             selector: { kind: 'message', text: 'Hello' }
         };
         const result = new HideParticipantFilter(rule).transform(root);
@@ -36,7 +36,7 @@ describe('HideParticipantFilter', () => {
         const root = createAst([msgA, msgB]);
         // Remove 'C'. msgB involves C (to: C).
         const rule: TransformRule = {
-            action: 'hideParticipant',
+            action: 'hide',
             selector: { kind: 'participant', text: 'C' }
         };
         const result = new HideParticipantFilter(rule).transform(root);

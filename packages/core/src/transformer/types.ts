@@ -5,7 +5,7 @@ export type TextMatcher = string | RegExp | { pattern: string; flags?: string };
 export type Selector = 
   | ParticipantSelector
   | MessageSelector
-  | BranchSelector
+  | FragmentSelector
   | GroupSelector;
 
 export interface ParticipantSelector {
@@ -23,8 +23,8 @@ export interface MessageSelector {
   class?: TextMatcher;
 }
 
-export interface BranchSelector {
-  kind: 'branch';
+export interface FragmentSelector {
+  kind: 'fragment';
   text?: TextMatcher;
   id?: string;
   class?: TextMatcher;
@@ -38,7 +38,7 @@ export interface GroupSelector {
 // -- Rules --
 
 export interface TransformRule {
-  action: 'focusFragment' | 'hideParticipant' | 'focusParticipant';
+  action: 'focus' | 'hide';
   selector: Selector;
 }
 
@@ -49,4 +49,11 @@ import { PolagramRoot } from '../ast';
 
 export interface Transformer {
     transform(root: PolagramRoot): PolagramRoot;
+}
+
+// -- Lens API --
+
+export interface TransformLens {
+    name?: string;
+    rules: TransformRule[];
 }

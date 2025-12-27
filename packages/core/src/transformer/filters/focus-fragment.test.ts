@@ -27,8 +27,8 @@ describe('FocusFragmentFilter', () => {
         
         // Unwrap branches with condition 'target'
         const rule: TransformRule = {
-            action: 'focusFragment',
-            selector: { kind: 'branch', text: 'target' }
+            action: 'focus',
+            selector: { kind: 'fragment', text: 'target' }
         };
 
         const result = new FocusFragmentFilter(rule).transform(root);
@@ -48,8 +48,8 @@ describe('FocusFragmentFilter', () => {
         const root = createAst([fragment]);
         
         const rule: TransformRule = {
-            action: 'focusFragment',
-            selector: { kind: 'branch', text: 'nomatch' }
+            action: 'focus',
+            selector: { kind: 'fragment', text: 'nomatch' }
         };
 
         const result = new FocusFragmentFilter(rule).transform(root);

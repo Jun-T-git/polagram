@@ -21,7 +21,17 @@ class TransformerRegistry {
     }
 
     public get(rule: TransformRule): Transformer | null {
-        const factory = this.factories.get(rule.action);
+        // Map public action + selector to internal implementation key
+        let key = '';
+        
+        if (rule.action === 'focus') {
+            if (rule.selector.kind === 'participant') key = 'focusParticipant';
+            else if (rule.selector.kind === 'fragment') key = 'focusFragment';
+        } else if (rule.action === 'hide') {
+            if (rule.selector.kind === 'participant') key = 'hideParticipant';
+        }
+
+        const factory = this.factories.get(key);
         if (!factory) return null;
         return factory(rule);
     }

@@ -3,7 +3,7 @@ import { MermaidGeneratorVisitor } from './generator/generators/mermaid';
 import { ParserFactory } from './parser';
 import { TransformationEngine } from './transformer/orchestration/engine';
 import {
-    BranchSelector,
+    FragmentSelector,
     ParticipantSelector,
     TextMatcher,
     TransformRule
@@ -50,7 +50,7 @@ export class PolagramBuilder {
      */
     focusParticipant(selector: string | RegExp | Partial<ParticipantSelector>): this {
         this.rules.push({
-            action: 'focusParticipant',
+            action: 'focus',
             selector: this.normalizeParticipantSelector(selector)
         });
         return this;
@@ -62,7 +62,7 @@ export class PolagramBuilder {
      */
     hideParticipant(selector: string | RegExp | Partial<ParticipantSelector>): this {
         this.rules.push({
-            action: 'hideParticipant',
+            action: 'hide',
             selector: this.normalizeParticipantSelector(selector)
         });
         return this;
@@ -72,10 +72,10 @@ export class PolagramBuilder {
      * Focus on specific fragments. Expands the fragment and shows only its content.
      * @param selector String (partial match), RegExp, or detailed selector object with id/class
      */
-    focusFragment(selector: string | RegExp | Partial<BranchSelector>): this {
+    focusFragment(selector: string | RegExp | Partial<FragmentSelector>): this {
         this.rules.push({
-            action: 'focusFragment',
-            selector: this.normalizeBranchSelector(selector)
+            action: 'focus',
+            selector: this.normalizeFragmentSelector(selector)
         });
         return this;
     }
@@ -128,17 +128,17 @@ export class PolagramBuilder {
         };
     }
 
-    private normalizeBranchSelector(
-        selector: string | RegExp | Partial<BranchSelector>
-    ): BranchSelector {
+    private normalizeFragmentSelector(
+        selector: string | RegExp | Partial<FragmentSelector>
+    ): FragmentSelector {
         if (typeof selector === 'string' || selector instanceof RegExp) {
             return {
-                kind: 'branch',
+                kind: 'fragment',
                 text: selector as TextMatcher
             };
         }
         return {
-            kind: 'branch',
+            kind: 'fragment',
             ...selector
         };
     }

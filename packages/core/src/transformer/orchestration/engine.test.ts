@@ -35,7 +35,7 @@ describe('TransformationEngine (Pipeline Integration)', () => {
         
         // Rule: Focus A. (Should keep msgAB, remove msgCD)
         const rule: TransformRule = {
-            action: 'focusParticipant',
+            action: 'focus',
             selector: { kind: 'participant', text: 'A' }
         };
 

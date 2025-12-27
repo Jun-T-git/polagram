@@ -1,4 +1,5 @@
-import { Polagram } from '@polagram/core';
+import { Polagram, TransformLens } from '@polagram/core';
+import yaml from 'js-yaml';
 import { useEffect, useState } from 'react';
 
 export interface TransformOperation {
@@ -12,6 +13,8 @@ interface UsePolagramReturn {
   transformedCode: string;
   error: string | null;
   pipeline: TransformOperation[];
+  lensYaml: string;
+  updateLensYaml: (yamlStr: string) => void;
   addTransform: (operation: 'focusParticipant' | 'hideParticipant' | 'focusFragment', target: string) => void;
   removeTransform: (index: number) => void;
   toggleTransform: (index: number) => void;
@@ -26,6 +29,38 @@ export function usePolagram(code: string): UsePolagramReturn {
   const [error, setError] = useState<string | null>(null);
   const [originalCode, setOriginalCode] = useState(code);
   const [pipeline, setPipeline] = useState<TransformOperation[]>([]);
+  const [lensYaml, setLensYaml] = useState<string>('');
+
+  // Helper: Generate YAML from pipeline
+  const generateLensYaml = (ops: TransformOperation[]) => {
+    const enabledOps = ops.filter(op => op.enabled);
+    if (enabledOps.length === 0) {
+      return '';
+    }
+
+    const rules = enabledOps.map(op => {
+      const rule: any = {};
+      
+      if (op.operation === 'focusParticipant') {
+        rule.action = 'focus';
+        rule.selector = { kind: 'participant', text: op.target };
+      } else if (op.operation === 'hideParticipant') {
+        rule.action = 'hide';
+        rule.selector = { kind: 'participant', text: op.target };
+      } else if (op.operation === 'focusFragment') {
+        rule.action = 'focus';
+        rule.selector = { kind: 'fragment', text: op.target };
+      }
+      return rule;
+    });
+
+    const lens: TransformLens = {
+      name: 'Generated Lens',
+      rules
+    };
+
+    return yaml.dump(lens);
+  };
 
   // Parse the Mermaid code into AST
   useEffect(() => {
@@ -43,7 +78,10 @@ export function usePolagram(code: string): UsePolagramReturn {
       setTransformedCode(code);
       setError(null);
       setOriginalCode(code);
-      setPipeline([]); // Reset pipeline when code changes
+      // Reset pipeline and YAML when code changes
+      const newPipeline: TransformOperation[] = [];
+      setPipeline(newPipeline);
+      setLensYaml(generateLensYaml(newPipeline));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to parse Mermaid code');
       setAst(null);
@@ -53,6 +91,9 @@ export function usePolagram(code: string): UsePolagramReturn {
 
   // Apply all transformations in the pipeline
   const applyPipeline = (operations: TransformOperation[]) => {
+    // Sync YAML
+    setLensYaml(generateLensYaml(operations));
+
     if (!originalCode || operations.length === 0) {
       setTransformedCode(originalCode);
       return;
@@ -87,6 +128,99 @@ export function usePolagram(code: string): UsePolagramReturn {
       setError(err instanceof Error ? err.message : 'Failed to apply transformations');
     }
   };
+
+  // Update pipeline from YAML input
+  const updateLensYaml = (yamlStr: string) => {
+    setLensYaml(yamlStr);
+    
+    if (!yamlStr.trim()) {
+      const newPipeline: TransformOperation[] = [];
+      setPipeline(newPipeline);
+      // Manually trigger apply (cannot use applyPipeline as it regenerates YAML)
+      // Actually, we want to update pipeline state AND apply it.
+      // But avoid re-generating YAML from the forced pipeline update, or accept normalization.
+      // Let's normalize: logic flow is YAML -> Pipeline -> (Back to YAML? No, keep user input if possible, 
+      // but the requirement says "Sync". If user types comments, they might be lost if we regen.
+      // For this implementation, we will regenerate YAML from Pipeline to ensure consistency, 
+      // OR we accept that the editor value might jump. 
+      // Plan said: "Updates pipeline state... Applies transformation."
+      // Let's map YAML to Pipeline.
+      
+      if (!originalCode) return;
+      setTransformedCode(originalCode);
+      return;
+    }
+
+    try {
+      const parsed = yaml.load(yamlStr) as TransformLens;
+      if (!parsed || !parsed.rules) {
+        // Invalid or empty
+        return;
+      }
+
+      const newPipeline: TransformOperation[] = parsed.rules.map((rule: any) => {
+        let operation: TransformOperation['operation'] = 'focusParticipant';
+        let target = '';
+
+        if (rule.action === 'focus') {
+             if (rule.selector?.kind === 'participant') operation = 'focusParticipant';
+             else if (rule.selector?.kind === 'fragment') operation = 'focusFragment';
+        } else if (rule.action === 'hide') {
+             if (rule.selector?.kind === 'participant') operation = 'hideParticipant';
+        }
+
+        // Extract target from selector
+        const selector = rule.selector as any;
+        if (selector.text) {
+            target = typeof selector.text === 'string' ? selector.text : selector.text.pattern || '';
+        }
+
+        return {
+          operation,
+          target,
+          enabled: true // YAML rules are always enabled
+        };
+      });
+
+      setPipeline(newPipeline);
+      
+      // Apply without regenerating YAML (to preserve cursor/formatting while typing if we could, 
+      // but applyPipeline design updates YAML. We should decouple apply logic.)
+      
+      // Refactored apply logic to NOT update YAML, but only apply transformations.
+      // applyPipeline function above UPDATES YAML. We need a separate function.
+      applyTransformationsOnly(newPipeline);
+
+    } catch (e) {
+      // Parse error, just ignore or show error
+      console.error(e);
+      // Keep old pipeline active? Or cleared? 
+      // If YAML is invalid, maybe just don't apply changes but keep YAML string.
+    }
+  };
+
+  const applyTransformationsOnly = (operations: TransformOperation[]) => {
+      if (!originalCode) return;
+      
+      try {
+        let builder = Polagram.init(originalCode);
+        const enabledOps = operations.filter(op => op.enabled);
+        
+        for (const op of enabledOps) {
+            if (op.operation === 'focusParticipant') builder = builder.focusParticipant(op.target);
+            else if (op.operation === 'hideParticipant') builder = builder.hideParticipant(op.target);
+            else if (op.operation === 'focusFragment') builder = builder.focusFragment(op.target);
+        }
+
+        const newMermaidCode = builder.toMermaid();
+        setAst(builder.toAST());
+        setTransformedCode(newMermaidCode);
+        setError(null);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to apply transformations');
+      }
+  };
+
 
   // Add a new transformation to the pipeline
   const addTransform = (operation: 'focusParticipant' | 'hideParticipant' | 'focusFragment', target: string) => {
@@ -141,8 +275,6 @@ export function usePolagram(code: string): UsePolagramReturn {
     
     if (operationType === 'participant') {
       // Extract participant names (labels) from AST
-      // If alias exists, name holds the alias. If not, name holds the ID.
-      // We only show the name to keep the list clean.
       const suggestions: string[] = [];
       ast.participants?.forEach((p: any) => {
         if (p.name) {
@@ -177,6 +309,8 @@ export function usePolagram(code: string): UsePolagramReturn {
     transformedCode, 
     error, 
     pipeline,
+    lensYaml,
+    updateLensYaml,
     addTransform,
     removeTransform,
     toggleTransform,
