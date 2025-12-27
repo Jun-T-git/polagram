@@ -1,6 +1,10 @@
 .container {
   border-top: 1px solid var(--glass-border);
   background: var(--color-bg-tertiary);
+  height: 100%;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .header {

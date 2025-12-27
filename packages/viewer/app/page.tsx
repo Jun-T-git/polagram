@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import CodeEditor from './components/CodeEditor';
 import SequenceDiagram from './components/SequenceDiagram';
+import Tabs from './components/Tabs';
 import TransformControls from './components/TransformControls';
 import { usePolagram } from './hooks/usePolagram';
 import styles from './page.module.css';
@@ -43,6 +45,7 @@ const DEFAULT_MERMAID = `sequenceDiagram
 
 export default function ViewerPage() {
   const [code, setCode] = useState(DEFAULT_MERMAID);
+  const [activeTab, setActiveTab] = useState('Mermaid Code');
   const { 
     transformedCode, 
     error, 
@@ -68,34 +71,53 @@ export default function ViewerPage() {
       </header>
 
       <main className={styles.main}>
-        <div className={styles.editorPanel}>
-          <div className={styles.panelHeader}>
-            <h2>Mermaid Code</h2>
-          </div>
-          <CodeEditor value={code} onChange={setCode} error={error} />
-          
-          <div className={styles.panelHeader} style={{ marginTop: '20px' }}>
-             <h2>Lens Configuration (YAML)</h2>
-          </div>
-          <CodeEditor value={lensYaml} onChange={updateLensYaml} error={null} />
+        <PanelGroup direction="horizontal" style={{ height: '100%', width: '100%' }}>
+          <Panel defaultSize={40} minSize={20} className={styles.panel}>
+            <PanelGroup direction="vertical" style={{ height: '100%', width: '100%' }}>
+              <Panel defaultSize={70} minSize={20} className={styles.panel}>
+                <div className={styles.editorPanel}>
+                  <Tabs 
+                    tabs={['Mermaid Code', 'Lens Config (YAML)']} 
+                    activeTab={activeTab} 
+                    onTabChange={setActiveTab} 
+                  />
+                  <div className={styles.editorContent}>
+                    {activeTab === 'Mermaid Code' ? (
+                      <CodeEditor value={code} onChange={setCode} error={error} />
+                    ) : (
+                      <CodeEditor value={lensYaml} onChange={updateLensYaml} error={null} />
+                    )}
+                  </div>
+                </div>
+              </Panel>
+              
+<PanelResizeHandle className={styles.resizeHandleHorizontal} />
 
-          <TransformControls 
-            pipeline={pipeline}
-            pipelineCode={getPipelineCode()}
-            onAddTransform={addTransform}
-            onRemoveTransform={removeTransform}
-            onToggleTransform={toggleTransform}
-            onToggleAll={toggleAll}
-            getSuggestions={getSuggestions}
-          />
-        </div>
+              <Panel defaultSize={30} minSize={10} className={styles.panel}>
+                <TransformControls 
+                  pipeline={pipeline}
+                  pipelineCode={getPipelineCode()}
+                  onAddTransform={addTransform}
+                  onRemoveTransform={removeTransform}
+                  onToggleTransform={toggleTransform}
+                  onToggleAll={toggleAll}
+                  getSuggestions={getSuggestions}
+                />
+              </Panel>
+            </PanelGroup>
+          </Panel>
 
-        <div className={styles.diagramPanel}>
-          <div className={styles.panelHeader}>
-            <h2>Sequence Diagram</h2>
-          </div>
-          <SequenceDiagram code={transformedCode} error={error} />
-        </div>
+<PanelResizeHandle className={styles.resizeHandleVertical} />
+
+          <Panel defaultSize={60} minSize={20} className={styles.panel}>
+            <div className={styles.diagramPanel}>
+              <div className={styles.panelHeader}>
+                <h2>Sequence Diagram</h2>
+              </div>
+              <SequenceDiagram code={transformedCode} error={error} />
+            </div>
+          </Panel>
+        </PanelGroup>
       </main>
     </div>
   );

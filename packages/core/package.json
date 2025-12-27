@@ -7,6 +7,7 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/polagram-core.js",
       "require": "./dist/polagram-core.umd.cjs"
     }

@@ -15,7 +15,8 @@
     "next": "16.1.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "react-mermaid2": "^0.1.4"
+    "react-mermaid2": "^0.1.4",
+    "react-resizable-panels": "^2.0.19"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

@@ -75,6 +75,9 @@ importers:
       react-mermaid2:
         specifier: ^0.1.4
         version: 0.1.4(@testing-library/dom@10.4.1)(@types/react@19.2.7)(eslint@9.39.2)(typescript@5.9.3)
+      react-resizable-panels:
+        specifier: ^2.0.19
+        version: 2.0.19(react-dom@19.2.3)(react@19.2.3)
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4
@@ -13853,6 +13856,16 @@ packages:
       - vue-template-compiler
       - webpack-cli
       - webpack-command
+    dev: false
+
+  /react-resizable-panels@2.0.19(react-dom@19.2.3)(react@19.2.3):
+    resolution: {integrity: sha512-v3E41kfKSuCPIvJVb4nL4mIZjjKIn/gh6YqZF/gDfQDolv/8XnhJBek4EiV2gOr3hhc5A3kOGOayk3DhanpaQw==}
+    peerDependencies:
+      react: ^16.14.0 || ^17.0.0 || ^18.0.0
+      react-dom: ^16.14.0 || ^17.0.0 || ^18.0.0
+    dependencies:
+      react: 19.2.3
+      react-dom: 19.2.3(react@19.2.3)
     dev: false
 
   /react-scripts@3.3.0(eslint@9.39.2)(react@16.14.0)(typescript@5.9.3):
