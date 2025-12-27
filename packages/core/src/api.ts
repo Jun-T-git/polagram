@@ -1,12 +1,16 @@
+
 import { PolagramRoot } from './ast';
 import { MermaidGeneratorVisitor } from './generator/generators/mermaid';
 import { ParserFactory } from './parser';
 import { TransformationEngine } from './transformer/orchestration/engine';
 import {
     FragmentSelector,
+    GroupSelector,
+    Layer,
+    Lens,
+    MessageSelector,
     ParticipantSelector,
-    TextMatcher,
-    TransformRule
+    TextMatcher
 } from './transformer/types';
 
 /**
@@ -15,7 +19,7 @@ import {
  * @example
  * const result = Polagram.init(mermaidCode)
  *   .focusParticipant('PaymentService')
- *   .hideParticipant('DebugLogger')
+ *   .removeParticipant('DebugLogger')
  *   .toMermaid();
  */
 export class Polagram {
@@ -36,20 +40,21 @@ export class Polagram {
  */
 export class PolagramBuilder {
     private ast: PolagramRoot;
-    private rules: TransformRule[] = [];
+    private layers: Layer[] = [];
 
     constructor(ast: PolagramRoot) {
         this.ast = ast;
     }
 
-    // -- New Intuitive API --
+    // -- Entity Filtering --
 
     /**
-     * Focus on specific participants. Keeps only interactions involving the matched participants.
-     * @param selector String (partial match), RegExp, or detailed selector object with id/class
+     * Focus on specific participants. 
+     * Keeps only interactions involving the matched participants.
+     * @param selector Name (string/RegExp) or detailed ParticipantSelector
      */
-    focusParticipant(selector: string | RegExp | Partial<ParticipantSelector>): this {
-        this.rules.push({
+    focusParticipant(selector: TextMatcher | Partial<ParticipantSelector>): this {
+        this.layers.push({
             action: 'focus',
             selector: this.normalizeParticipantSelector(selector)
         });
@@ -57,39 +62,66 @@ export class PolagramBuilder {
     }
 
     /**
-     * Hide specific participants and their interactions.
-     * @param selector String (partial match), RegExp, or detailed selector object with id/class
+     * Remove specific participants and their interactions.
+     * @param selector Name (string/RegExp) or detailed ParticipantSelector
      */
-    hideParticipant(selector: string | RegExp | Partial<ParticipantSelector>): this {
-        this.rules.push({
-            action: 'hide',
+    removeParticipant(selector: TextMatcher | Partial<ParticipantSelector>): this {
+        this.layers.push({
+            action: 'remove',
             selector: this.normalizeParticipantSelector(selector)
         });
         return this;
     }
 
+    // -- Message Filtering --
+
     /**
-     * Focus on specific fragments. Expands the fragment and shows only its content.
-     * @param selector String (partial match), RegExp, or detailed selector object with id/class
+     * Remove specific messages.
+     * @param selector Message text (string/RegExp) or detailed MessageSelector
      */
-    focusFragment(selector: string | RegExp | Partial<FragmentSelector>): this {
-        this.rules.push({
-            action: 'focus',
+    removeMessage(selector: TextMatcher | Partial<MessageSelector>): this {
+        this.layers.push({
+            action: 'remove',
+            selector: this.normalizeMessageSelector(selector)
+        });
+        return this;
+    }
+
+    // -- Group Filtering --
+
+    /**
+     * Remove specific groups (visual boxes).
+     * @param selector Group name (string/RegExp) or detailed GroupSelector
+     */
+    removeGroup(selector: TextMatcher | Partial<GroupSelector>): this {
+        this.layers.push({
+            action: 'remove',
+            selector: this.normalizeGroupSelector(selector)
+        });
+        return this;
+    }
+
+    // -- Structural Resolution --
+
+    /**
+     * Resolve (unwrap) specific fragments like 'alt', 'opt', 'loop'.
+     * Promotes the content of the matched branch and removes the wrapper.
+     * @param selector Condition text (string/RegExp) or detailed FragmentSelector
+     */
+    resolveFragment(selector: TextMatcher | Partial<FragmentSelector>): this {
+        this.layers.push({
+            action: 'resolve',
             selector: this.normalizeFragmentSelector(selector)
         });
         return this;
     }
 
-
-
-    // -- Legacy API (Deprecated) -- Removed
-
     /**
-     * Apply a custom transformation rule.
-     * @param rule Custom TransformRule
+     * Apply a Lens (a named set of transformation layers).
+     * @param lens Lens object containing layers
      */
-    transform(rule: TransformRule): this {
-        this.rules.push(rule);
+    applyLens(lens: Lens): this {
+        this.layers.push(...lens.layers);
         return this;
     }
 
@@ -98,7 +130,7 @@ export class PolagramBuilder {
      */
     toMermaid(): string {
         const engine = new TransformationEngine();
-        const transformedAst = engine.transform(this.ast, this.rules);
+        const transformedAst = engine.transform(this.ast, this.layers);
         const generator = new MermaidGeneratorVisitor();
         return generator.generate(transformedAst);
     }
@@ -108,38 +140,48 @@ export class PolagramBuilder {
      */
     toAST(): PolagramRoot {
         const engine = new TransformationEngine();
-        return engine.transform(this.ast, this.rules);
+        return engine.transform(this.ast, this.layers);
     }
 
     // -- Helper Methods --
 
     private normalizeParticipantSelector(
-        selector: string | RegExp | Partial<ParticipantSelector>
+        selector: TextMatcher | Partial<ParticipantSelector>
     ): ParticipantSelector {
-        if (typeof selector === 'string' || selector instanceof RegExp) {
-            return {
-                kind: 'participant',
-                text: selector as TextMatcher
-            };
+        if (this.isTextMatcher(selector)) {
+            return { kind: 'participant', name: selector };
         }
-        return {
-            kind: 'participant',
-            ...selector
-        };
+        return { kind: 'participant', ...selector };
+    }
+
+    private normalizeMessageSelector(
+        selector: TextMatcher | Partial<MessageSelector>
+    ): MessageSelector {
+        if (this.isTextMatcher(selector)) {
+            return { kind: 'message', text: selector };
+        }
+        return { kind: 'message', ...selector };
+    }
+
+    private normalizeGroupSelector(
+        selector: TextMatcher | Partial<GroupSelector>
+    ): GroupSelector {
+        if (this.isTextMatcher(selector)) {
+            return { kind: 'group', name: selector };
+        }
+        return { kind: 'group', ...selector };
     }
 
     private normalizeFragmentSelector(
-        selector: string | RegExp | Partial<FragmentSelector>
+        selector: TextMatcher | Partial<FragmentSelector>
     ): FragmentSelector {
-        if (typeof selector === 'string' || selector instanceof RegExp) {
-            return {
-                kind: 'fragment',
-                text: selector as TextMatcher
-            };
+        if (this.isTextMatcher(selector)) {
+            return { kind: 'fragment', condition: selector };
         }
-        return {
-            kind: 'fragment',
-            ...selector
-        };
+        return { kind: 'fragment', ...selector };
+    }
+
+    private isTextMatcher(val: any): val is TextMatcher {
+        return typeof val === 'string' || val instanceof RegExp || (typeof val === 'object' && val !== null && 'pattern' in val && !('kind' in val));
     }
 }

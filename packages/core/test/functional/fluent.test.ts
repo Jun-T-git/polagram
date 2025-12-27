@@ -1,3 +1,4 @@
+
 import { describe, expect, it } from 'vitest';
 import { Polagram } from '../../src/api';
 
@@ -31,7 +32,7 @@ describe('Fluent API Tests', () => {
 
     it('should support remove with string selector', () => {
       const result = Polagram.init(sampleCode)
-        .hideParticipant('B')
+        .removeParticipant('B')
         .toMermaid();
       
       const normalized = normalize(result);
@@ -67,7 +68,7 @@ describe('Fluent API Tests', () => {
     PaymentService->>ErrorLogger: Error`;
 
       const result = Polagram.init(code)
-        .hideParticipant(/^Debug.*/)
+        .removeParticipant(/^Debug.*/)
         .toMermaid();
       
       const normalized = normalize(result);
@@ -80,7 +81,7 @@ describe('Fluent API Tests', () => {
   describe('Object Selectors', () => {
     it('should support focus with object selector', () => {
       const result = Polagram.init(sampleCode)
-        .focusParticipant({ text: 'B' })
+        .focusParticipant({ name: 'B' })
         .toMermaid();
       
       expect(normalize(result)).toContain('participant B');
@@ -100,7 +101,7 @@ describe('Fluent API Tests', () => {
     D->>A: Message 4`;
 
       const result = Polagram.init(code)
-        .hideParticipant('D')
+        .removeParticipant('D')
         .focusParticipant('B')
         .toMermaid();
       
@@ -110,8 +111,8 @@ describe('Fluent API Tests', () => {
     });
   });
 
-  describe('FocusFragment', () => {
-    it('should focus on fragments', () => {
+  describe('ResolveFragment', () => {
+    it('should resolve (unwrap) fragments', () => {
       const code = `sequenceDiagram
     participant A
     participant B
@@ -120,7 +121,7 @@ describe('Fluent API Tests', () => {
     end`;
 
       const result = Polagram.init(code)
-        .focusFragment('Option')
+        .resolveFragment('Option')
         .toMermaid();
       
       const normalized = normalize(result);

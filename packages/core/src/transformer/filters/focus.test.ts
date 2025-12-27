@@ -1,10 +1,10 @@
 
 import { describe, expect, it } from 'vitest';
 import { FragmentNode, MessageNode, PolagramRoot } from '../../ast';
-import { TransformRule } from '../types';
-import { FocusParticipantFilter } from './focus-participant';
+import { FocusLayer } from '../types';
+import { FocusFilter } from './focus';
 
-describe('FocusParticipantFilter', () => {
+describe('FocusFilter', () => {
     const createAst = (events: any[]): PolagramRoot => ({
         kind: 'root',
         meta: { version: '1', source: 'unknown' },
@@ -24,21 +24,18 @@ describe('FocusParticipantFilter', () => {
 
     it('removes messages not related to focused participant', () => {
         const root = createAst([msgAB, msgBC, msgCD]);
-        const rule: TransformRule = {
+        const layer: FocusLayer = {
             action: 'focus',
-            selector: { kind: 'participant', text: 'A' }
+            selector: { kind: 'participant', name: 'A' }
         };
         // Expect: msgAB (involves A), others removed
-        const result = new FocusParticipantFilter(rule).transform(root);
+        const result = new FocusFilter(layer).transform(root);
         
         expect(result.events).toHaveLength(1);
         expect((result.events[0] as MessageNode).id).toBe('m1');
     });
 
-    it('removes messages even inside fragments, but keeps structure (does NOT prune empty)', () => {
-        // FocusParticipantFilter separates concerns: it filters content but leaves empty branches.
-        // Pruning is done by StructureCleaner.
-        
+    it('removes messages even inside fragments, but keeps structure', () => {
         const fragment: FragmentNode = {
             kind: 'fragment', id: 'f1', operator: 'alt',
             branches: [
@@ -47,12 +44,12 @@ describe('FocusParticipantFilter', () => {
             ]
         };
         const root = createAst([fragment]);
-        const rule: TransformRule = {
+        const layer: FocusLayer = {
             action: 'focus',
-            selector: { kind: 'participant', text: 'A' }
+            selector: { kind: 'participant', name: 'A' }
         };
 
-        const result = new FocusParticipantFilter(rule).transform(root);
+        const result = new FocusFilter(layer).transform(root);
         const resFrag = result.events[0] as FragmentNode;
         
         // b1 should keep event

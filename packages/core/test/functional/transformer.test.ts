@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
 import { MermaidGeneratorVisitor } from '../../src/generator/generators/mermaid';
 import { ParserFactory } from '../../src/parser';
 import { TransformationEngine } from '../../src/transformer/orchestration/engine';
-import { TransformRule } from '../../src/transformer/types';
+import { Layer } from '../../src/transformer/types';
 
 const FIXTURES_DIR = join(__dirname, '../fixtures/transform');
 
@@ -16,7 +16,7 @@ function normalize(code: string): string {
     .join('\n');
 }
 
-function runTest(subDir: string, fileName: string, rules: TransformRule[]) {
+function runTest(subDir: string, fileName: string, layers: Layer[]) {
   const inputPath = join(FIXTURES_DIR, subDir, `${fileName}.mmd`);
   const expectedPath = join(FIXTURES_DIR, subDir, `${fileName}_expected.mmd`);
   
@@ -29,7 +29,7 @@ function runTest(subDir: string, fileName: string, rules: TransformRule[]) {
 
   // 2. Transform
   const engine = new TransformationEngine();
-  const transformedAst = engine.transform(ast, rules);
+  const transformedAst = engine.transform(ast, layers);
 
   // 3. Generate
   const generator = new MermaidGeneratorVisitor();
@@ -50,26 +50,26 @@ function runTest(subDir: string, fileName: string, rules: TransformRule[]) {
   describe('FocusParticipant', () => {
     it('should focus on participant B', () => {
       runTest('focus-participant', '01_simple', [{
-        action: 'focusParticipant',
-        selector: { kind: 'participant', text: 'B' }
+        action: 'focus',
+        selector: { kind: 'participant', name: 'B' }
       }]);
     });
   });
 
-  describe('HideParticipant', () => {
+  describe('RemoveParticipant', () => {
     it('should remove participant B', () => {
       runTest('hide-participant', '01_simple', [{
-        action: 'hideParticipant',
-        selector: { kind: 'participant', text: 'B' }
+        action: 'remove',
+        selector: { kind: 'participant', name: 'B' }
       }]);
     });
   });
 
-  describe('FocusFragment', () => {
+  describe('ResolveFragment', () => {
     it('should unwrap option blocks', () => {
       runTest('focus-fragment', '01_opt', [{
-        action: 'focusFragment',
-        selector: { kind: 'branch', text: 'Option' }
+        action: 'resolve',
+        selector: { kind: 'fragment', condition: 'Option' }
       }]);
     });
   });

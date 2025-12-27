@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import CodeEditor from './components/CodeEditor';
 import SequenceDiagram from './components/SequenceDiagram';
@@ -45,7 +45,10 @@ const DEFAULT_MERMAID = `sequenceDiagram
 
 export default function ViewerPage() {
   const [code, setCode] = useState(DEFAULT_MERMAID);
-  const [activeTab, setActiveTab] = useState('Mermaid Code');
+  const [activeTab, setActiveTab] = useState('sample-lens.yaml');
+  const [workspaceHeight, setWorkspaceHeight] = useState(600);
+  const isResizingRef = useRef(false);
+
   const { 
     transformedCode, 
     error, 
@@ -60,6 +63,40 @@ export default function ViewerPage() {
     getSuggestions
   } = usePolagram(code);
 
+  const startResizing = useCallback(() => {
+    isResizingRef.current = true;
+    document.body.style.cursor = 'row-resize';
+    document.body.style.userSelect = 'none';
+  }, []);
+
+  const stopResizing = useCallback(() => {
+    isResizingRef.current = false;
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+  }, []);
+
+  const resize = useCallback((e: MouseEvent) => {
+    if (isResizingRef.current) {
+      // Allow resizing by calculating distance from top, adjusting for header approx height (80-90px)
+      // or easier: just use the mouse Y position relative to the main container.
+      // But Since main is at the top, e.clientY - headerHeight is a good approx.
+      // Let's assume header is ~85px. 
+      const newHeight = e.clientY - 85; 
+      if (newHeight > 200) {
+         setWorkspaceHeight(newHeight);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('mousemove', resize);
+    window.addEventListener('mouseup', stopResizing);
+    return () => {
+      window.removeEventListener('mousemove', resize);
+      window.removeEventListener('mouseup', stopResizing);
+    };
+  }, [resize, stopResizing]);
+
   return (
     <div className={styles.container}>
       <header className={styles.header}>
@@ -71,53 +108,61 @@ export default function ViewerPage() {
       </header>
 
       <main className={styles.main}>
-        <PanelGroup direction="horizontal" style={{ height: '100%', width: '100%' }}>
-          <Panel defaultSize={40} minSize={20} className={styles.panel}>
-            <PanelGroup direction="vertical" style={{ height: '100%', width: '100%' }}>
-              <Panel defaultSize={70} minSize={20} className={styles.panel}>
-                <div className={styles.editorPanel}>
-                  <Tabs 
-                    tabs={['Mermaid Code', 'Lens Config (YAML)']} 
-                    activeTab={activeTab} 
-                    onTabChange={setActiveTab} 
-                  />
-                  <div className={styles.editorContent}>
-                    {activeTab === 'Mermaid Code' ? (
-                      <CodeEditor value={code} onChange={setCode} error={error} />
-                    ) : (
-                      <CodeEditor value={lensYaml} onChange={updateLensYaml} error={null} />
-                    )}
-                  </div>
-                </div>
-              </Panel>
-              
-<PanelResizeHandle className={styles.resizeHandleHorizontal} />
-
-              <Panel defaultSize={30} minSize={10} className={styles.panel}>
-                <TransformControls 
-                  pipeline={pipeline}
-                  pipelineCode={getPipelineCode()}
-                  onAddTransform={addTransform}
-                  onRemoveTransform={removeTransform}
-                  onToggleTransform={toggleTransform}
-                  onToggleAll={toggleAll}
-                  getSuggestions={getSuggestions}
+        <div className={styles.workspace} style={{ height: workspaceHeight }}>
+          <PanelGroup direction="horizontal" style={{ height: '100%', width: '100%' }}>
+            <Panel defaultSize={40} minSize={20} className={styles.panel}>
+              <div className={styles.editorPanel}>
+                <Tabs 
+                  tabs={['sample-lens.yaml', 'sequence-source.mmd']} 
+                  activeTab={activeTab} 
+                  onTabChange={setActiveTab} 
                 />
-              </Panel>
-            </PanelGroup>
-          </Panel>
-
-<PanelResizeHandle className={styles.resizeHandleVertical} />
-
-          <Panel defaultSize={60} minSize={20} className={styles.panel}>
-            <div className={styles.diagramPanel}>
-              <div className={styles.panelHeader}>
-                <h2>Sequence Diagram</h2>
+                <div className={styles.editorContent}>
+                  {activeTab === 'sequence-source.mmd' ? (
+                    <CodeEditor 
+                      value={code} 
+                      onChange={setCode} 
+                      error={error} 
+                      placeholder="Enter sequence diagram code (Mermaid)..."
+                    />
+                  ) : (
+                    <CodeEditor 
+                      value={lensYaml} 
+                      onChange={updateLensYaml} 
+                      error={null} 
+                      placeholder="Enter Lens configuration (YAML)..."
+                    />
+                  )}
+                </div>
               </div>
-              <SequenceDiagram code={transformedCode} error={error} />
-            </div>
-          </Panel>
-        </PanelGroup>
+            </Panel>
+
+            <PanelResizeHandle className={styles.resizeHandleVertical} />
+
+            <Panel defaultSize={60} minSize={20} className={styles.panel}>
+              <div className={styles.diagramPanel}>
+                <div className={styles.panelHeader}>
+                  <h2>Sequence Diagram</h2>
+                </div>
+                <SequenceDiagram code={transformedCode} error={error} />
+              </div>
+            </Panel>
+          </PanelGroup>
+        </div>
+        
+        <div className={styles.workspaceResizer} onMouseDown={startResizing} />
+
+        <div className={styles.pipelinePanel}>
+          <TransformControls 
+            pipeline={pipeline}
+            pipelineCode={getPipelineCode()}
+            onAddTransform={addTransform}
+            onRemoveTransform={removeTransform}
+            onToggleTransform={toggleTransform}
+            onToggleAll={toggleAll}
+            getSuggestions={getSuggestions}
+          />
+        </div>
       </main>
     </div>
   );

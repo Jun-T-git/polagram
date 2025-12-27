@@ -1,9 +1,10 @@
-import { Polagram, TransformLens } from '@polagram/core';
+import { Lens, Polagram } from '@polagram/core';
 import yaml from 'js-yaml';
 import { useEffect, useState } from 'react';
 
+// UI Operations (Legacy keys kept for UI compatibility if needed, but mapped to new API)
 export interface TransformOperation {
-  operation: 'focusParticipant' | 'hideParticipant' | 'focusFragment';
+  operation: 'focusParticipant' | 'removeParticipant' | 'resolveFragment';
   target: string;
   enabled: boolean;
 }
@@ -15,7 +16,7 @@ interface UsePolagramReturn {
   pipeline: TransformOperation[];
   lensYaml: string;
   updateLensYaml: (yamlStr: string) => void;
-  addTransform: (operation: 'focusParticipant' | 'hideParticipant' | 'focusFragment', target: string) => void;
+  addTransform: (operation: TransformOperation['operation'], target: string) => void;
   removeTransform: (index: number) => void;
   toggleTransform: (index: number) => void;
   toggleAll: () => void;
@@ -31,34 +32,42 @@ export function usePolagram(code: string): UsePolagramReturn {
   const [pipeline, setPipeline] = useState<TransformOperation[]>([]);
   const [lensYaml, setLensYaml] = useState<string>('');
 
-  // Helper: Generate YAML from pipeline
-  const generateLensYaml = (ops: TransformOperation[]) => {
+  // Helper: Convert pipeline operations to Lens object
+  const createLensFromPipeline = (ops: TransformOperation[]): Lens => {
     const enabledOps = ops.filter(op => op.enabled);
+    
     if (enabledOps.length === 0) {
-      return '';
+      return { name: 'Empty Lens', layers: [] };
     }
 
-    const rules = enabledOps.map(op => {
-      const rule: any = {};
+    const layers = enabledOps.map(op => {
+      const layer: any = {};
       
       if (op.operation === 'focusParticipant') {
-        rule.action = 'focus';
-        rule.selector = { kind: 'participant', text: op.target };
-      } else if (op.operation === 'hideParticipant') {
-        rule.action = 'hide';
-        rule.selector = { kind: 'participant', text: op.target };
-      } else if (op.operation === 'focusFragment') {
-        rule.action = 'focus';
-        rule.selector = { kind: 'fragment', text: op.target };
+        layer.action = 'focus';
+        layer.selector = { kind: 'participant', name: op.target };
+      } else if (op.operation === 'removeParticipant') {
+        layer.action = 'remove';
+        layer.selector = { kind: 'participant', name: op.target };
+      } else if (op.operation === 'resolveFragment') {
+        layer.action = 'resolve';
+        layer.selector = { kind: 'fragment', condition: op.target };
       }
-      return rule;
+      return layer;
     });
 
-    const lens: TransformLens = {
+    return {
       name: 'Generated Lens',
-      rules
+      layers
     };
+  };
 
+  // Helper: Generate YAML from pipeline
+  const generateLensYaml = (ops: TransformOperation[]) => {
+    const lens = createLensFromPipeline(ops);
+    if (lens.layers.length === 0) {
+      return '';
+    }
     return yaml.dump(lens);
   };
 
@@ -89,127 +98,16 @@ export function usePolagram(code: string): UsePolagramReturn {
     }
   }, [code]);
 
-  // Apply all transformations in the pipeline
-  const applyPipeline = (operations: TransformOperation[]) => {
-    // Sync YAML
-    setLensYaml(generateLensYaml(operations));
-
-    if (!originalCode || operations.length === 0) {
-      setTransformedCode(originalCode);
-      return;
-    }
-
-    try {
-      let builder = Polagram.init(originalCode);
-      
-      // Apply only enabled transformations in sequence
-      const enabledOps = operations.filter(op => op.enabled);
-      for (const op of enabledOps) {
-        switch (op.operation) {
-          case 'focusParticipant':
-            builder = builder.focusParticipant(op.target);
-            break;
-          case 'hideParticipant':
-            builder = builder.hideParticipant(op.target);
-            break;
-          case 'focusFragment':
-            builder = builder.focusFragment(op.target);
-            break;
-        }
-      }
-
-      const transformedAst = builder.toAST();
-      const newMermaidCode = builder.toMermaid();
-      
-      setAst(transformedAst);
-      setTransformedCode(newMermaidCode);
-      setError(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to apply transformations');
-    }
-  };
-
-  // Update pipeline from YAML input
-  const updateLensYaml = (yamlStr: string) => {
-    setLensYaml(yamlStr);
-    
-    if (!yamlStr.trim()) {
-      const newPipeline: TransformOperation[] = [];
-      setPipeline(newPipeline);
-      // Manually trigger apply (cannot use applyPipeline as it regenerates YAML)
-      // Actually, we want to update pipeline state AND apply it.
-      // But avoid re-generating YAML from the forced pipeline update, or accept normalization.
-      // Let's normalize: logic flow is YAML -> Pipeline -> (Back to YAML? No, keep user input if possible, 
-      // but the requirement says "Sync". If user types comments, they might be lost if we regen.
-      // For this implementation, we will regenerate YAML from Pipeline to ensure consistency, 
-      // OR we accept that the editor value might jump. 
-      // Plan said: "Updates pipeline state... Applies transformation."
-      // Let's map YAML to Pipeline.
-      
-      if (!originalCode) return;
-      setTransformedCode(originalCode);
-      return;
-    }
-
-    try {
-      const parsed = yaml.load(yamlStr) as TransformLens;
-      if (!parsed || !parsed.rules) {
-        // Invalid or empty
-        return;
-      }
-
-      const newPipeline: TransformOperation[] = parsed.rules.map((rule: any) => {
-        let operation: TransformOperation['operation'] = 'focusParticipant';
-        let target = '';
-
-        if (rule.action === 'focus') {
-             if (rule.selector?.kind === 'participant') operation = 'focusParticipant';
-             else if (rule.selector?.kind === 'fragment') operation = 'focusFragment';
-        } else if (rule.action === 'hide') {
-             if (rule.selector?.kind === 'participant') operation = 'hideParticipant';
-        }
-
-        // Extract target from selector
-        const selector = rule.selector as any;
-        if (selector.text) {
-            target = typeof selector.text === 'string' ? selector.text : selector.text.pattern || '';
-        }
-
-        return {
-          operation,
-          target,
-          enabled: true // YAML rules are always enabled
-        };
-      });
-
-      setPipeline(newPipeline);
-      
-      // Apply without regenerating YAML (to preserve cursor/formatting while typing if we could, 
-      // but applyPipeline design updates YAML. We should decouple apply logic.)
-      
-      // Refactored apply logic to NOT update YAML, but only apply transformations.
-      // applyPipeline function above UPDATES YAML. We need a separate function.
-      applyTransformationsOnly(newPipeline);
-
-    } catch (e) {
-      // Parse error, just ignore or show error
-      console.error(e);
-      // Keep old pipeline active? Or cleared? 
-      // If YAML is invalid, maybe just don't apply changes but keep YAML string.
-    }
-  };
-
-  const applyTransformationsOnly = (operations: TransformOperation[]) => {
+  // Apply transformation using Lens
+  const applyLensTransformation = (lens: Lens) => {
       if (!originalCode) return;
       
       try {
         let builder = Polagram.init(originalCode);
-        const enabledOps = operations.filter(op => op.enabled);
         
-        for (const op of enabledOps) {
-            if (op.operation === 'focusParticipant') builder = builder.focusParticipant(op.target);
-            else if (op.operation === 'hideParticipant') builder = builder.hideParticipant(op.target);
-            else if (op.operation === 'focusFragment') builder = builder.focusFragment(op.target);
+        // Use applyLens for all transformations
+        if (lens.layers.length > 0) {
+            builder = builder.applyLens(lens);
         }
 
         const newMermaidCode = builder.toMermaid();
@@ -221,9 +119,80 @@ export function usePolagram(code: string): UsePolagramReturn {
       }
   };
 
+  // Apply all transformations in the pipeline
+  const applyPipeline = (operations: TransformOperation[]) => {
+    // Sync YAML
+    setLensYaml(generateLensYaml(operations));
+    
+    // Create Lens and Apply
+    const lens = createLensFromPipeline(operations);
+    applyLensTransformation(lens);
+  };
+
+  // Update pipeline from YAML input
+  const updateLensYaml = (yamlStr: string) => {
+    setLensYaml(yamlStr);
+    
+    if (!yamlStr.trim()) {
+      const newPipeline: TransformOperation[] = [];
+      setPipeline(newPipeline);
+      
+      // Apply empty lens
+      const emptyLens: Lens = { name: 'Empty', layers: [] };
+      applyLensTransformation(emptyLens);
+      
+      if (!originalCode) return;
+      setTransformedCode(originalCode);
+      return;
+    }
+
+    try {
+      const parsed = yaml.load(yamlStr) as Lens;
+      if (!parsed || !parsed.layers) {
+        return;
+      }
+
+      // Reconstruct pipeline from Lens
+      const newPipeline: TransformOperation[] = parsed.layers.map((layer: any) => {
+        let operation: TransformOperation['operation'] = 'focusParticipant';
+        let target = '';
+
+        if (layer.action === 'focus' && layer.selector?.kind === 'participant') {
+             operation = 'focusParticipant';
+        } else if (layer.action === 'remove' && layer.selector?.kind === 'participant') {
+             operation = 'removeParticipant';
+        } else if (layer.action === 'resolve' && layer.selector?.kind === 'fragment') {
+             operation = 'resolveFragment';
+        }
+
+        // Extract target from selector
+        const selector = layer.selector as any;
+        if (selector) {
+            if (selector.name) target = typeof selector.name === 'string' ? selector.name : selector.name.pattern || '';
+            else if (selector.condition) target = typeof selector.condition === 'string' ? selector.condition : selector.condition.pattern || '';
+        }
+
+        return {
+          operation,
+          target,
+          enabled: true // YAML rules are always enabled
+        };
+      });
+
+      setPipeline(newPipeline);
+      
+      // Apply the parsed lens directly
+      applyLensTransformation(parsed);
+
+    } catch (e) {
+      console.error(e);
+      // Don't clear transformed code on partial parse error to avoid flashing
+    }
+  };
+
 
   // Add a new transformation to the pipeline
-  const addTransform = (operation: 'focusParticipant' | 'hideParticipant' | 'focusFragment', target: string) => {
+  const addTransform = (operation: TransformOperation['operation'], target: string) => {
     const newPipeline = [...pipeline, { operation, target, enabled: true }];
     setPipeline(newPipeline);
     applyPipeline(newPipeline);
@@ -248,20 +217,19 @@ export function usePolagram(code: string): UsePolagramReturn {
   // Toggle all transformations on/off
   const toggleAll = () => {
     if (pipeline.length === 0) return;
-    
-    // If any transformation is enabled, disable all. Otherwise, enable all.
     const hasEnabled = pipeline.some(op => op.enabled);
     const newPipeline = pipeline.map(op => ({ ...op, enabled: !hasEnabled }));
-    
     setPipeline(newPipeline);
     applyPipeline(newPipeline);
   };
 
-  // Generate code representation of the pipeline
+  // Generate code representation of the pipeline (Updated to show applyLens equivalent ideally, but keeping builder pattern for display if preferred, or we can switch to show lens usage)
   const getPipelineCode = (): string => {
     const enabledOps = pipeline.filter(op => op.enabled);
     if (enabledOps.length === 0) return 'Polagram.init(code)';
     
+    // Representing as builder chain is still valid, but we could also show the lens object.
+    // For now, let's keep the builder chain representation as it's easier to read for simple ops.
     const operations = enabledOps
       .map(op => `.${op.operation}("${op.target}")`)
       .join('');
@@ -274,33 +242,26 @@ export function usePolagram(code: string): UsePolagramReturn {
     if (!ast) return [];
     
     if (operationType === 'participant') {
-      // Extract participant names (labels) from AST
       const suggestions: string[] = [];
       ast.participants?.forEach((p: any) => {
-        if (p.name) {
-          suggestions.push(p.name);
-        } else if (p.id) {
-          suggestions.push(p.id);
-        }
+        if (p.name) suggestions.push(p.name);
+        else if (p.id) suggestions.push(p.id);
       });
-      return [...new Set(suggestions)]; // Remove duplicates
+      return [...new Set(suggestions)];
     } else {
-      // Extract fragment labels from AST events
       const fragments: string[] = [];
       const extractFragments = (events: any[]) => {
         events?.forEach((event: any) => {
           if (event.kind === 'fragment') {
             event.branches?.forEach((branch: any) => {
-              if (branch.condition) {
-                fragments.push(branch.condition);
-              }
+              if (branch.condition) fragments.push(branch.condition);
               extractFragments(branch.events);
             });
           }
         });
       };
       extractFragments(ast.events);
-      return [...new Set(fragments)]; // Remove duplicates
+      return [...new Set(fragments)];
     }
   };
 

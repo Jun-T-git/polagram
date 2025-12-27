@@ -1,59 +1,66 @@
-export type TextMatcher = string | RegExp | { pattern: string; flags?: string };
+import { FragmentOperator, PolagramRoot } from '../ast';
 
 // -- Selectors --
 
-export type Selector = 
-  | ParticipantSelector
-  | MessageSelector
-  | FragmentSelector
-  | GroupSelector;
+export type TextMatcher = string | RegExp | { pattern: string; flags?: string };
+
+export interface FragmentSelector {
+    kind?: 'fragment';
+    condition?: TextMatcher;
+    operator?: FragmentOperator | FragmentOperator[];
+}
 
 export interface ParticipantSelector {
-  kind: 'participant';
-  text?: TextMatcher;
-  id?: string;
-  class?: TextMatcher;
+    kind?: 'participant';
+    name?: TextMatcher;
+    id?: TextMatcher;
+    stereotype?: TextMatcher;
 }
 
 export interface MessageSelector {
-  kind: 'message';
-  text?: TextMatcher;
-  from?: string;
-  to?: string; 
-  class?: TextMatcher;
-}
-
-export interface FragmentSelector {
-  kind: 'fragment';
-  text?: TextMatcher;
-  id?: string;
-  class?: TextMatcher;
+    kind?: 'message';
+    text?: TextMatcher;
+    from?: TextMatcher;
+    to?: TextMatcher;
 }
 
 export interface GroupSelector {
-  kind: 'group';
-  text: TextMatcher;
+    kind?: 'group';
+    name?: TextMatcher;
 }
 
-// -- Rules --
+// -- Layers --
 
-export interface TransformRule {
-  action: 'focus' | 'hide';
-  selector: Selector;
+export type Layer = 
+    | ResolveLayer 
+    | FocusLayer 
+    | RemoveLayer;
+
+export interface ResolveLayer {
+    action: 'resolve';
+    selector: FragmentSelector;
 }
 
+export interface FocusLayer {
+    action: 'focus';
+    selector: ParticipantSelector;
+}
 
-import { PolagramRoot } from '../ast';
+export interface RemoveLayer {
+    action: 'remove';
+    selector: ParticipantSelector | MessageSelector | GroupSelector;
+}
+
+// -- Lens --
+
+export interface Lens {
+    name?: string;
+    description?: string;
+    layers: Layer[];
+}
 
 // -- Engine --
 
 export interface Transformer {
     transform(root: PolagramRoot): PolagramRoot;
-}
-
-// -- Lens API --
-
-export interface TransformLens {
-    name?: string;
-    rules: TransformRule[];
 }

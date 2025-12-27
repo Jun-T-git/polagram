@@ -5,7 +5,7 @@ import styles from './TransformControls.module.css';
 interface TransformControlsProps {
   pipeline: TransformOperation[];
   pipelineCode: string;
-  onAddTransform: (operation: 'focusParticipant' | 'hideParticipant' | 'focusFragment', target: string) => void;
+  onAddTransform: (operation: 'focusParticipant' | 'removeParticipant' | 'resolveFragment', target: string) => void;
   onRemoveTransform: (index: number) => void;
   onToggleTransform: (index: number) => void;
   onToggleAll: () => void;
@@ -21,12 +21,12 @@ export default function TransformControls({
   onToggleAll,
   getSuggestions
 }: TransformControlsProps) {
-  const [selectedOperation, setSelectedOperation] = useState<'focusParticipant' | 'hideParticipant' | 'focusFragment'>('focusParticipant');
+  const [selectedOperation, setSelectedOperation] = useState<'focusParticipant' | 'removeParticipant' | 'resolveFragment'>('focusParticipant');
   const [target, setTarget] = useState('');
 
   // Get suggestions based on selected operation
   const suggestions = getSuggestions(
-    selectedOperation === 'focusParticipant' || selectedOperation === 'hideParticipant' 
+    selectedOperation === 'focusParticipant' || selectedOperation === 'removeParticipant' 
       ? 'participant' 
       : 'fragment'
   );
@@ -34,14 +34,14 @@ export default function TransformControls({
   const getOperationLabel = (operation: string): string => {
     switch (operation) {
       case 'focusParticipant': return 'Focus Participant';
-      case 'hideParticipant': return 'Hide Participant';
-      case 'focusFragment': return 'Focus Fragment';
+      case 'removeParticipant': return 'Remove Participant';
+      case 'resolveFragment': return 'Resolve Fragment';
       default: return operation;
     }
   };
 
   const getPlaceholder = () => {
-    if (selectedOperation === 'focusParticipant' || selectedOperation === 'hideParticipant') {
+    if (selectedOperation === 'focusParticipant' || selectedOperation === 'removeParticipant') {
       return 'Participant name (e.g., Auth, API Server, Database)';
     } else {
       return 'Fragment label (e.g., Success, Cache Miss, Retry)';
@@ -52,10 +52,10 @@ export default function TransformControls({
     switch (selectedOperation) {
       case 'focusParticipant':
         return 'Show only messages sent or received by the specified participant';
-      case 'hideParticipant':
+      case 'removeParticipant':
         return 'Remove the specified participant from the diagram';
-      case 'focusFragment':
-        return 'Focus on the specified fragment and show only its contents';
+      case 'resolveFragment':
+        return 'Focus on the specified fragment and show only its contents (Unwrap/Resolve)';
     }
   };
 
@@ -133,11 +133,11 @@ export default function TransformControls({
           <select 
             className={styles.select}
             value={selectedOperation}
-            onChange={(e) => setSelectedOperation(e.target.value as 'focusParticipant' | 'hideParticipant' | 'focusFragment')}
+            onChange={(e) => setSelectedOperation(e.target.value as 'focusParticipant' | 'removeParticipant' | 'resolveFragment')}
           >
             <option value="focusParticipant">Focus Participant</option>
-            <option value="hideParticipant">Hide Participant</option>
-            <option value="focusFragment">Focus Fragment</option>
+            <option value="removeParticipant">Remove Participant</option>
+            <option value="resolveFragment">Resolve Fragment</option>
           </select>
           
           <p className={styles.description}>{getDescription()}</p>

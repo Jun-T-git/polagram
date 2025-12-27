@@ -1,10 +1,10 @@
 
 import { describe, expect, it } from 'vitest';
 import { FragmentNode, MessageNode, PolagramRoot } from '../../ast';
-import { TransformRule } from '../types';
-import { FocusFragmentFilter } from './focus-fragment';
+import { ResolveLayer } from '../types';
+import { ResolveFilter } from './resolve';
 
-describe('FocusFragmentFilter', () => {
+describe('ResolveFilter', () => {
     const createAst = (events: any[]): PolagramRoot => ({
         kind: 'root',
         meta: { version: '1', source: 'unknown' },
@@ -26,12 +26,12 @@ describe('FocusFragmentFilter', () => {
         const root = createAst([fragment]);
         
         // Unwrap branches with condition 'target'
-        const rule: TransformRule = {
-            action: 'focus',
-            selector: { kind: 'fragment', text: 'target' }
+        const layer: ResolveLayer = {
+            action: 'resolve',
+            selector: { kind: 'fragment', condition: 'target' }
         };
 
-        const result = new FocusFragmentFilter(rule).transform(root);
+        const result = new ResolveFilter(layer).transform(root);
         
         // Should trigger unwrap: return content of b1
         expect(result.events).toHaveLength(1);
@@ -47,12 +47,12 @@ describe('FocusFragmentFilter', () => {
         };
         const root = createAst([fragment]);
         
-        const rule: TransformRule = {
-            action: 'focus',
-            selector: { kind: 'fragment', text: 'nomatch' }
+        const layer: ResolveLayer = {
+            action: 'resolve',
+            selector: { kind: 'fragment', condition: 'nomatch' }
         };
 
-        const result = new FocusFragmentFilter(rule).transform(root);
+        const result = new ResolveFilter(layer).transform(root);
         
         // Should keep fragment
         expect(result.events).toHaveLength(1);

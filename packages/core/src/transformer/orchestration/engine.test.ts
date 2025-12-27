@@ -1,7 +1,7 @@
 
 import { describe, expect, it } from 'vitest';
 import { FragmentNode, MessageNode, PolagramRoot } from '../../ast';
-import { TransformRule } from '../types';
+import { FocusLayer } from '../types';
 import { TransformationEngine } from './engine';
 
 describe('TransformationEngine (Pipeline Integration)', () => {
@@ -34,12 +34,12 @@ describe('TransformationEngine (Pipeline Integration)', () => {
         const root = createAst([pA, pB, pC, pD], [fragment]);
         
         // Rule: Focus A. (Should keep msgAB, remove msgCD)
-        const rule: TransformRule = {
+        const layer: FocusLayer = {
             action: 'focus',
-            selector: { kind: 'participant', text: 'A' }
+            selector: { kind: 'participant', name: 'A' }
         };
 
-        const result = new TransformationEngine().transform(root, [rule]);
+        const result = new TransformationEngine().transform(root, [layer]);
 
         // 1. Filter (Focus) should have cleared events in b2 but left empty branch
         // 2. Cleaner (Structure) should have removed b2

@@ -1,13 +1,13 @@
 
 import { PolagramRoot } from '../ast';
 import { TransformationEngine } from './orchestration/engine';
-import { TransformLens, TransformRule } from './types';
+import { Layer, Lens } from './types';
 
 /**
- * Type Guard to validate if an object is a valid TransformLens.
+ * Type Guard to validate if an object is a valid Lens.
  * Acts as an Anti-Corruption Layer.
  */
-export function validateLens(lens: unknown): lens is TransformLens {
+export function validateLens(lens: unknown): lens is Lens {
     if (typeof lens !== 'object' || lens === null) {
         return false;
     }
@@ -19,14 +19,14 @@ export function validateLens(lens: unknown): lens is TransformLens {
         return false;
     }
 
-    // Check rules (required array)
-    if (!Array.isArray(l.rules)) {
+    // Check layers (required array)
+    if (!Array.isArray(l.layers)) {
         return false;
     }
 
-    // Validate each rule
-    for (const rule of l.rules) {
-        if (!validateRule(rule)) {
+    // Validate each layer
+    for (const layer of l.layers) {
+        if (!validateLayer(layer)) {
             return false;
         }
     }
@@ -34,29 +34,29 @@ export function validateLens(lens: unknown): lens is TransformLens {
     return true;
 }
 
-function validateRule(rule: unknown): rule is TransformRule {
-    if (typeof rule !== 'object' || rule === null) {
+function validateLayer(layer: unknown): layer is Layer {
+    if (typeof layer !== 'object' || layer === null) {
         return false;
     }
     
-    const r = rule as Record<string, unknown>;
+    const l = layer as Record<string, unknown>;
 
     // Check action
-    if (typeof r.action !== 'string') {
+    if (typeof l.action !== 'string') {
         return false;
     }
-    const validActions = ['focus', 'hide'];
-    if (!validActions.includes(r.action)) {
+    const validActions = ['focus', 'remove', 'resolve'];
+    if (!validActions.includes(l.action)) {
         return false;
     }
 
     // Check selector
-    if (typeof r.selector !== 'object' || r.selector === null) {
+    if (typeof l.selector !== 'object' || l.selector === null) {
         return false;
     }
 
-    // Simple check for selector structure (could be deeper)
-    const s = r.selector as Record<string, unknown>;
+    // Simple check for selector structure
+    const s = l.selector as Record<string, unknown>;
     if (typeof s.kind !== 'string') {
         return false;
     }
@@ -68,7 +68,7 @@ function validateRule(rule: unknown): rule is TransformRule {
  * Apply a lens object to the AST.
  * Facade for the TransformationEngine.
  */
-export function applyLens(root: PolagramRoot, lens: TransformLens): PolagramRoot {
+export function applyLens(root: PolagramRoot, lens: Lens): PolagramRoot {
     const engine = new TransformationEngine();
-    return engine.transform(root, lens.rules);
+    return engine.transform(root, lens.layers);
 }

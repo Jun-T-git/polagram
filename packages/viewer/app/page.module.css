@@ -1,8 +1,10 @@
 .container {
-  height: 100vh;
+  height: auto;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   background: var(--color-bg-primary);
+  overflow-y: auto;
 }
 
 .header {
@@ -10,6 +12,7 @@
   background: var(--glass-bg);
   backdrop-filter: blur(var(--glass-blur));
   border-bottom: 1px solid var(--glass-border);
+  flex: 0 0 auto;
 }
 
 .title {
@@ -39,7 +42,6 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
   padding: var(--spacing-lg);
 }
 
@@ -103,14 +105,6 @@
   overflow: hidden;
 }
 
-
-
-
-
-
-
-
-
 .resizeHandleHorizontal {
   display: flex;
   justify-content: center;
@@ -151,4 +145,56 @@
 .resizeHandleVertical:hover,
 .resizeHandleVertical:active {
   background-color: rgba(138, 92, 246, 0.2);
+}
+
+.workspace {
+  /* Resizable workspace via JS */
+  /* height set via inline style */
+  min-height: 200px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; 
+  /* margin-bottom: var(--spacing-sm); Removed, handled by resizer */
+}
+
+.workspaceResizer {
+  height: 12px;
+  width: 100%;
+  cursor: row-resize;
+  background: transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: background 0.2s;
+  flex-shrink: 0; 
+  /* Visual cue */
+}
+
+.workspaceResizer:hover,
+.workspaceResizer:active {
+  background: rgba(138, 92, 246, 0.1);
+}
+
+.workspaceResizer::after {
+  content: "";
+  display: block;
+  width: 40px;
+  height: 4px;
+  background: var(--glass-border);
+  border-radius: 2px;
+}
+
+.pipelinePanel {
+  flex: 0 0 auto; /* Don't force resize, let it grow */
+  width: 100%;
+  border-top: 1px solid var(--glass-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  border-radius: 12px;
+  /* overflow-y: auto; Removed to allow full height */
+  display: flex;
+  flex-direction: column;
+  height: auto; /* Allow unlimited height */
+  min-height: 200px;
 }

@@ -10,29 +10,29 @@ describe('Matcher', () => {
     // We test via matchParticipant since matchText is private
     it('matches string as partial match', () => {
       const p: Participant = { type: 'participant', name: 'UserLogService', id: 'p1' };
-      expect(matcher.match(p, { kind: 'participant', text: 'Log' })).toBe(true);
-      expect(matcher.match(p, { kind: 'participant', text: 'Admin' })).toBe(false);
+      expect(matcher.matchParticipant(p, { kind: 'participant', name: 'Log' })).toBe(true);
+      expect(matcher.matchParticipant(p, { kind: 'participant', name: 'Admin' })).toBe(false);
     });
 
     it('matches RegExp', () => {
       const p: Participant = { type: 'participant', name: 'UserLogService', id: 'p1' };
-      expect(matcher.match(p, { kind: 'participant', text: /Log/ })).toBe(true);
-      expect(matcher.match(p, { kind: 'participant', text: /^User/ })).toBe(true);
-      expect(matcher.match(p, { kind: 'participant', text: /^Service/ })).toBe(false);
+      expect(matcher.matchParticipant(p, { kind: 'participant', name: /Log/ })).toBe(true);
+      expect(matcher.matchParticipant(p, { kind: 'participant', name: /^User/ })).toBe(true);
+      expect(matcher.matchParticipant(p, { kind: 'participant', name: /^Service/ })).toBe(false);
     });
 
     it('matches Serializable Object', () => {
       const p: Participant = { type: 'participant', name: 'UserLogService', id: 'p1' };
-      expect(matcher.match(p, { kind: 'participant', text: { pattern: 'Log' } })).toBe(true);
-      expect(matcher.match(p, { kind: 'participant', text: { pattern: '^user', flags: 'i' } })).toBe(true);
+      expect(matcher.matchParticipant(p, { kind: 'participant', name: { pattern: 'Log' } })).toBe(true);
+      expect(matcher.matchParticipant(p, { kind: 'participant', name: { pattern: '^user', flags: 'i' } })).toBe(true);
     });
   });
 
   describe('Participant Matching', () => {
     it('matches by ID', () => {
       const p: Participant = { type: 'participant', name: 'User', id: 'user_01' };
-      expect(matcher.match(p, { kind: 'participant', id: 'user_01' })).toBe(true);
-      expect(matcher.match(p, { kind: 'participant', id: 'other' })).toBe(false);
+      expect(matcher.matchParticipant(p, { kind: 'participant', id: 'user_01' })).toBe(true);
+      expect(matcher.matchParticipant(p, { kind: 'participant', id: 'other' })).toBe(false);
     });
   });
 
@@ -51,12 +51,12 @@ describe('Matcher', () => {
     };
 
     it('matches by text', () => {
-      expect(matcher.match(msg, { kind: 'message', text: 'Login' })).toBe(true);
+      expect(matcher.matchMessage(msg, { kind: 'message', text: 'Login' })).toBe(true);
     });
 
     it('matches by from/to', () => {
-      expect(matcher.match(msg, { kind: 'message', from: 'user' })).toBe(true);
-      expect(matcher.match(msg, { kind: 'message', to: 'db' })).toBe(false);
+      expect(matcher.matchMessage(msg, { kind: 'message', from: 'user' })).toBe(true);
+      expect(matcher.matchMessage(msg, { kind: 'message', to: 'db' })).toBe(false);
     });
   });
 });
