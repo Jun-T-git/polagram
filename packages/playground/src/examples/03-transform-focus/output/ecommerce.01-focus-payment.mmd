@@ -1,9 +1,0 @@
-sequenceDiagram
-    participant OrderService
-    participant PaymentService
-    loop Retry up to 3 times
-        OrderService->>PaymentService: Charge Credit Card
-        activate PaymentService
-        PaymentService-->>OrderService: Payment OK
-        deactivate PaymentService
-    end

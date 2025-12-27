@@ -1,8 +1,0 @@
-sequenceDiagram
-    participant User
-    participant Frontend
-    participant OrderService
-    User->>Frontend: Click Checkout
-    Frontend->>OrderService: Create Order
-    OrderService-->>Frontend: Order Confirmed
-    Frontend-->>User: Show Receipt

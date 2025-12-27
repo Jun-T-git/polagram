@@ -39,19 +39,6 @@ importers:
         specifier: ^4.1.1
         version: 4.1.1
 
-  packages/playground:
-    dependencies:
-      '@polagram/core':
-        specifier: workspace:*
-        version: link:../core
-    devDependencies:
-      tsx:
-        specifier: ^4.7.0
-        version: 4.21.0
-      typescript:
-        specifier: ^5.0.0
-        version: 5.9.3
-
   packages/viewer:
     dependencies:
       '@polagram/core':
@@ -15725,17 +15712,6 @@ packages:
     dependencies:
       tslib: 1.14.1
       typescript: 5.9.3
-
-  /tsx@4.21.0:
-    resolution: {integrity: sha512-5C1sg4USs1lfG0GFb2RLXsdpXqBSEhAaA/0kPL01wxzpMqLILNxIxIOKiILz+cdg/pLnOUxFYOR5yhHU666wbw==}
-    engines: {node: '>=18.0.0'}
-    hasBin: true
-    dependencies:
-      esbuild: 0.27.2
-      get-tsconfig: 4.13.0
-    optionalDependencies:
-      fsevents: 2.3.3
-    dev: true
 
   /tty-browserify@0.0.0:
     resolution: {integrity: sha512-JVa5ijo+j/sOoHGjw0sxw734b1LhBkQ3bvUGNdxnVXDCX81Yx7TFgnZygxrIIWn23hbfTaMYLwRmAxFyDuFmIw==}
