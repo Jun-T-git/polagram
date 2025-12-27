@@ -207,9 +207,10 @@ export class Parser extends BaseParser {
     // Check for 'as'
     if (this.currToken.type === 'AS') {
       this.advance(); // eat 'as'
-      if (this.isParticipantToken(this.currToken)) {
-        name = this.currToken.literal;
-        this.advance();
+      // Use readRestOfLine to capture multi-word aliases (e.g., "API Server")
+      const alias = this.readRestOfLine().trim();
+      if (alias) {
+        name = alias;
       }
     }
     

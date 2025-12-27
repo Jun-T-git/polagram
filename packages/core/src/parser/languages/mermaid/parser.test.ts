@@ -51,6 +51,19 @@ participant Bob
         type: 'participant'
       });
     });
+    
+    it('should parse participant with multi-word alias', () => {
+      const input = `
+sequenceDiagram
+participant API as API Server
+participant DB as Database System
+API->>DB: Query
+`;
+      const ast = parse(input);
+      const api = ast.participants.find(p => p.id === 'API');
+      expect(api).toBeDefined();
+      expect(api?.name).toBe('API Server');
+    });
   });
 
   describe('Message Definitions', () => {

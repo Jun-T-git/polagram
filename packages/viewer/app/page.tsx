@@ -10,37 +10,37 @@ import { usePolagram } from './hooks/usePolagram';
 import styles from './page.module.css';
 
 const DEFAULT_MERMAID = `sequenceDiagram
-    participant Client as フロントエンド
-    participant API as APIサーバー
-    participant Auth as 認証
-    participant DB as データベース
-    participant Cache as キャッシュ
+    participant Client as Frontend
+    participant API as API Server
+    participant Auth as Auth Service
+    participant DB as Database
+    participant Cache as Cache
     
-    Note over Client,Cache: ユーザー情報取得API
+    Note over Client,Cache: User Info Retrieval API
     
     Client->>API: GET /api/users/123
-    API->>Auth: トークン検証
+    API->>Auth: Verify Token
     
-    alt 認証成功
+    alt Auth Success
         Auth-->>API: OK
-        API->>Cache: ユーザー情報取得
+        API->>Cache: Get User Info
         
-        alt キャッシュヒット
-            Cache-->>API: ユーザー情報
+        alt Cache Hit
+            Cache-->>API: User Info
             API-->>Client: 200 OK
-        else キャッシュミス
-            Cache-->>API: なし
+        else Cache Miss
+            Cache-->>API: None
             API->>DB: SELECT * FROM users WHERE id=123
-            DB-->>API: ユーザー情報
-            API->>Cache: キャッシュ保存 (TTL: 5分)
+            DB-->>API: User Info
+            API->>Cache: Save to Cache (TTL: 5min)
             API-->>Client: 200 OK
         end
-    else 認証失敗
-        Auth--xAPI: 無効なトークン
+    else Auth Failed
+        Auth--xAPI: Invalid Token
         API--xClient: 401 Unauthorized
     end
     
-    Note over Client,Cache: Focusで特定の処理だけ確認できます
+    Note over Client,Cache: You can check specific processes with Focus
 `;
 
 export default function ViewerPage() {

@@ -38,6 +38,25 @@ describe('MermaidGeneratorVisitor', () => {
         expect(output).toContain('actor B as Bob');
     });
 
+    it('should generate participant with multi-word name without extra quotes', () => {
+        const root: PolagramRoot = { 
+            kind: 'root', 
+            meta: { version: '1.0.0', source: 'mermaid' }, 
+            participants: [
+                { id: 'API', name: 'API Server', type: 'participant' }
+            ], 
+            groups: [], 
+            events: [] 
+        };
+        const visitor = new MermaidGeneratorVisitor();
+        const output = visitor.generate(root);
+        
+        // We expect it NOT to be quoted if the user wants clean text
+        // But currently it IS quoted. checking what it does now vs what we want.
+        // If we want to fix it, we should expect "API Server" plain.
+        expect(output).toContain('participant API as API Server');
+    });
+
     it('should generate messages', () => {
          const msg: MessageNode = { 
             kind: 'message', 

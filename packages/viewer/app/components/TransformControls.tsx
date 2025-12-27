@@ -82,9 +82,9 @@ export default function TransformControls({
             <button 
               className={styles.toggleAllButton} 
               onClick={onToggleAll}
-              title={hasEnabled ? "全て無効化" : "全て有効化"}
+              title={hasEnabled ? "Disable All" : "Enable All"}
             >
-              {hasEnabled ? '👁️‍🗨️ 全て無効化' : '👁️ 全て有効化'}
+              {hasEnabled ? '👁️‍🗨️ Disable All' : '👁️ Enable All'}
             </button>
           );
         })()}
@@ -105,7 +105,7 @@ export default function TransformControls({
                 <button 
                   className={styles.toggleButton}
                   onClick={() => onToggleTransform(index)}
-                  title={op.enabled ? "一時的に無効化" : "有効化"}
+                  title={op.enabled ? "Disable Temporarily" : "Enable"}
                 >
                   {op.enabled ? '👁️' : '👁️‍🗨️'}
                 </button>
@@ -116,7 +116,7 @@ export default function TransformControls({
                 <button 
                   className={styles.removeButton}
                   onClick={() => onRemoveTransform(index)}
-                  title="削除"
+                  title="Remove"
                 >
                   ✕
                 </button>

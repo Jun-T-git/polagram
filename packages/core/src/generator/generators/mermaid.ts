@@ -58,7 +58,7 @@ export class MermaidGeneratorVisitor implements PolagramVisitor {
 
   visitParticipant(node: Participant): void {
     const typeKeyword = node.type === 'actor' ? 'actor' : 'participant';
-    const safeName = node.name.includes(' ') ? `"${node.name}"` : node.name;
+    const safeName = node.name;
     
     if (node.id === node.name) {
       this.add(`${typeKeyword} ${node.id}`);
