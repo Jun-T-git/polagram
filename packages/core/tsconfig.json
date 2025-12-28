@@ -4,6 +4,10 @@
   "compilerOptions": {
     "composite": true,
     "baseUrl": ".",
+    "declaration": true,
+    "noEmit": false,
+    "allowImportingTsExtensions": false,
+    "outDir": "dist",
     "paths": {
       "@/*": ["src/*"]
     }
