@@ -26,6 +26,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Build Core
+        run: pnpm --filter @polagram/core build
+
       - name: Build CLI
         run: pnpm --filter @polagram/cli build
 
