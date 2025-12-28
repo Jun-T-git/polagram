@@ -2,12 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
-import CodeEditor from './components/CodeEditor';
-import SequenceDiagram from './components/SequenceDiagram';
-import Tabs from './components/Tabs';
-import TransformControls from './components/TransformControls';
-import { usePolagram } from './hooks/usePolagram';
-import styles from './page.module.css';
+import CodeEditor from '../../components/CodeEditor';
+import SequenceDiagram from '../../components/SequenceDiagram';
+import Tabs from '../../components/Tabs';
+import TransformControls from '../../components/TransformControls';
+import { usePolagram } from '../../hooks/usePolagram';
 
 const DEFAULT_MERMAID = `sequenceDiagram
     participant Client as Frontend
@@ -77,10 +76,6 @@ export default function ViewerPage() {
 
   const resize = useCallback((e: MouseEvent) => {
     if (isResizingRef.current) {
-      // Allow resizing by calculating distance from top, adjusting for header approx height (80-90px)
-      // or easier: just use the mouse Y position relative to the main container.
-      // But Since main is at the top, e.clientY - headerHeight is a good approx.
-      // Let's assume header is ~85px. 
       const newHeight = e.clientY - 85; 
       if (newHeight > 200) {
          setWorkspaceHeight(newHeight);
@@ -98,26 +93,31 @@ export default function ViewerPage() {
   }, [resize, stopResizing]);
 
   return (
-    <div className={styles.container}>
-      <header className={styles.header}>
-        <h1 className={styles.title}>
-          <span className={styles.logo}>🎭</span>
-          Polagram Viewer
-        </h1>
-        <p className={styles.subtitle}>Interactive Sequence Diagram Viewer</p>
+    <div className="flex flex-col min-h-[calc(100vh-4rem)] bg-background text-foreground">
+      <header className="px-6 py-4 border-b border-border bg-muted/20 flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-bold flex items-center gap-2">
+            <span className="text-2xl">🎭</span>
+            <span>Polagram Viewer</span>
+          </h1>
+          <p className="text-xs text-muted-foreground mt-1">Interactive Sequence Diagram Viewer</p>
+        </div>
       </header>
 
-      <main className={styles.main}>
-        <div className={styles.workspace} style={{ height: workspaceHeight }}>
-          <PanelGroup direction="horizontal" style={{ height: '100%', width: '100%' }}>
-            <Panel defaultSize={40} minSize={20} className={styles.panel}>
-              <div className={styles.editorPanel}>
+      <main className="flex-1 flex flex-col overflow-hidden">
+        <div 
+          className="w-full bg-card/50"
+          style={{ height: workspaceHeight }}
+        >
+          <PanelGroup direction="horizontal" className="h-full w-full">
+            <Panel defaultSize={40} minSize={20} className="flex flex-col border-r border-border/50">
+              <div className="h-full flex flex-col bg-muted/10">
                 <Tabs 
                   tabs={['sample-lens.yaml', 'sequence-source.mmd']} 
                   activeTab={activeTab} 
                   onTabChange={setActiveTab} 
                 />
-                <div className={styles.editorContent}>
+                <div className="flex-1 relative overflow-hidden">
                   {activeTab === 'sequence-source.mmd' ? (
                     <CodeEditor 
                       value={code} 
@@ -137,22 +137,30 @@ export default function ViewerPage() {
               </div>
             </Panel>
 
-            <PanelResizeHandle className={styles.resizeHandleVertical} />
+            <PanelResizeHandle className="w-1.5 bg-border hover:bg-primary/50 transition-colors cursor-col-resize z-10" />
 
-            <Panel defaultSize={60} minSize={20} className={styles.panel}>
-              <div className={styles.diagramPanel}>
-                <div className={styles.panelHeader}>
-                  <h2>Sequence Diagram</h2>
+            <Panel defaultSize={60} minSize={20} className="flex flex-col">
+              <div className="h-full flex flex-col bg-background">
+                <div className="px-4 py-2 border-b border-border bg-muted/10">
+                  <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Sequence Diagram</h2>
                 </div>
-                <SequenceDiagram code={transformedCode} error={error} />
+                <div className="flex-1 overflow-auto p-4 bg-white/50 dark:bg-neutral-900/50">
+                  <SequenceDiagram code={transformedCode} error={error} />
+                </div>
               </div>
             </Panel>
           </PanelGroup>
         </div>
         
-        <div className={styles.workspaceResizer} onMouseDown={startResizing} />
+        {/* Workspace Resizer */}
+        <div 
+            className="h-1.5 w-full bg-border hover:bg-primary/50 cursor-row-resize transition-colors z-20 flex items-center justify-center group" 
+            onMouseDown={startResizing}
+        >
+            <div className="w-12 h-1 rounded-full bg-muted-foreground/20 group-hover:bg-primary/80 transition-colors" />
+        </div>
 
-        <div className={styles.pipelinePanel}>
+        <div className="flex-1 bg-background overflow-auto border-t border-border">
           <TransformControls 
             pipeline={pipeline}
             pipelineCode={getPipelineCode()}

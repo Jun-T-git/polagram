@@ -2,7 +2,6 @@
 
 import mermaid from 'mermaid';
 import { useEffect, useRef } from 'react';
-import styles from './MermaidRenderer.module.css';
 
 interface MermaidRendererProps {
   code: string;
@@ -62,9 +61,9 @@ export default function MermaidRenderer({ code }: MermaidRendererProps) {
         console.error('Mermaid rendering error:', error);
         if (containerRef.current) {
           containerRef.current.innerHTML = `
-            <div class="${styles.error}">
-              <p>Failed to render diagram</p>
-              <pre>${error instanceof Error ? error.message : 'Unknown error'}</pre>
+            <div class="flex flex-col items-center justify-center p-6 text-destructive bg-destructive/5 rounded-lg border border-destructive/20">
+              <p class="font-semibold mb-2">Failed to render diagram</p>
+              <pre class="text-xs font-mono whitespace-pre-wrap break-all">${error instanceof Error ? error.message : 'Unknown error'}</pre>
             </div>
           `;
         }
@@ -74,5 +73,10 @@ export default function MermaidRenderer({ code }: MermaidRendererProps) {
     renderDiagram();
   }, [code]);
 
-  return <div ref={containerRef} className={styles.container} />;
+  return (
+    <div 
+      ref={containerRef} 
+      className="w-full flex justify-center [&_svg]:max-w-full [&_svg]:h-auto" 
+    />
+  );
 }
