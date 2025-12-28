@@ -20,7 +20,7 @@
     "build": "tsc && vite build",
     "test": "vitest run",
     "test:watch": "vitest",
-    "gen:docs": "polagram run -c docs/sequence/polagram.yml "
+    "gen:docs": "node ../cli/dist/index.js run -c docs/sequence/polagram.yml"
   },
   "devDependencies": {
     "@polagram/cli": "workspace:^",
