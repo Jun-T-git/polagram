@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: [ main ]
 
+permissions:
+  contents: write
+
 jobs:
   generate-diagrams:
     runs-on: ubuntu-latest
@@ -35,11 +38,8 @@ jobs:
       - name: Generate Core Diagrams
         run: pnpm --filter @polagram/core run gen:docs
 
-      - name: Verify Changed Files
-        run: |
-          if [ -n "$(git status --porcelain)" ]; then
-            echo "::error::Diagrams are not up to date. Please run 'pnpm --filter @polagram/core run gen:docs' locally and commit the changes."
-            git status
-            git diff
-            exit 1
-          fi
+      - name: Commit Generated Diagrams
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "docs: generate mermaid diagrams [skip ci]"
+          file_pattern: 'packages/core/docs/sequence/generated/**'
