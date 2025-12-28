@@ -1,0 +1,42 @@
+name: Diagram Generation
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  generate-diagrams:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Install pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8.15.1
+          
+      - name: request node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build CLI
+        run: pnpm --filter @polagram/cli build
+
+      - name: Generate Core Diagrams
+        run: pnpm --filter @polagram/core run gen:docs
+
+      - name: Verify Changed Files
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            echo "::error::Diagrams are not up to date. Please run 'pnpm --filter @polagram/core run gen:docs' locally and commit the changes."
+            git status
+            git diff
+            exit 1
+          fi

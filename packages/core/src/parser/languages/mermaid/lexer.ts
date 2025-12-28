@@ -12,46 +12,49 @@ export class Lexer extends BaseLexer {
     this.skipWhitespace();
 
     const start = this.position;
+    const startColumn = this.column;
     let tok: Token;
 
     switch (this.ch) {
       case ':':
-        tok = this.newToken('COLON', this.ch, start);
+        tok = this.newToken('COLON', this.ch, start, startColumn);
         break;
       case ',':
-        tok = this.newToken('COMMA', this.ch, start);
+        tok = this.newToken('COMMA', this.ch, start, startColumn);
         break;
       case '+':
-        tok = this.newToken('PLUS', this.ch, start);
+        tok = this.newToken('PLUS', this.ch, start, startColumn);
         break;
       case '-':
         if (this.isArrowStart()) {
           const literal = this.readArrow();
-          tok = this.newToken('ARROW', literal, start);
+          tok = this.newToken('ARROW', literal, start, startColumn);
           return tok;
         } else {
-          tok = this.newToken('MINUS', this.ch, start);
+          tok = this.newToken('MINUS', this.ch, start, startColumn);
         }
         break;
       case '"':
-        tok = this.newToken('STRING', this.readString(), start);
+        // eslint-disable-next-line no-case-declarations
+        const str = this.readString();
+        tok = this.newToken('STRING', str, start, startColumn);
         return tok; 
       case '\n':
-        tok = this.newToken('NEWLINE', this.ch, start);
+        tok = this.newToken('NEWLINE', this.ch, start, startColumn);
         break;
       case '':
-        tok = this.newToken('EOF', '', start);
+        tok = this.newToken('EOF', '', start, startColumn);
         break;
       default:
         if (this.isLetter(this.ch)) {
           const literal = this.readIdentifier();
           const type = this.lookupIdent(literal);
-          return { type, literal, line: this.line, column: this.column - literal.length, start, end: this.position };
+          return this.newToken(type, literal, start, startColumn);
         } else if (this.isDigit(this.ch)) {
            const literal = this.readNumber();
-           return { type: 'IDENTIFIER', literal, line: this.line, column: this.column - literal.length, start, end: this.position };
+           return this.newToken('IDENTIFIER', literal, start, startColumn);
         } else {
-          tok = this.newToken('UNKNOWN', this.ch, start);
+          tok = this.newToken('UNKNOWN', this.ch, start, startColumn);
         }
     }
 
@@ -59,8 +62,17 @@ export class Lexer extends BaseLexer {
     return tok;
   }
 
-  private newToken(type: TokenType | 'UNKNOWN', literal: string, start: number): Token {
-    return { type: type as TokenType, literal, line: this.line, column: this.column, start, end: start + literal.length };
+  private newToken(type: TokenType | 'UNKNOWN', literal: string, start: number, startColumn: number): Token {
+    return { 
+        type: type as TokenType, 
+        literal, 
+        line: this.line, 
+        column: startColumn, 
+        start,
+        // If the lexer position has advanced beyond the start (consumed tokens like String/Arrow), use that position.
+        // Otherwise (simple chars), assume length-based calculation.
+        end: (this.position > start) ? this.position : start + literal.length 
+    };
   }
 
   private readIdentifier(): string {

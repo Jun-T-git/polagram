@@ -8,10 +8,10 @@ describe('Matcher', () => {
 
   describe('Text Matching', () => {
     // We test via matchParticipant since matchText is private
-    it('matches string as partial match', () => {
+    it('matches string as exact match', () => {
       const p: Participant = { type: 'participant', name: 'UserLogService', id: 'p1' };
-      expect(matcher.matchParticipant(p, { kind: 'participant', name: 'Log' })).toBe(true);
-      expect(matcher.matchParticipant(p, { kind: 'participant', name: 'Admin' })).toBe(false);
+      expect(matcher.matchParticipant(p, { kind: 'participant', name: 'UserLogService' })).toBe(true);
+      expect(matcher.matchParticipant(p, { kind: 'participant', name: 'Log' })).toBe(false);
     });
 
     it('matches RegExp', () => {
@@ -51,7 +51,8 @@ describe('Matcher', () => {
     };
 
     it('matches by text', () => {
-      expect(matcher.matchMessage(msg, { kind: 'message', text: 'Login' })).toBe(true);
+      expect(matcher.matchMessage(msg, { kind: 'message', text: 'Login Request' })).toBe(true);
+      expect(matcher.matchMessage(msg, { kind: 'message', text: 'Login' })).toBe(false);
     });
 
     it('matches by from/to', () => {

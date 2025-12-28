@@ -1,0 +1,32 @@
+sequenceDiagram
+    participant User
+    participant CLI
+    participant ConfigLoader
+    participant Core
+    participant FileSystem
+
+    User->>CLI: Run polagram
+    CLI->>ConfigLoader: loadConfig()
+    ConfigLoader->>FileSystem: readFile(polagram.yml)
+    
+    alt Success: File Exists
+        FileSystem-->>ConfigLoader: content
+        ConfigLoader->>Core: validateConfig(content)
+        
+        alt Success: Validation Success
+            Core-->>ConfigLoader: valid config
+            ConfigLoader-->>CLI: config object
+            CLI->>Core: process targets
+            Core-->>CLI: processing complete
+            CLI-->>User: "Done"
+        else Failure: Validation Failed
+            Core-->>ConfigLoader: error
+            ConfigLoader-->>CLI: error
+            CLI-->>User: "Invalid Config"
+        end
+        
+    else Failure: File Not Found
+        FileSystem-->>ConfigLoader: error
+        ConfigLoader-->>CLI: error
+        CLI-->>User: "Config not found"
+    end

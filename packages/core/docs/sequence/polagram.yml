@@ -1,0 +1,36 @@
+version: 1
+targets:
+  - input: ["sequence.mmd"]
+    outputDir: "generated"
+    lenses:
+      - name: "simple"
+        layers:
+          # Resolve the main structure to the happy path
+          - action: resolve
+            selector:
+              kind: fragment
+              condition: 
+                pattern: "Success:.*"
+          # Simplify by removing unimportant participants
+          - action: remove
+            selector:
+              kind: participant
+              name: 
+                pattern: "^(FileSystem|ConfigLoader)$"
+      
+      - name: "normal"
+        layers:
+          # Just show the normal flow (happy path) but keep all details/participants
+          - action: resolve
+            selector:
+              kind: fragment
+              condition: 
+                pattern: "Success:.*"
+
+      - name: "focus-user"
+        layers:
+          # Focus on the User participant
+          - action: focus
+            selector:
+              kind: participant
+              name: User

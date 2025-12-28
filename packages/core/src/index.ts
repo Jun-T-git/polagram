@@ -23,3 +23,6 @@ export * from './transformer';
 export { Polagram, PolagramBuilder } from './api';
 
 // Legacy compatibility or convenience helpers could go here if needed.
+
+// Configuration & Schema
+export * from './config';

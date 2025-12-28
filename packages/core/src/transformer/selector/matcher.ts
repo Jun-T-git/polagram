@@ -61,7 +61,7 @@ export class Matcher {
 
     private matchText(actual: string, matcher: TextMatcher): boolean {
         if (typeof matcher === 'string') {
-            return actual.includes(matcher); // Default: Partial match
+            return actual === matcher; // Default: Exact match
         }
         if (matcher instanceof RegExp) {
             return matcher.test(actual);

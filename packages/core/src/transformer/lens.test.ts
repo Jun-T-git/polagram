@@ -9,8 +9,8 @@ describe('Lens API', () => {
         it('should return true for valid lens object', () => {
             const valid = {
                 name: 'Test Lens',
-                rules: [
-                    { action: 'focus', selector: { kind: 'participant', text: 'Bob' } }
+                layers: [
+                    { action: 'focus', selector: { kind: 'participant', name: 'Bob' } }
                 ]
             };
             expect(validateLens(valid)).toBe(true);
@@ -19,12 +19,12 @@ describe('Lens API', () => {
         it('should return false for invalid structure', () => {
             expect(validateLens(null)).toBe(false);
             expect(validateLens({ name: 123 })).toBe(false); // Invalid name
-            expect(validateLens({ rules: 'not-array' })).toBe(false);
+            expect(validateLens({ layers: 'not-array' })).toBe(false);
         });
 
         it('should return false for invalid rule action', () => {
             const invalid = {
-                rules: [{ action: 'destroyWorld', selector: { kind: 'participant' } }]
+                layers: [{ action: 'destroyWorld', selector: { kind: 'participant' } }]
             };
             expect(validateLens(invalid)).toBe(false);
         });
@@ -34,11 +34,11 @@ describe('Lens API', () => {
         it('should parse YAML and apply lens correctly', () => {
             const yamlStr = `
 name: My Transformation
-rules:
+layers:
   - action: focus
     selector:
       kind: participant
-      text: Bob
+      name: Bob
 `;
             // 1. Adapter Layer: Parse YAML
             const parsed = yaml.load(yamlStr);
