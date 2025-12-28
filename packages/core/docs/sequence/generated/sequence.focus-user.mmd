@@ -1,0 +1,13 @@
+sequenceDiagram
+    participant User
+    participant CLI
+    User->>CLI: Run polagram
+    alt Success: File Exists
+        alt Success: Validation Success
+            CLI-->>User: "Done"
+        else Failure: Validation Failed
+            CLI-->>User: "Invalid Config"
+        end
+    else Failure: File Not Found
+        CLI-->>User: "Config not found"
+    end

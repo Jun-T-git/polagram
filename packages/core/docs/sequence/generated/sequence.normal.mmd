@@ -1,0 +1,16 @@
+sequenceDiagram
+    participant User
+    participant CLI
+    participant ConfigLoader
+    participant Core
+    participant FileSystem
+    User->>CLI: Run polagram
+    CLI->>ConfigLoader: loadConfig()
+    ConfigLoader->>FileSystem: readFile(polagram.yml)
+    FileSystem-->>ConfigLoader: content
+    ConfigLoader->>Core: validateConfig(content)
+    Core-->>ConfigLoader: valid config
+    ConfigLoader-->>CLI: config object
+    CLI->>Core: process targets
+    Core-->>CLI: processing complete
+    CLI-->>User: "Done"

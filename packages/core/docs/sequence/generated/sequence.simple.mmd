@@ -1,0 +1,8 @@
+sequenceDiagram
+    participant User
+    participant CLI
+    participant Core
+    User->>CLI: Run polagram
+    CLI->>Core: process targets
+    Core-->>CLI: processing complete
+    CLI-->>User: "Done"
