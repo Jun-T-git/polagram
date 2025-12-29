@@ -1,8 +1,7 @@
 'use client';
 
 import { Check, Copy } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { codeToHtml } from 'shiki';
+import { useState } from 'react';
 import { cn } from '../../lib/utils';
 
 interface CodeBlockProps {
@@ -10,26 +9,11 @@ interface CodeBlockProps {
   language?: string;
   filename?: string;
   className?: string;
+  showHeader?: boolean;
 }
 
-export function CodeBlock({ code, language = 'typescript', filename, className }: CodeBlockProps) {
-  const [html, setHtml] = useState<string>('');
+export function CodeBlock({ code, language = 'typescript', filename, className, showHeader = true }: CodeBlockProps) {
   const [copied, setCopied] = useState(false);
-
-  useEffect(() => {
-    async function highlight() {
-      const highlighted = await codeToHtml(code, {
-        lang: language,
-        themes: {
-           light: 'github-light',
-           dark: 'vesper' // A darker/warmer theme fitting the premium aesthetic
-        },
-        defaultColor: false,
-      });
-      setHtml(highlighted);
-    }
-    highlight();
-  }, [code, language]);
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(code);
@@ -40,7 +24,8 @@ export function CodeBlock({ code, language = 'typescript', filename, className }
   return (
     <div className={cn("relative group rounded-xl bg-card border border-border overflow-hidden my-8 shadow-xl", className)}>
       {/* Header / Window Controls */}
-      <div className="flex items-center justify-between px-4 py-3 bg-muted/30 border-b border-border">
+      {showHeader && (
+        <div className="flex items-center justify-between px-4 py-3 bg-muted/30 border-b border-border">
         <div className="flex items-center gap-4">
            {/* Traffic Lights */}
             <div className="flex gap-1.5 opacity-60">
@@ -61,18 +46,12 @@ export function CodeBlock({ code, language = 'typescript', filename, className }
         >
           {copied ? <Check size={14} className="text-secondary-foreground" /> : <Copy size={14} />}
         </button>
-      </div>
+        </div>
+      )}
 
       {/* Code Area */}
       <div className="p-5 overflow-x-auto bg-[#101010]">
-         {html ? (
-           <div 
-             className="text-[13px] font-mono leading-relaxed [&_pre]:bg-transparent! [&_pre]:!m-0 text-white"
-             dangerouslySetInnerHTML={{ __html: html }} 
-           />
-         ) : (
            <pre className="text-[13px] font-mono text-muted-foreground">{code}</pre>
-         )}
       </div>
     </div>
   );

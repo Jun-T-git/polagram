@@ -22,7 +22,6 @@
     "react-dom": "19.2.3",
     "react-mermaid2": "^0.1.4",
     "react-resizable-panels": "^2.0.19",
-    "shiki": "^3.20.0",
     "tailwind-merge": "^3.4.0"
   },
   "devDependencies": {

@@ -32,8 +32,10 @@ export default function SequenceDiagram({ code, error }: SequenceDiagramProps) {
   }
 
   return (
-    <div className="w-full h-full flex items-center justify-center overflow-auto">
-      <MermaidRenderer code={code} />
+    <div className="w-full h-full overflow-auto scrollbar-thin scrollbar-thumb-neutral-700 scrollbar-track-transparent">
+      <div className="min-h-full w-full flex items-center justify-center p-4">
+        <MermaidRenderer code={code} />
+      </div>
     </div>
   );
 }

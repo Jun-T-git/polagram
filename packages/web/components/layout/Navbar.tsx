@@ -1,13 +1,13 @@
 'use client';
 
 import { Github } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '../../lib/utils';
 
 const navItems = [
   { label: 'Docs', href: '/docs' },
-  { label: 'Examples', href: '/examples/focus' }, // Temporary link to first example
   { label: 'Playground', href: '/playground' },
 ];
 
@@ -21,7 +21,12 @@ export function Navbar() {
           href="/" 
           className="flex items-center gap-2 font-bold text-xl text-foreground hover:text-primary transition-colors"
         >
-          <span className="text-2xl">🎭</span>
+          <Image
+            src="/polagram-logo.png"
+            alt="Logo"
+            width={24}
+            height={24}
+          />
           <span className="bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">
             Polagram
           </span>

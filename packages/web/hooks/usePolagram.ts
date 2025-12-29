@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 
 // UI Operations (Legacy keys kept for UI compatibility if needed, but mapped to new API)
 export interface TransformOperation {
-  operation: 'focusParticipant' | 'removeParticipant' | 'resolveFragment';
+  operation: 'focusParticipant' | 'removeParticipant' | 'resolveFragment' | 'removeMessage';
   target: string;
   enabled: boolean;
 }
@@ -52,6 +52,10 @@ export function usePolagram(code: string): UsePolagramReturn {
       } else if (op.operation === 'resolveFragment') {
         layer.action = 'resolve';
         layer.selector = { kind: 'fragment', condition: op.target };
+      } else if (op.operation === 'removeMessage') {
+        layer.action = 'remove';
+        // Treat message target as regex pattern for flexibility in demo
+        layer.selector = { kind: 'message', text: { pattern: op.target } };
       }
       return layer;
     });
@@ -163,6 +167,8 @@ export function usePolagram(code: string): UsePolagramReturn {
              operation = 'removeParticipant';
         } else if (layer.action === 'resolve' && layer.selector?.kind === 'fragment') {
              operation = 'resolveFragment';
+        } else if (layer.action === 'remove' && layer.selector?.kind === 'message') {
+             operation = 'removeMessage';
         }
 
         // Extract target from selector
@@ -170,6 +176,7 @@ export function usePolagram(code: string): UsePolagramReturn {
         if (selector) {
             if (selector.name) target = typeof selector.name === 'string' ? selector.name : selector.name.pattern || '';
             else if (selector.condition) target = typeof selector.condition === 'string' ? selector.condition : selector.condition.pattern || '';
+            else if (selector.text) target = typeof selector.text === 'string' ? selector.text : selector.text.pattern || '';
         }
 
         return {
