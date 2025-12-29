@@ -1,6 +1,8 @@
-'use client';
 
-import { FocusDemo } from '../../components/demos/FocusDemo';
+import { Filter, PackageOpen, ScanSearch, Sprout, Zap } from 'lucide-react';
+
+import { LiveDemo } from '../../components/demos/LiveDemo';
+import { PhilosophyConcept } from '../../components/docs/PhilosophyConcept';
 import { CodeBlock } from '../../components/ui/CodeBlock';
 
 function PropertyDefinition({ name, type, required, description, example }: { name: string; type: string; required?: boolean; description: React.ReactNode; example?: string }) {
@@ -36,7 +38,7 @@ export default function DocsPage() {
             </span>
         </div>
         
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-6 text-foreground">
+        <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-8 text-foreground">
           Introduction
         </h1>
         
@@ -45,25 +47,26 @@ export default function DocsPage() {
         </p>
         
         {/* The Problem */}
-        <h2 className="text-2xl font-bold text-foreground mb-4 mt-8">The Problem: One Size Doesn't Fit All</h2>
+        {/* The Problem */}
+        <h2 className="text-3xl font-bold text-foreground mb-8 mt-16 scroll-mt-32" id="problem">The Problem: One Size Doesn't Fit All</h2>
         <p className="text-muted-foreground mb-6 leading-7">
           Sequence diagrams are a powerful tool for visualizing systems, but a single diagram rarely satisfies everyone's needs. The "optimal" level of detail depends entirely on your role:
         </p>
         <ul className="space-y-3 text-muted-foreground mb-8 text-sm">
           <li className="flex gap-3">
-             <div className="w-1.5 h-1.5 rounded-full bg-primary mt-2 shrink-0" />
+             <div className="w-1.5 h-1.5 rounded-full bg-green-500 mt-2 shrink-0" />
              <span>
                 <strong className="text-foreground">For Developers:</strong> Details like error handling, retry logic, and authentication flows are critical for implementation.
              </span>
           </li>
           <li className="flex gap-3">
-             <div className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-2 shrink-0" />
+             <div className="w-1.5 h-1.5 rounded-full bg-blue-500 mt-2 shrink-0" />
              <span>
                 <strong className="text-foreground">For Product Managers:</strong> These technical details are noise. They need to see the high-level user journey and happy paths to understand the feature.
              </span>
           </li>
           <li className="flex gap-3">
-             <div className="w-1.5 h-1.5 rounded-full bg-green-400 mt-2 shrink-0" />
+             <div className="w-1.5 h-1.5 rounded-full bg-orange-500 mt-2 shrink-0" />
              <span>
                 <strong className="text-foreground">For QA Engineers:</strong> They might need to focus exclusively on specific failure scenarios or edge cases.
              </span>
@@ -74,36 +77,52 @@ export default function DocsPage() {
         </p>
         
         {/* Philosophy Card */}
-        <div className="bg-card/50 backdrop-blur-sm border border-border rounded-xl p-8 mb-16 shadow-lg">
-            <h2 className="text-lg font-semibold mb-4 text-foreground">The Philosophy: Clarity from Chaos</h2>
-            <p className="text-muted-foreground mb-8 leading-7 text-sm">
-                In real-world distributed systems, a "complete" sequence diagram is often too noisy. It lists every log line and health check. However, maintaining separate simplified diagrams leads to drift.
-            </p>
-            
-            <div className="grid md:grid-cols-2 gap-4">
-                 <div className="glass-card p-5 rounded-lg border border-border hover:border-primary/50 transition-colors">
-                     <div className="text-primary font-medium mb-1 text-sm">1. The Master Diagram</div>
-                     <p className="text-xs text-muted-foreground leading-relaxed">Your single source of truth containing everything.</p>
-                 </div>
-                 <div className="glass-card p-5 rounded-lg border border-border hover:border-purple-500/50 transition-colors">
-                     <div className="text-purple-400 font-medium mb-1 text-sm">2. Lenses</div>
-                     <p className="text-xs text-muted-foreground leading-relaxed">Semantic filters defined in polagram.yml or via API. (Focus, Remove, Unwrap)</p>
-                 </div>
-            </div>
+        <section className="mb-24 scroll-mt-32" id="philosophy">
+             <h2 className="text-3xl font-bold text-foreground mb-8">One Diagram. Every View.</h2>
+             <p className="text-xl text-muted-foreground leading-8 mb-12 font-light">
+               Polagram treats diagrams like code. Instead of maintaining multiple fragmented diagrams manually, you maintain <strong>one master diagram</strong> and use <strong>Lenses</strong> to generate specific views.
+             </p>
+             
+             <div className="my-12">
+                 <PhilosophyConcept />
+             </div>
+        </section>
+
+        {/* Live Demo: The Power of Lenses */}
+        <div id="demo" className="scroll-mt-32 mb-16 animate-fade-in">
+           <div className="mb-6">
+              <span className="text-purple-400 font-mono text-[10px] uppercase tracking-widest font-semibold border border-purple-500/20 bg-purple-500/10 px-3 py-1 rounded-full">
+                See it in Action
+              </span>
+          </div>
+          
+          <h2 className="text-3xl font-bold text-foreground mb-8">The Power of Lenses</h2>
+          <p className="text-xl text-muted-foreground leading-8 mb-12 font-light">
+            Don't just take our word for it. <strong className="text-foreground font-medium">Lenses</strong> allow you to transform a complex master diagram into specific views for every stakeholder.
+          </p>
+
+          <div className="mb-12">
+              <p className="text-muted-foreground mb-6 text-sm">
+                  Try applying different lenses to the complex diagram below. Notice how the internal logic changes based on the audience.
+              </p>
+            <LiveDemo />
+          </div>
         </div>
 
-        <h3 className="text-lg font-semibold text-foreground mb-6 mt-12">
+        <h3 className="text-xl font-bold text-foreground mb-4 mt-8">
              Why Polagram?
         </h3>
         <div className="grid sm:grid-cols-2 gap-3">
             {[
-                { icon: '🔍', title: 'Focus Mode', desc: 'Instantly extract the lifecycle of a specific service.' },
-                { icon: '🙈', title: 'Noise Reduction', desc: 'Filter out messages or participants using Regex.' },
-                { icon: '📦', title: 'Fragment Resolution', desc: 'Unwrap complex alt or loop blocks.' },
-                { icon: '🚀', title: 'Client-Side', desc: 'Runs entirely in the browser using the library.' },
+                { icon: <ScanSearch className="w-5 h-5" />, title: 'Focus Mode', desc: 'Instantly extract the lifecycle of a specific service.' },
+                { icon: <Filter className="w-5 h-5" />, title: 'Noise Reduction', desc: 'Filter out messages or participants using Regex.' },
+                { icon: <PackageOpen className="w-5 h-5" />, title: 'Fragment Resolution', desc: 'Unwrap complex alt or loop blocks.' },
+                { icon: <Zap className="w-5 h-5" />, title: 'Client-Side', desc: 'Runs entirely in the browser using the library.' },
             ].map((feature, i) => (
                 <div key={i} className="flex gap-4 p-4 rounded-lg bg-card/30 border border-transparent hover:border-border transition-colors">
-                    <span className="text-xl opacity-80">{feature.icon}</span>
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                        {feature.icon}
+                    </div>
                     <div>
                         <div className="text-sm font-medium text-foreground">{feature.title}</div>
                         <div className="text-xs text-muted-foreground mt-1 leading-relaxed">{feature.desc}</div>
@@ -115,7 +134,7 @@ export default function DocsPage() {
 
       {/* Installation */}
       <section id="installation" className="scroll-mt-32 mb-24 border-t border-border pt-24">
-        <h2 className="text-3xl font-bold text-foreground mb-6">Installation</h2>
+        <h2 className="text-3xl font-bold text-foreground mb-8">Installation</h2>
         <p className="text-muted-foreground mb-8 leading-7">
           Install the Polagram CLI globally or as a development dependency in your project.
         </p>
@@ -127,7 +146,7 @@ export default function DocsPage() {
 pnpm add -g @polagram/cli`} 
         />
 
-        <h3 className="text-xl font-semibold text-foreground mb-4 mt-12">Quick Start</h3>
+        <h3 className="text-xl font-bold text-foreground mb-4 mt-8">Quick Start</h3>
         <p className="text-muted-foreground mb-6 text-sm">
             Create a <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded text-xs">polagram.yml</code> configuration file to define your diagram targets and transformations.
         </p>
@@ -142,11 +161,26 @@ targets:
     lenses:
       - name: clean-view
         layers:
-          # Hide the Logger participant
+          # A comprehensive lens example
+          
+          # 1. Hide the Logger participant (Remove)
           - action: remove
             selector:
               kind: participant
-              name: Logger`} 
+              name: Logger
+              
+          # 2. Focus only on critical path participants (Focus)
+          - action: focus
+            selector:
+              kind: participant
+              name: API
+              
+          # 3. Simplify success scenarios (Resolve)
+          - action: resolve
+            selector:
+              kind: fragment
+              condition:
+                pattern: "Success:.*"`} 
         />
         
         <p className="text-muted-foreground text-sm mt-6 mb-4">
@@ -157,64 +191,67 @@ targets:
             language="bash" 
             code={`polagram run`}
         />
+
+        <h3 className="text-xl font-bold text-foreground mb-4 mt-8">CLI Options</h3>
+        <p className="text-muted-foreground mb-6 text-sm">
+            Customize the execution with the following options:
+        </p>
+        
+        <div className="grid gap-4">
+            <div className="bg-card/30 p-4 rounded-lg border border-border">
+               <div className="flex items-center gap-3 mb-2">
+                 <code className="text-primary font-bold bg-primary/10 px-2 py-0.5 rounded border border-primary/20">-c, --config &lt;path&gt;</code>
+               </div>
+               <p className="text-sm text-muted-foreground leading-relaxed">
+                 Specify the path to the configuration file. Defaults to <code className="text-foreground">polagram.yml</code> in the current directory.
+               </p>
+            </div>
+            
+             <div className="bg-card/30 p-4 rounded-lg border border-border">
+               <div className="flex items-center gap-3 mb-2">
+                 <code className="text-foreground font-bold bg-muted px-2 py-0.5 rounded border border-border">POLAGRAM_CONFIG</code>
+                 <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground border border-border px-1.5 py-0.5 rounded">Env Var</span>
+               </div>
+               <p className="text-sm text-muted-foreground leading-relaxed">
+                 Alternative way to specify the config file path via environment variable.
+               </p>
+            </div>
+        </div>
       </section>
 
-      {/* Tutorials: Focus */}
-      <section id="focus" className="scroll-mt-32 mb-24 border-t border-border pt-24">
-         <div className="mb-6">
-            <span className="text-purple-400 font-mono text-[10px] uppercase tracking-widest font-semibold border border-purple-500/20 bg-purple-500/10 px-3 py-1 rounded-full">
-              Tutorial
-            </span>
-        </div>
-        
-        <h2 className="text-3xl font-bold text-foreground mb-6">Focus Lens</h2>
+      {/* CI/CD Integration */}
+      <section id="cicd" className="scroll-mt-32 mb-24 border-t border-border pt-24">
+        <h2 className="text-3xl font-bold text-foreground mb-8">CI/CD Integration</h2>
         <p className="text-base text-muted-foreground mb-8 leading-7">
-          The <strong>Focus</strong> lens is one of the most powerful tools in Polagram. 
-          It allows you to select one or more participants and show only their relevant interactions.
-        </p>
-
-        <div className="mb-12">
-            <h3 className="text-xl font-semibold text-foreground mb-4">Try it Live</h3>
-            <p className="text-muted-foreground mb-6 text-sm">
-                Click "Focus Web" below. Notice how interactions between API and DB (which don't involve Web directly) disappear.
-            </p>
-          <FocusDemo />
-        </div>
-
-        <h3 className="text-xl font-semibold text-foreground mb-4">Configuration</h3>
-         <p className="text-muted-foreground mb-6 text-sm">
-          Define focus lenses in your <code className="text-primary">polagram.yml</code> to automatically generate focused views for different teams (e.g., Frontend, Backend, Payment).
+          Polagram is built for automation. Generate up-to-date diagrams on every commit using GitHub Actions or your preferred CI provider.
         </p>
 
         <CodeBlock 
-            language="yaml"
-            filename="polagram.yml" 
-            code={`version: 1
-targets:
-  - input: ["diagram.mmd"]
-    outputDir: "generated"
-    lenses:
-      # Single participant focus
-      - name: web-view
-        layers:
-          - action: focus
-            selector:
-              kind: participant
-              name: Web
+            language="yaml" 
+            filename=".github/workflows/diagrams.yml"
+            code={`name: Generate Diagrams
+on: [push]
+jobs:
+  diagrams:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: pnpm/action-setup@v2
+      - name: Install Polagram
+        run: pnpm add -g @polagram/cli
       
-      # Multiple participants with filtering
-      - name: web-api-clean
-        layers:
-          - action: focus
-            selector:
-              kind: participant
-              name: /Web|API/
-          - action: remove
-            selector:
-              kind: message
-              name: /^DEBUG:/`} 
+      - name: Generate Diagrams
+        run: polagram run
+      
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: diagrams
+          path: generated/`} 
         />
       </section>
+
+
 
       {/* Configuration Specification */}
       <section id="reference" className="scroll-mt-32 mb-24 border-t border-border pt-24">
@@ -362,7 +399,7 @@ targets:
                     Specifies the criteria for selecting elements. All string matching is exact by default. Use an object with <code>pattern</code> for Regex.
                 </p>
                 
-                <h4 className="font-semibold text-foreground mb-4 mt-6">Common Fields</h4>
+                <h4 className="font-bold text-foreground mb-3 mt-6 text-sm uppercase tracking-wider">Common Fields</h4>
                 <div className="space-y-6">
                      <PropertyDefinition 
                         name="kind" 
@@ -372,7 +409,7 @@ targets:
                     />
                 </div>
 
-                <h4 className="font-semibold text-foreground mb-4 mt-8">Kind-Specific Fields</h4>
+                <h4 className="font-bold text-foreground mb-3 mt-8 text-sm uppercase tracking-wider">Kind-Specific Fields</h4>
                 
                 <div className="grid md:grid-cols-2 gap-6">
                    <div className="bg-card/30 p-4 rounded-lg border border-border">
@@ -402,7 +439,7 @@ targets:
                    </div>
                 </div>
 
-                <h4 className="font-semibold text-foreground mb-4 mt-8 text-sm uppercase tracking-wider text-muted-foreground">Type Definitions</h4>
+                <h4 className="font-bold text-foreground mb-3 mt-8 text-sm uppercase tracking-wider text-muted-foreground">Type Definitions</h4>
                 <div className="bg-muted/30 p-4 rounded-lg border border-border text-sm font-mono">
                     <div><span className="text-primary">Matcher</span> = string | &#123; pattern: string, flags?: string &#125;</div>
                 </div>
@@ -411,45 +448,15 @@ targets:
         </div>
       </section>
 
-      {/* CI/CD Integration */}
-      <section id="cicd" className="scroll-mt-32 mb-24 border-t border-border pt-24">
-        <h2 className="text-3xl font-bold text-foreground mb-6">CI/CD Integration</h2>
-        <p className="text-base text-muted-foreground mb-8 leading-7">
-          Polagram is built for automation. Generate up-to-date diagrams on every commit using GitHub Actions or your preferred CI provider.
-        </p>
 
-        <CodeBlock 
-            language="yaml" 
-            filename=".github/workflows/diagrams.yml"
-            code={`name: Generate Diagrams
-on: [push]
-jobs:
-  diagrams:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: pnpm/action-setup@v2
-      - name: Install Polagram
-        run: pnpm add -g @polagram/cli
-      
-      - name: Generate Diagrams
-        run: polagram run
-      
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v3
-        with:
-          name: diagrams
-          path: generated/`} 
-        />
-      </section>
 
       {/* Roadmap */}
       <section id="roadmap" className="scroll-mt-32 mb-24 border-t border-border pt-24 opacity-80">
-        <h2 className="text-2xl font-bold text-foreground mb-6">Coming Soon</h2>
+        <h2 className="text-3xl font-bold text-foreground mb-8">Coming Soon</h2>
         <div className="bg-card/30 border border-border/50 rounded-xl p-6">
             <div className="flex items-start gap-4">
                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                  🌱
+                  <Sprout className="w-5 h-5" />
                </div>
                <div>
                  <h3 className="text-lg font-semibold text-foreground mb-2">PlantUML Support</h3>
