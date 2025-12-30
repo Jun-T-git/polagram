@@ -10,6 +10,7 @@ interface MermaidRendererProps {
 // Initialize mermaid with custom theme
 mermaid.initialize({
   startOnLoad: false,
+  suppressErrorRendering: true,
   theme: 'dark',
   themeVariables: {
     primaryColor: '#8a5cf6',
@@ -58,7 +59,7 @@ export default function MermaidRenderer({ code }: MermaidRendererProps) {
           containerRef.current.innerHTML = svg;
         }
       } catch (error) {
-        console.error('Mermaid rendering error:', error);
+        // console.error('Mermaid rendering error:', error);
         if (containerRef.current) {
           containerRef.current.innerHTML = `
             <div class="flex flex-col items-center justify-center p-6 text-destructive bg-destructive/5 rounded-lg border border-destructive/20">

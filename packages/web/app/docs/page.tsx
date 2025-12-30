@@ -30,25 +30,28 @@ export default function DocsPage() {
   return (
     <div className="max-w-[75ch] mx-auto pb-48">
       
+      <h1 className="sr-only">Polagram Documentation</h1>
+
       {/* Introduction */}
-      <section id="introduction" className="scroll-mt-32 mb-32 animate-fade-in">
+      <section id="introduction" className="scroll-mt-32 mb-20 animate-fade-in">
         <div className="mb-6">
             <span className="text-primary font-mono text-[10px] uppercase tracking-widest font-semibold border border-primary/20 bg-primary/10 px-3 py-1 rounded-full">
               Overview
             </span>
         </div>
         
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-8 text-foreground">
+        <h2 className="text-3xl md:text-4xl font-bold tracking-tight mb-8 text-foreground">
           Introduction
-        </h1>
+        </h2>
         
-        <p className="text-xl text-muted-foreground leading-8 mb-12 font-light">
+        <p className="text-xl text-muted-foreground leading-8 mb-8 font-light">
           <strong className="text-foreground font-medium">Polagram</strong> is a sequence diagram transformation engine designed for complex systems. It helps you maintain a single source of truth while generating clarity for every context.
         </p>
+      </section>
         
-        {/* The Problem */}
-        {/* The Problem */}
-        <h2 className="text-3xl font-bold text-foreground mb-8 mt-16 scroll-mt-32" id="problem">The Problem: One Size Doesn't Fit All</h2>
+      {/* The Problem */}
+      <section id="problem" className="scroll-mt-32 mb-24">
+        <h2 className="text-3xl font-bold text-foreground mb-8">The Problem: One Size Doesn't Fit All</h2>
         <p className="text-muted-foreground mb-6 leading-7">
           Sequence diagrams are a powerful tool for visualizing systems, but a single diagram rarely satisfies everyone's needs. The "optimal" level of detail depends entirely on your role:
         </p>
@@ -72,46 +75,42 @@ export default function DocsPage() {
              </span>
           </li>
         </ul>
-        <p className="text-muted-foreground mb-12 leading-7 bg-muted/30 p-4 rounded-lg border border-border/50">
+        <p className="text-muted-foreground mb-4 leading-7 bg-muted/30 p-4 rounded-lg border border-border/50">
           Traditionally, this forces a choice: maintain one giant, unreadable diagram, or manually keep multiple diagrams in sync—a recipe for documentation drift. <strong className="text-foreground">Polagram</strong> solves this by dynamically generating all these views from a single source of truth.
         </p>
+      </section>
         
-        {/* Philosophy Card */}
-        <section className="mb-24 scroll-mt-32" id="philosophy">
-             <h2 className="text-3xl font-bold text-foreground mb-8">One Diagram. Every View.</h2>
-             <p className="text-xl text-muted-foreground leading-8 mb-12 font-light">
-               Polagram treats diagrams like code. Instead of maintaining multiple fragmented diagrams manually, you maintain <strong>one master diagram</strong> and use <strong>Lenses</strong> to generate specific views.
-             </p>
-             
-             <div className="my-12">
-                 <PhilosophyConcept />
-             </div>
-        </section>
+      {/* Philosophy Card */}
+      <section id="philosophy" className="scroll-mt-32 mb-24">
+           <h2 className="text-3xl font-bold text-foreground mb-8">One Diagram. Every View.</h2>
+           <p className="text-xl text-muted-foreground leading-8 mb-12 font-light">
+             Polagram treats diagrams like code. Instead of maintaining multiple fragmented diagrams manually, you maintain <strong>one master diagram</strong> and use <strong>Lenses</strong> to generate specific views.
+           </p>
+           
+           <div className="my-12">
+               <PhilosophyConcept />
+           </div>
+      </section>
 
-        {/* Live Demo: The Power of Lenses */}
-        <div id="demo" className="scroll-mt-32 mb-16 animate-fade-in">
-           <div className="mb-6">
-              <span className="text-purple-400 font-mono text-[10px] uppercase tracking-widest font-semibold border border-purple-500/20 bg-purple-500/10 px-3 py-1 rounded-full">
-                See it in Action
-              </span>
-          </div>
-          
-          <h2 className="text-3xl font-bold text-foreground mb-8">The Power of Lenses</h2>
-          <p className="text-xl text-muted-foreground leading-8 mb-12 font-light">
-            Don't just take our word for it. <strong className="text-foreground font-medium">Lenses</strong> allow you to transform a complex master diagram into specific views for every stakeholder.
-          </p>
+      {/* Live Demo: The Power of Lenses */}
+      <section id="demo" className="scroll-mt-32 mb-24 animate-fade-in">
+        <h2 className="text-3xl font-bold text-foreground mb-8">The Power of Lenses</h2>
+        <p className="text-xl text-muted-foreground leading-8 mb-12 font-light">
+          Don't just take our word for it. <strong className="text-foreground font-medium">Lenses</strong> allow you to transform a complex master diagram into specific views for every stakeholder.
+        </p>
 
-          <div className="mb-12">
-              <p className="text-muted-foreground mb-6 text-sm">
-                  Try applying different lenses to the complex diagram below. Notice how the internal logic changes based on the audience.
-              </p>
-            <LiveDemo />
-          </div>
+        <div className="mb-12">
+            <p className="text-muted-foreground mb-6 text-sm">
+                Try applying different lenses to the complex diagram below. Notice how the internal logic changes based on the audience.
+            </p>
+          <LiveDemo />
         </div>
+      </section>
 
-        <h3 className="text-xl font-bold text-foreground mb-4 mt-8">
+      <section id="features" className="mb-24">
+        <h2 className="text-2xl font-bold text-foreground mb-8">
              Why Polagram?
-        </h3>
+        </h2>
         <div className="grid sm:grid-cols-2 gap-3">
             {[
                 { icon: <ScanSearch className="w-5 h-5" />, title: 'Focus Mode', desc: 'Instantly extract the lifecycle of a specific service.' },
@@ -133,7 +132,12 @@ export default function DocsPage() {
       </section>
 
       {/* Installation */}
-      <section id="installation" className="scroll-mt-32 mb-24 border-t border-border pt-24">
+      <section id="installation" className="scroll-mt-32 mb-24 border-t border-border pt-12">
+        <div className="mb-6">
+            <span className="text-emerald-500 font-mono text-[10px] uppercase tracking-widest font-semibold border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 rounded-full">
+              Getting Started
+            </span>
+        </div>
         <h2 className="text-3xl font-bold text-foreground mb-8">Installation</h2>
         <p className="text-muted-foreground mb-8 leading-7">
           Install the Polagram CLI globally or as a development dependency in your project.
@@ -220,7 +224,7 @@ targets:
       </section>
 
       {/* CI/CD Integration */}
-      <section id="cicd" className="scroll-mt-32 mb-24 border-t border-border pt-24">
+      <section id="cicd" className="scroll-mt-32 mb-24 border-t border-border pt-12">
         <h2 className="text-3xl font-bold text-foreground mb-8">CI/CD Integration</h2>
         <p className="text-base text-muted-foreground mb-8 leading-7">
           Polagram is built for automation. Generate up-to-date diagrams on every commit using GitHub Actions or your preferred CI provider.
@@ -254,7 +258,7 @@ jobs:
 
 
       {/* Configuration Specification */}
-      <section id="reference" className="scroll-mt-32 mb-24 border-t border-border pt-24">
+      <section id="reference" className="scroll-mt-32 mb-24 border-t border-border pt-12">
          <div className="mb-6">
             <span className="text-blue-400 font-mono text-[10px] uppercase tracking-widest font-semibold border border-blue-500/20 bg-blue-500/10 px-3 py-1 rounded-full">
               Reference
@@ -448,10 +452,8 @@ jobs:
         </div>
       </section>
 
-
-
       {/* Roadmap */}
-      <section id="roadmap" className="scroll-mt-32 mb-24 border-t border-border pt-24 opacity-80">
+      <section id="roadmap" className="scroll-mt-32 mb-24 border-t border-border pt-12 opacity-80">
         <h2 className="text-3xl font-bold text-foreground mb-8">Coming Soon</h2>
         <div className="bg-card/30 border border-border/50 rounded-xl p-6">
             <div className="flex items-start gap-4">

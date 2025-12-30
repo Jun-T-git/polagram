@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 import CodeEditor from '../../components/CodeEditor';
@@ -44,7 +45,7 @@ const DEFAULT_MERMAID = `sequenceDiagram
 
 export default function ViewerPage() {
   const [code, setCode] = useState(DEFAULT_MERMAID);
-  const [activeTab, setActiveTab] = useState('sample-lens.yaml');
+  const [activeTab, setActiveTab] = useState('polagram.yml');
   const [workspaceHeight, setWorkspaceHeight] = useState(600);
   const isResizingRef = useRef(false);
 
@@ -58,7 +59,6 @@ export default function ViewerPage() {
     removeTransform,
     toggleTransform,
     toggleAll,
-    getPipelineCode,
     getSuggestions
   } = usePolagram(code);
 
@@ -97,7 +97,7 @@ export default function ViewerPage() {
       <header className="px-6 py-4 border-b border-border bg-muted/20 flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold flex items-center gap-2">
-            <span className="text-2xl">🎭</span>
+            <Image src="/polagram-logo.png" alt="Polagram" width={24} height={24} />
             <span>Polagram Viewer</span>
           </h1>
           <p className="text-xs text-muted-foreground mt-1">Interactive Sequence Diagram Viewer</p>
@@ -113,12 +113,12 @@ export default function ViewerPage() {
             <Panel defaultSize={40} minSize={20} className="flex flex-col border-r border-border/50">
               <div className="h-full flex flex-col bg-muted/10">
                 <Tabs 
-                  tabs={['sample-lens.yaml', 'sequence-source.mmd']} 
+                  tabs={['polagram.yml', 'diagram.mmd']} 
                   activeTab={activeTab} 
                   onTabChange={setActiveTab} 
                 />
                 <div className="flex-1 relative overflow-hidden">
-                  {activeTab === 'sequence-source.mmd' ? (
+                  {activeTab === 'diagram.mmd' ? (
                     <CodeEditor 
                       value={code} 
                       onChange={setCode} 
@@ -160,10 +160,18 @@ export default function ViewerPage() {
             <div className="w-12 h-1 rounded-full bg-muted-foreground/20 group-hover:bg-primary/80 transition-colors" />
         </div>
 
-        <div className="flex-1 bg-background overflow-auto border-t border-border">
+        {/* Error Banner */}
+        {error && (
+          <div className="bg-destructive/10 border-t border-destructive/20 px-4 py-2 text-xs text-destructive flex items-center gap-2">
+            <span>⚠️</span>
+            <span className="font-medium">{error}</span>
+          </div>
+        )}
+        
+        {/* Control Bar Footer */}
+        <div className="flex-none bg-background">
           <TransformControls 
             pipeline={pipeline}
-            pipelineCode={getPipelineCode()}
             onAddTransform={addTransform}
             onRemoveTransform={removeTransform}
             onToggleTransform={toggleTransform}

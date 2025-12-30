@@ -3,60 +3,32 @@ import type { TransformOperation } from '../hooks/usePolagram';
 
 interface TransformControlsProps {
   pipeline: TransformOperation[];
-  pipelineCode: string;
-  onAddTransform: (operation: 'focusParticipant' | 'removeParticipant' | 'resolveFragment', target: string) => void;
+  onAddTransform: (operation: 'focusParticipant' | 'removeParticipant' | 'resolveFragment' | 'removeMessage' | 'removeGroup', target: string) => void;
   onRemoveTransform: (index: number) => void;
   onToggleTransform: (index: number) => void;
   onToggleAll: () => void;
-  getSuggestions: (operationType: 'participant' | 'fragment') => string[];
+  getSuggestions: (operationType: 'participant' | 'fragment' | 'group') => string[];
 }
 
 export default function TransformControls({ 
   pipeline, 
-  pipelineCode,
   onAddTransform, 
   onRemoveTransform,
   onToggleTransform,
   onToggleAll,
   getSuggestions
 }: TransformControlsProps) {
-  const [selectedOperation, setSelectedOperation] = useState<'focusParticipant' | 'removeParticipant' | 'resolveFragment'>('focusParticipant');
+  const [selectedOperation, setSelectedOperation] = useState<'focusParticipant' | 'removeParticipant' | 'resolveFragment' | 'removeMessage' | 'removeGroup'>('focusParticipant');
   const [target, setTarget] = useState('');
 
   // Get suggestions based on selected operation
   const suggestions = getSuggestions(
     selectedOperation === 'focusParticipant' || selectedOperation === 'removeParticipant' 
       ? 'participant' 
-      : 'fragment'
+      : selectedOperation === 'removeGroup'
+        ? 'group'
+        : 'fragment'
   );
-
-  const getOperationLabel = (operation: string): string => {
-    switch (operation) {
-      case 'focusParticipant': return 'Focus Participant';
-      case 'removeParticipant': return 'Remove Participant';
-      case 'resolveFragment': return 'Resolve Fragment';
-      default: return operation;
-    }
-  };
-
-  const getPlaceholder = () => {
-    if (selectedOperation === 'focusParticipant' || selectedOperation === 'removeParticipant') {
-      return 'Participant name (e.g., Auth, API Server, Database)';
-    } else {
-      return 'Fragment label (e.g., Success, Cache Miss, Retry)';
-    }
-  };
-
-  const getDescription = () => {
-    switch (selectedOperation) {
-      case 'focusParticipant':
-        return 'Show only messages sent or received by the specified participant';
-      case 'removeParticipant':
-        return 'Remove the specified participant from the diagram';
-      case 'resolveFragment':
-        return 'Focus on the specified fragment and show only its contents (Unwrap/Resolve)';
-    }
-  };
 
   const handleApply = () => {
     if (target.trim()) {
@@ -72,109 +44,109 @@ export default function TransformControls({
   };
 
   return (
-    <div className="flex flex-col h-full bg-background border-l border-border/40">
-      <div className="px-6 py-4 flex items-center justify-between border-b border-border bg-muted/20">
-        <h3 className="font-semibold text-sm uppercase tracking-wide text-foreground">Transform Pipeline</h3>
-        {pipeline.length > 0 && (() => {
-          const hasEnabled = pipeline.some(op => op.enabled);
-          return (
-            <button 
-              className="text-xs font-medium px-3 py-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-              onClick={onToggleAll}
-              title={hasEnabled ? "Disable All" : "Enable All"}
-            >
-              {hasEnabled ? '👁️‍🗨️ Disable All' : '👁️ Enable All'}
-            </button>
-          );
-        })()}
+    <div className="flex flex-row items-center h-14 bg-background border-t border-border px-4 gap-4 shadow-sm z-30">
+      {/* Add New Transformation (Compact) */}
+      <div className="flex items-center gap-2 flex-none">
+        <select 
+          className="h-9 px-3 rounded-md bg-background border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
+          value={selectedOperation}
+          onChange={(e) => setSelectedOperation(e.target.value as 'focusParticipant' | 'removeParticipant' | 'resolveFragment' | 'removeMessage' | 'removeGroup')}
+        >
+          <option value="focusParticipant">Focus Participant</option>
+          <option value="removeParticipant">Remove Participant</option>
+          <option value="removeMessage">Remove Message</option>
+          <option value="removeGroup">Remove Group</option>
+          <option value="resolveFragment">Resolve Fragment</option>
+        </select>
+        
+        <div className="relative w-48">
+          <input
+            type="text"
+            className="w-full h-9 px-3 rounded-md bg-background border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/50"
+            value={target}
+            onChange={(e) => setTarget(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder={
+              selectedOperation === 'resolveFragment' ? "Fragment..." : 
+              selectedOperation === 'removeMessage' ? "Message text..." : 
+              selectedOperation === 'removeGroup' ? "Group name..." :
+              "Participant..."
+            }
+            list="suggestions"
+          />
+          <datalist id="suggestions">
+            {suggestions.map((s, i) => <option key={i} value={s} />)}
+          </datalist>
+        </div>
+        
+        <button 
+          className="h-9 px-4 bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-medium rounded-md transition-colors shadow-sm whitespace-nowrap"
+          onClick={handleApply}
+        >
+          Add Lens
+        </button>
       </div>
 
-      <div className="flex-1 overflow-auto p-6 space-y-6">
-        {/* Pipeline Display */}
-        {pipeline.length > 0 && (
-          <div className="space-y-4">
-            <div className="p-4 bg-muted/30 rounded-lg border border-border/50 font-mono text-xs text-muted-foreground overflow-x-auto">
-              <code>{pipelineCode}</code>
+      {/* Divider */}
+      <div className="w-px h-6 bg-border mx-2 flex-none" />
+
+      {/* Pipeline Display (Chips) */}
+      <div className="flex-1 overflow-x-auto flex items-center gap-2 no-scrollbar">
+        {pipeline.length === 0 ? (
+          <span className="text-xs text-muted-foreground italic truncate">No active lenses applied</span>
+        ) : (
+          pipeline.map((op, index) => (
+            <div 
+              key={index} 
+              className={`
+                group flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-medium transition-all whitespace-nowrap
+                ${!op.enabled 
+                  ? 'bg-muted/10 border-border text-muted-foreground opacity-70' 
+                  : 'bg-primary/5 border-primary/20 text-foreground shadow-sm'}
+              `}
+            >
+              <button 
+                className="hover:text-primary transition-colors"
+                onClick={() => onToggleTransform(index)}
+                title={op.enabled ? "Disable" : "Enable"}
+              >
+                {op.enabled ? '●' : '○'}
+              </button>
+              
+              <span className="opacity-75">{index + 1}.</span>
+              <span className="max-w-[100px] truncate">
+                {op.operation === 'focusParticipant' ? 'Focus' : 
+                 op.operation === 'removeParticipant' ? 'Remove' : 
+                 op.operation === 'removeMessage' ? 'Rm Msg' :
+                 op.operation === 'removeGroup' ? 'Rm Grp' :
+                 op.operation === 'resolveFragment' ? 'Resolve' : op.operation}
+              </span>
+              <span className="px-1.5 py-0.5 rounded-md bg-background/50 border border-border/50 truncate max-w-[80px]">
+                {op.target}
+              </span>
+              
+              <button 
+                className="ml-1 text-muted-foreground hover:text-destructive transition-colors opacity-50 group-hover:opacity-100"
+                onClick={() => onRemoveTransform(index)}
+                title="Remove"
+              >
+                ×
+              </button>
             </div>
-            <div className="space-y-2">
-              {pipeline.map((op, index) => (
-                <div 
-                  key={index} 
-                  className={`
-                    group flex items-center gap-3 p-3 rounded-lg border transition-all duration-200
-                    ${!op.enabled 
-                      ? 'bg-muted/10 border-border text-muted-foreground opacity-70' 
-                      : 'bg-card border-border hover:border-primary/30 shadow-sm'}
-                  `}
-                >
-                  <button 
-                    className="p-1.5 rounded-md hover:bg-muted/50 text-muted-foreground transition-colors"
-                    onClick={() => onToggleTransform(index)}
-                    title={op.enabled ? "Disable Temporarily" : "Enable"}
-                  >
-                    {op.enabled ? '👁️' : '👁️‍🗨️'}
-                  </button>
-                  <div className="flex-1 flex items-center gap-2 min-w-0">
-                    <span className="text-xs font-medium text-primary/80 w-5">{index + 1}.</span>
-                    <span className="text-sm font-medium truncate">{getOperationLabel(op.operation)}</span>
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground truncate max-w-[150px]">
-                      "{op.target}"
-                    </span>
-                  </div>
-                  <button 
-                    className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors opacity-0 group-hover:opacity-100"
-                    onClick={() => onRemoveTransform(index)}
-                    title="Remove"
-                  >
-                    ✕
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
+          ))
         )}
-        
-        {/* Add New Transformation */}
-        <div className="p-6 rounded-xl border border-border bg-card/30 space-y-4 shadow-sm">
-          <div className="space-y-2">
-            <label className="text-xs font-semibold text-foreground uppercase tracking-wider">Add Transform Lens</label>
-            <select 
-              className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
-              value={selectedOperation}
-              onChange={(e) => setSelectedOperation(e.target.value as 'focusParticipant' | 'removeParticipant' | 'resolveFragment')}
-            >
-              <option value="focusParticipant">Focus Participant</option>
-              <option value="removeParticipant">Remove Participant</option>
-              <option value="resolveFragment">Resolve Fragment</option>
-            </select>
-          </div>
-          
-          <p className="text-xs text-muted-foreground leading-relaxed pl-1 border-l-2 border-primary/20">{getDescription()}</p>
-          
-          <div className="flex gap-2 pt-2">
-            <div className="relative flex-1">
-              <input
-                type="text"
-                className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/50 transition-all placeholder:text-muted-foreground/40"
-                value={target}
-                onChange={(e) => setTarget(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder={getPlaceholder()}
-                list="suggestions"
-              />
-              <datalist id="suggestions">
-                {suggestions.map((s, i) => <option key={i} value={s} />)}
-              </datalist>
-            </div>
-            <button 
-              className="px-4 py-2 bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-medium rounded-lg transition-colors shadow-sm"
-              onClick={handleApply}
-            >
-              Add
-            </button>
-          </div>
-        </div>
       </div>
+
+      {/* Global Actions */}
+      {pipeline.length > 0 && (
+        <button 
+          className="flex-none text-xs font-medium px-3 py-1.5 rounded-full bg-muted/50 hover:bg-muted text-muted-foreground transition-colors"
+          onClick={onToggleAll}
+          title={pipeline.some(op => op.enabled) ? "Disable All" : "Enable All"}
+        >
+          {pipeline.some(op => op.enabled) ? 'Disable All' : 'Enable All'}
+        </button>
+      )}
     </div>
   );
 }
