@@ -1,6 +1,5 @@
 'use client';
 
-import { Github } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -53,19 +52,6 @@ export function Navbar() {
             })}
           </div>
           
-          <div className="w-px h-5 bg-border" />
-          
-          <Link
-            href="https://github.com/teraokajun/polagram"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={cn(
-              "p-2 rounded-full transition-colors text-muted-foreground hover:text-foreground hover:bg-secondary/50",
-            )}
-            aria-label="GitHub"
-          >
-             <Github className="w-5 h-5" />
-          </Link>
         </div>
       </div>
     </nav>
