@@ -1,6 +1,6 @@
 
 import { describe, expect, it } from 'vitest';
-import { PolagramRoot } from '../../ast';
+import { PolagraphRoot } from '../../ast';
 import { Token, TokenType } from '../languages/mermaid/tokens';
 import { BaseLexer } from './lexer';
 import { BaseParser } from './parser';
@@ -24,7 +24,7 @@ class MockLexer extends BaseLexer {
 }
 
 class TestParser extends BaseParser {
-    parse(): PolagramRoot {
+    parse(): PolagraphRoot {
         return { kind: 'root', meta: { version: '1.0.0', source: 'unknown' }, participants: [], groups: [], events: [] };
     }
     

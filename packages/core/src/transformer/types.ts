@@ -1,4 +1,4 @@
-import { FragmentOperator, PolagramRoot } from '../ast';
+import { FragmentOperator, PolagraphRoot } from '../ast';
 
 // -- Selectors --
 
@@ -22,6 +22,7 @@ export interface MessageSelector {
     text?: TextMatcher;
     from?: TextMatcher;
     to?: TextMatcher;
+    // For now, these are direct references or regexes
 }
 
 export interface GroupSelector {
@@ -62,5 +63,5 @@ export interface Lens {
 // -- Engine --
 
 export interface Transformer {
-    transform(root: PolagramRoot): PolagramRoot;
+    transform(root: PolagraphRoot): PolagraphRoot;
 }

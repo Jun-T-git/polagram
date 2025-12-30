@@ -1,13 +1,13 @@
 // packages/core/test/complex_ast_example.test.ts
 import { describe, expect, it } from 'vitest';
-import type { PolagramRoot } from './index';
+import type { PolagraphRoot } from './index';
 
 describe('Polagram AST Definition', () => {
   it('should support a complex lossless scenario', () => {
     // This "Rosetta Stone" object attempts to use ALL new features
     // to prove they are correctly typed and coexist.
     
-    const complexAst: PolagramRoot = {
+    const complexAst: PolagraphRoot = {
       kind: 'root',
       meta: {
         version: '1.0.0',

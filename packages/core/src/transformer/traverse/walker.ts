@@ -1,5 +1,5 @@
 
-import { EventNode, FragmentBranch, FragmentNode, PolagramRoot } from '../../ast';
+import { EventNode, FragmentBranch, FragmentNode, PolagraphRoot } from '../../ast';
 
 /**
  * Abstract base class for tree transformations.
@@ -9,7 +9,7 @@ import { EventNode, FragmentBranch, FragmentNode, PolagramRoot } from '../../ast
  */
 export abstract class Walker {
   
-  public transform(root: PolagramRoot): PolagramRoot {
+  public transform(root: PolagraphRoot): PolagraphRoot {
     // 1. Map Events (Recursively)
     const newEvents = this.mapEvents(root.events);
     

@@ -1,7 +1,7 @@
 // packages/core/src/ast.ts
 
 /**
- * Polagram Abstract Syntax Tree (AST) Definitions
+ * Polagraph Abstract Syntax Tree (AST) Definitions
  *
  * Designed to be a lossless representation of Sequence Diagrams from:
  * - Mermaid
@@ -14,7 +14,7 @@
 // 1. Root Definition
 // ------------------------------------------------------------------
 
-export interface PolagramRoot {
+export interface PolagraphRoot {
   kind: 'root';
   meta: MetaData;
   participants: Participant[];

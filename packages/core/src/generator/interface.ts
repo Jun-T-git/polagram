@@ -1,23 +1,23 @@
 
 import {
-    ActivationNode,
-    DividerNode,
-    FragmentNode,
-    MessageNode,
-    NoteNode,
-    Participant,
-    ParticipantGroup,
-    PolagramRoot,
-    ReferenceNode,
-    SpacerNode,
+  ActivationNode,
+  DividerNode,
+  FragmentNode,
+  MessageNode,
+  NoteNode,
+  Participant,
+  ParticipantGroup,
+  PolagraphRoot,
+  ReferenceNode,
+  SpacerNode,
 } from '../ast';
 
 /**
- * Visitor interface for traversing the Polagram AST.
+ * Visitor interface for traversing the Polagraph AST.
  * Implement this interface to create code generators, validators, etc.
  */
-export interface PolagramVisitor {
-  visitRoot(node: PolagramRoot): void;
+export interface PolagraphVisitor {
+  visitRoot(node: PolagraphRoot): void;
   
   visitParticipant(node: Participant): void;
   visitParticipantGroup(node: ParticipantGroup): void;

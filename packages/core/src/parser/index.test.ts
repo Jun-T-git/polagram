@@ -1,6 +1,6 @@
 
 import { describe, expect, it } from 'vitest';
-import { PolagramRoot } from '../ast';
+import { PolagraphRoot } from '../ast';
 import { ParserFactory } from './index';
 import { DiagramParser } from './interface';
 
@@ -20,7 +20,7 @@ describe('ParserFactory', () => {
 
     it('should allow registering new parser', () => {
         const mockParser: DiagramParser = {
-            parse: (_code: string): PolagramRoot => ({ kind: 'root', meta: { version: '1.0.0', source: 'unknown' }, participants: [], groups: [], events: [] })
+            parse: (_code: string): PolagraphRoot => ({ kind: 'root', meta: { version: '1.0.0', source: 'unknown' }, participants: [], groups: [], events: [] })
         };
 
         ParserFactory.register('test-lang', mockParser);

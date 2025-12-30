@@ -1,6 +1,6 @@
 
 import { describe, expect, it } from 'vitest';
-import { FragmentNode, MessageNode, PolagramRoot } from '../../ast';
+import { FragmentNode, MessageNode, PolagraphRoot } from '../../ast';
 import { Walker } from './walker';
 
 class IdentityWalker extends Walker {
@@ -8,7 +8,7 @@ class IdentityWalker extends Walker {
 }
 
 describe('Walker (Base Traversal)', () => {
-    const createAst = (events: any[]): PolagramRoot => ({
+    const createAst = (events: any[]): PolagraphRoot => ({
         kind: 'root',
         meta: { version: '1', source: 'unknown' },
         participants: [],

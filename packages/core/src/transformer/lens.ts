@@ -1,5 +1,5 @@
 
-import { PolagramRoot } from '../ast';
+import { PolagraphRoot } from '../ast';
 import { TransformationEngine } from './orchestration/engine';
 import { Layer, Lens } from './types';
 
@@ -68,7 +68,7 @@ function validateLayer(layer: unknown): layer is Layer {
  * Apply a lens object to the AST.
  * Facade for the TransformationEngine.
  */
-export function applyLens(root: PolagramRoot, lens: Lens): PolagramRoot {
+export function applyLens(root: PolagraphRoot, lens: Lens): PolagraphRoot {
     const engine = new TransformationEngine();
     return engine.transform(root, lens.layers);
 }

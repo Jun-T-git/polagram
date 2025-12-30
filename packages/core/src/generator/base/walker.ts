@@ -1,15 +1,15 @@
 
-import { EventNode, PolagramRoot } from '../../ast';
-import { PolagramVisitor } from '../interface';
+import { EventNode, PolagraphRoot } from '../../ast';
+import { PolagraphVisitor } from '../interface';
 
 /**
  * Helper class to traverse AST nodes and dispatch to the visitor.
  */
 export class Traverser {
   
-  constructor(private visitor: PolagramVisitor) {}
+  constructor(private visitor: PolagraphVisitor) {}
 
-  public traverse(root: PolagramRoot) {
+  public traverse(root: PolagraphRoot) {
     this.visitor.visitRoot(root);
   }
 

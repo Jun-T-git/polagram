@@ -97,8 +97,8 @@ export default function ViewerPage() {
       <header className="px-6 py-4 border-b border-border bg-muted/20 flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold flex items-center gap-2">
-            <Image src="/polagraph-logo.png" alt="Polagram" width={24} height={24} />
-            <span>Polagram Viewer</span>
+            <Image src="/polagraph-logo.png" alt="Polagraph" width={24} height={24} />
+            <span>Polagraph Viewer</span>
           </h1>
           <p className="text-xs text-muted-foreground mt-1">Interactive Sequence Diagram Viewer</p>
         </div>

@@ -1,11 +1,11 @@
 
 import { describe, expect, it } from 'vitest';
-import { FragmentNode, MessageNode, PolagramRoot } from '../../ast';
+import { FragmentNode, MessageNode, PolagraphRoot } from '../../ast';
 import { ResolveLayer } from '../types';
 import { ResolveFilter } from './resolve';
 
 describe('ResolveFilter', () => {
-    const createAst = (events: any[]): PolagramRoot => ({
+    const createAst = (events: any[]): PolagraphRoot => ({
         kind: 'root',
         meta: { version: '1', source: 'unknown' },
         participants: [],

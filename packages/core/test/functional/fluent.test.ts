@@ -1,6 +1,5 @@
-
 import { describe, expect, it } from 'vitest';
-import { Polagram } from '../../src/api';
+import { Polagraph } from '../../src/api';
 
 const sampleCode = `sequenceDiagram
     participant A
@@ -21,7 +20,7 @@ function normalize(code: string): string {
 describe('Fluent API Tests', () => {
   describe('Basic Chaining', () => {
     it('should support focus with string selector', () => {
-      const result = Polagram.init(sampleCode)
+      const result = Polagraph.init(sampleCode)
         .focusParticipant('B')
         .toMermaid();
       
@@ -31,7 +30,7 @@ describe('Fluent API Tests', () => {
     });
 
     it('should support remove with string selector', () => {
-      const result = Polagram.init(sampleCode)
+      const result = Polagraph.init(sampleCode)
         .removeParticipant('B')
         .toMermaid();
       
@@ -49,7 +48,7 @@ describe('Fluent API Tests', () => {
     participant InventoryService
     PaymentService->>InventoryService: Check stock`;
 
-      const result = Polagram.init(code)
+      const result = Polagraph.init(code)
         .focusParticipant(/.*Service$/)
         .toMermaid();
       
@@ -67,7 +66,7 @@ describe('Fluent API Tests', () => {
     PaymentService->>DebugLogger: Log
     PaymentService->>ErrorLogger: Error`;
 
-      const result = Polagram.init(code)
+      const result = Polagraph.init(code)
         .removeParticipant(/^Debug.*/)
         .toMermaid();
       
@@ -80,7 +79,7 @@ describe('Fluent API Tests', () => {
 
   describe('Object Selectors', () => {
     it('should support focus with object selector', () => {
-      const result = Polagram.init(sampleCode)
+      const result = Polagraph.init(sampleCode)
         .focusParticipant({ name: 'B' })
         .toMermaid();
       
@@ -100,7 +99,7 @@ describe('Fluent API Tests', () => {
     C->>D: Message 3
     D->>A: Message 4`;
 
-      const result = Polagram.init(code)
+      const result = Polagraph.init(code)
         .removeParticipant('D')
         .focusParticipant('B')
         .toMermaid();
@@ -120,7 +119,7 @@ describe('Fluent API Tests', () => {
         A->>B: Message
     end`;
 
-      const result = Polagram.init(code)
+      const result = Polagraph.init(code)
         .resolveFragment('Option')
         .toMermaid();
       
@@ -132,7 +131,7 @@ describe('Fluent API Tests', () => {
 
   describe('toAST', () => {
     it('should return transformed AST', () => {
-      const ast = Polagram.init(sampleCode)
+      const ast = Polagraph.init(sampleCode)
         .focusParticipant('B')
         .toAST();
       

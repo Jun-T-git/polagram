@@ -1,24 +1,24 @@
 
 import {
-    ActivationNode,
-    DividerNode,
-    FragmentNode,
-    MessageNode,
-    NoteNode,
-    Participant,
-    ParticipantGroup,
-    PolagramRoot,
-    ReferenceNode,
-    SpacerNode,
+  ActivationNode,
+  DividerNode,
+  FragmentNode,
+  MessageNode,
+  NoteNode,
+  Participant,
+  ParticipantGroup,
+  PolagraphRoot,
+  ReferenceNode,
+  SpacerNode,
 } from '../../ast';
 import { getArrowString } from '../../parser/languages/mermaid/constants';
 import { Traverser } from '../base/walker';
-import { PolagramVisitor } from '../interface';
+import { PolagraphVisitor } from '../interface';
 
 /**
  * Visitor implementation that generates Mermaid code.
  */
-export class MermaidGeneratorVisitor implements PolagramVisitor {
+export class MermaidGeneratorVisitor implements PolagraphVisitor {
   private lines: string[] = [];
   private indentLevel = 0;
   private traverser: Traverser;
@@ -27,14 +27,14 @@ export class MermaidGeneratorVisitor implements PolagramVisitor {
     this.traverser = new Traverser(this);
   }
 
-  public generate(ast: PolagramRoot): string {
+  public generate(ast: PolagraphRoot): string {
     this.lines = [];
     this.indentLevel = 0;
     this.traverser.traverse(ast);
     return this.lines.join('\n');
   }
 
-  visitRoot(node: PolagramRoot): void {
+  visitRoot(node: PolagraphRoot): void {
     this.lines.push('sequenceDiagram');
     this.indentLevel++;
 

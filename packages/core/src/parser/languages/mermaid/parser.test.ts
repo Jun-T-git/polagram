@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import type { PolagramRoot } from '../../../ast';
+import type { PolagraphRoot } from '../../../ast';
 import { Lexer } from './lexer';
 import { Parser } from './parser';
 
 describe('Mermaid Parser', () => {
-  const parse = (input: string): PolagramRoot => {
+  const parse = (input: string): PolagraphRoot => {
     const lexer = new Lexer(input);
     const parser = new Parser(lexer);
     return parser.parse();

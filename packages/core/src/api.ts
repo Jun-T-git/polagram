@@ -1,48 +1,51 @@
-
-import { PolagramRoot } from './ast';
+import { PolagraphRoot } from './ast';
 import { MermaidGeneratorVisitor } from './generator/generators/mermaid';
 import { ParserFactory } from './parser';
 import { TransformationEngine } from './transformer/orchestration/engine';
 import {
-    FragmentSelector,
-    GroupSelector,
-    Layer,
-    Lens,
-    MessageSelector,
-    ParticipantSelector,
-    TextMatcher
+  FragmentSelector,
+  GroupSelector,
+  Layer,
+  Lens,
+  MessageSelector,
+  ParticipantSelector,
+  TextMatcher
 } from './transformer/types';
 
 /**
- * Fluent API for Polagram transformations.
+ * Polagraph Fluent API
+ * 
+ * Provides a high-level, chainable interface for transformations.
  * 
  * @example
- * const result = Polagram.init(mermaidCode)
+ * const result = Polagraph.init(mermaidCode)
  *   .focusParticipant('PaymentService')
  *   .removeParticipant('DebugLogger')
  *   .toMermaid();
  */
-export class Polagram {
+export class Polagraph {
+    private constructor() {}
+
     /**
-     * Initialize a new Polagram transformation pipeline.
+     * Initialize a new Polagraph transformation pipeline.
      * @param code Source diagram code
      * @param format Input format (currently only 'mermaid' is supported)
      */
-    static init(code: string, format: 'mermaid' = 'mermaid'): PolagramBuilder {
+    static init(code: string, format: 'mermaid' = 'mermaid'): PolagraphBuilder {
         const parser = ParserFactory.getParser(format);
         const ast = parser.parse(code);
-        return new PolagramBuilder(ast);
+        return new PolagraphBuilder(ast);
     }
 }
 
 /**
  * Builder class for chaining transformations.
  */
-export class PolagramBuilder {
-    private ast: PolagramRoot;
+export class PolagraphBuilder {
+    private ast: PolagraphRoot;
     private layers: Layer[] = [];
 
-    constructor(ast: PolagramRoot) {
+    constructor(ast: PolagraphRoot) {
         this.ast = ast;
     }
 
@@ -138,7 +141,7 @@ export class PolagramBuilder {
     /**
      * Get the transformed AST (for advanced use cases).
      */
-    toAST(): PolagramRoot {
+    toAST(): PolagraphRoot {
         const engine = new TransformationEngine();
         return engine.transform(this.ast, this.layers);
     }

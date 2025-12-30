@@ -1,11 +1,11 @@
 
 import { describe, expect, it } from 'vitest';
-import { MessageNode, PolagramRoot } from '../../ast';
+import { MessageNode, PolagraphRoot } from '../../ast';
 import { RemoveLayer } from '../types';
 import { RemoveFilter } from './remove';
 
 describe('RemoveFilter', () => {
-    const createAst = (events: any[]): PolagramRoot => ({
+    const createAst = (events: any[]): PolagraphRoot => ({
         kind: 'root',
         meta: { version: '1', source: 'unknown' },
         participants: [

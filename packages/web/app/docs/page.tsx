@@ -30,7 +30,7 @@ export default function DocsPage() {
   return (
     <div className="max-w-[75ch] mx-auto pb-48">
       
-      <h1 className="sr-only">Polagram Documentation</h1>
+      <h1 className="sr-only">Polagraph Documentation</h1>
 
       {/* Introduction */}
       <section id="introduction" className="scroll-mt-32 mb-20 animate-fade-in">
@@ -45,7 +45,7 @@ export default function DocsPage() {
         </h2>
         
         <p className="text-xl text-muted-foreground leading-8 mb-8 font-light">
-          <strong className="text-foreground font-medium">Polagram</strong> is a sequence diagram transformation engine designed for complex systems. It helps you maintain a single source of truth while generating clarity for every context.
+          <strong className="text-foreground font-medium">Polagraph</strong> is a sequence diagram transformation engine designed for complex systems. It helps you maintain a single source of truth while generating clarity for every context.
         </p>
       </section>
         
@@ -76,7 +76,7 @@ export default function DocsPage() {
           </li>
         </ul>
         <p className="text-muted-foreground mb-4 leading-7 bg-muted/30 p-4 rounded-lg border border-border/50">
-          Traditionally, this forces a choice: maintain one giant, unreadable diagram, or manually keep multiple diagrams in sync—a recipe for documentation drift. <strong className="text-foreground">Polagram</strong> solves this by dynamically generating all these views from a single source of truth.
+          Traditionally, this forces a choice: maintain one giant, unreadable diagram, or manually keep multiple diagrams in sync—a recipe for documentation drift. <strong className="text-foreground">Polagraph</strong> solves this by dynamically generating all these views from a single source of truth.
         </p>
       </section>
         
@@ -84,7 +84,7 @@ export default function DocsPage() {
       <section id="philosophy" className="scroll-mt-32 mb-24">
            <h2 className="text-3xl font-bold text-foreground mb-8">One Diagram. Every View.</h2>
            <p className="text-xl text-muted-foreground leading-8 mb-12 font-light">
-             Polagram treats diagrams like code. Instead of maintaining multiple fragmented diagrams manually, you maintain <strong>one master diagram</strong> and use <strong>Lenses</strong> to generate specific views.
+             Polagraph treats diagrams like code. Instead of maintaining multiple fragmented diagrams manually, you maintain <strong>one master diagram</strong> and use <strong>Lenses</strong> to generate specific views.
            </p>
            
            <div className="my-12">
@@ -109,7 +109,7 @@ export default function DocsPage() {
 
       <section id="features" className="mb-24">
         <h2 className="text-2xl font-bold text-foreground mb-8">
-             Why Polagram?
+             Why Polagraph?
         </h2>
         <div className="grid sm:grid-cols-2 gap-3">
             {[
@@ -140,7 +140,7 @@ export default function DocsPage() {
         </div>
         <h2 className="text-3xl font-bold text-foreground mb-8">Installation</h2>
         <p className="text-muted-foreground mb-8 leading-7">
-          Install the Polagram CLI globally or as a development dependency in your project.
+          Install the Polagraph CLI globally or as a development dependency in your project.
         </p>
 
         <CodeBlock 
@@ -213,7 +213,7 @@ targets:
             
              <div className="bg-card/30 p-4 rounded-lg border border-border">
                <div className="flex items-center gap-3 mb-2">
-                 <code className="text-foreground font-bold bg-muted px-2 py-0.5 rounded border border-border">POLAGRAM_CONFIG</code>
+                 <code className="text-foreground font-bold bg-muted px-2 py-0.5 rounded border border-border">POLAGRAph_CONFIG</code>
                  <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground border border-border px-1.5 py-0.5 rounded">Env Var</span>
                </div>
                <p className="text-sm text-muted-foreground leading-relaxed">
@@ -227,7 +227,7 @@ targets:
       <section id="cicd" className="scroll-mt-32 mb-24 border-t border-border pt-12">
         <h2 className="text-3xl font-bold text-foreground mb-8">CI/CD Integration</h2>
         <p className="text-base text-muted-foreground mb-8 leading-7">
-          Polagram is built for automation. Generate up-to-date diagrams on every commit using GitHub Actions or your preferred CI provider.
+          Polagraph is built for automation. Generate up-to-date diagrams on every commit using GitHub Actions or your preferred CI provider.
         </p>
 
         <CodeBlock 
@@ -241,7 +241,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: pnpm/action-setup@v2
-      - name: Install Polagram
+      - name: Install Polagraph
         run: pnpm add -g @polagraph/cli
       
       - name: Generate Diagrams

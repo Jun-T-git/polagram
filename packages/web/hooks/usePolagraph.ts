@@ -1,4 +1,4 @@
-import { EventNode, Layer, Lens, Participant, Polagram, PolagramRoot, TextMatcher } from '@polagraph/core';
+import { EventNode, Layer, Lens, Participant, Polagraph, PolagraphRoot, TextMatcher } from '@polagraph/core';
 import yaml from 'js-yaml';
 import { useMemo, useState } from 'react';
 
@@ -10,7 +10,7 @@ export interface TransformOperation {
 }
 
 interface UsePolagraphReturn {
-  ast: PolagramRoot | null;
+  ast: PolagraphRoot | null;
   transformedCode: string;
   error: string | null;
   pipeline: TransformOperation[];
@@ -64,7 +64,7 @@ export function usePolagraph(code: string): UsePolagraphReturn {
 
     try {
       // 1. Always parse the base AST from the source code
-      const builder = Polagram.init(code);
+      const builder = Polagraph.init(code);
       const computedAst = builder.toAST();
       let computedCode = code;
 

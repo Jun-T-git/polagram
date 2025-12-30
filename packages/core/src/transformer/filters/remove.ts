@@ -1,5 +1,5 @@
 
-import { ActivationNode, EventNode, MessageNode, NoteNode, PolagramRoot } from '../../ast';
+import { ActivationNode, EventNode, MessageNode, NoteNode, PolagraphRoot } from '../../ast';
 import { Matcher } from '../selector/matcher';
 import { Walker } from '../traverse/walker';
 import { RemoveLayer } from '../types';
@@ -12,7 +12,7 @@ export class RemoveFilter extends Walker {
         super();
     }
 
-    public transform(root: PolagramRoot): PolagramRoot {
+    public transform(root: PolagraphRoot): PolagraphRoot {
         const selector = this.layer.selector;
 
         // 1. Pre-calculate removed participants
