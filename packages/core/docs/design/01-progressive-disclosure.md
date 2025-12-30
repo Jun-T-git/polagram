@@ -118,7 +118,7 @@ It applies a "Map" operation: `Node -> Node[]`.
 
 ```typescript
 abstract class TreeMapper {
-  transform(root: PolagramRoot): PolagramRoot {
+  transform(root: PolagraphRoot): PolagraphRoot {
     // Always return a new Root object
     return {
       ...root,

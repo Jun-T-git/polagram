@@ -35,7 +35,7 @@ describe('Config Schema Validation', () => {
             targets: []
         };
 
-        expect(() => validateConfig(input)).toThrow('Invalid Polagram Configuration');
+        expect(() => validateConfig(input)).toThrow('Invalid Polagraph Configuration');
         // Zod message might vary, just checking it fails is often enough, 
         // but let's check for the path at least.
         expect(() => validateConfig(input)).toThrow('[version]:');

@@ -36,7 +36,7 @@ export abstract class Walker {
     }
     
     // Groups are tricky because they are defined in root.groups AND sometimes used as containers in other ASTs.
-    // In Polagram AST, `Box` is currently represented as `Group` in `ParticipantGroup`? 
+    // In Polagraph AST, `Box` is currently represented as `Group` in `ParticipantGroup`? 
     // Wait, let's check AST. `groups` is at root. `events` contains `Spacer`, `Note` etc.
     // Ah, AST definition has `groups` at root, but does it have Group as an Event?
     // Looking at parser.ts: `root.groups.push(group)` and `events` are just events.

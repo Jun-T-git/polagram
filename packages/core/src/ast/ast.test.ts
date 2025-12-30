@@ -2,7 +2,7 @@
 import { describe, expect, it } from 'vitest';
 import type { PolagraphRoot } from './index';
 
-describe('Polagram AST Definition', () => {
+describe('Polagraph AST Definition', () => {
   it('should support a complex lossless scenario', () => {
     // This "Rosetta Stone" object attempts to use ALL new features
     // to prove they are correctly typed and coexist.

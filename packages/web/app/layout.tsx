@@ -7,7 +7,7 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Polagram - Interactive Sequence Diagrams',
+  title: 'Polagraph - Interactive Sequence Diagrams',
   description: 'Interactive sequence diagram viewer and transformation engine.',
 };
 

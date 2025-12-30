@@ -1,6 +1,6 @@
-# Polagram AST Specification & Mermaid Mapping
+# Polagraph AST Specification & Mermaid Mapping
 
-This document serves as the "Rosetta Stone" between Mermaid sequence diagram syntax and Polagram Abstract Syntax Tree (AST).
+This document serves as the "Rosetta Stone" between Mermaid sequence diagram syntax and Polagraph Abstract Syntax Tree (AST).
 
 *   **Status Legend:**
     *   ✅ **IMPLEMENTED**: Fully supported in current parser.
