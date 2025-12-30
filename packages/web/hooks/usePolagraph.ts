@@ -1,6 +1,6 @@
-import { Lens, Polagram } from '@polagram/core';
+import { EventNode, Layer, Lens, Participant, Polagram, PolagramRoot, TextMatcher } from '@polagraph/core';
 import yaml from 'js-yaml';
-import { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 // UI Operations (Legacy keys kept for UI compatibility if needed, but mapped to new API)
 export interface TransformOperation {
@@ -9,8 +9,8 @@ export interface TransformOperation {
   enabled: boolean;
 }
 
-interface UsePolagramReturn {
-  ast: any;
+interface UsePolagraphReturn {
+  ast: PolagramRoot | null;
   transformedCode: string;
   error: string | null;
   pipeline: TransformOperation[];
@@ -23,6 +23,16 @@ interface UsePolagramReturn {
   getSuggestions: (operationType: 'participant' | 'fragment' | 'group') => string[];
 }
 
+// Internal Config Shape for YAML parsing
+interface ConfigShape {
+    version?: number;
+    targets?: {
+        input: string[];
+        outputDir: string;
+        lenses: Lens[];
+    }[];
+}
+
 // Default YAML content
 const DEFAULT_YAML = `version: 1
 targets:
@@ -33,12 +43,61 @@ targets:
         layers: []
 `;
 
-export function usePolagram(code: string): UsePolagramReturn {
-  const [ast, setAst] = useState<any>(null);
-  const [transformedCode, setTransformedCode] = useState(code);
-  const [error, setError] = useState<string | null>(null);
+// Helper to extract string representation from TextMatcher
+function getTextMatcherString(tm: TextMatcher | undefined): string {
+    if (!tm) return '';
+    if (typeof tm === 'string') return tm;
+    if (tm instanceof RegExp) return tm.source;
+    if ('pattern' in tm) return tm.pattern;
+    return '';
+}
+
+export function usePolagraph(code: string): UsePolagraphReturn {
   const [pipeline, setPipeline] = useState<TransformOperation[]>([]);
   const [lensYaml, setLensYaml] = useState<string>(DEFAULT_YAML);
+
+  // Derived state for AST, transformed code, and error
+  const { ast, transformedCode, error } = useMemo(() => {
+    if (!code.trim()) {
+      return { ast: null, transformedCode: '', error: null };
+    }
+
+    try {
+      // 1. Always parse the base AST from the source code
+      const builder = Polagram.init(code);
+      const computedAst = builder.toAST();
+      let computedCode = code;
+
+      // 2. Apply Lens if it exists
+      if (lensYaml.trim()) {
+        try {
+          const config = yaml.load(lensYaml) as ConfigShape;
+          // Extract the first lens from the first target
+          const lens = config?.targets?.[0]?.lenses?.[0];
+
+          if (lens && lens.layers && lens.layers.length > 0) {
+            const transformedBuilder = builder.applyLens(lens);
+            computedCode = transformedBuilder.toMermaid();
+          }
+        } catch (yamlErr) {
+           console.warn('Invalid YAML during apply:', yamlErr);
+           // Keep original code on YAML error, but don't fail the whole hook
+        }
+      }
+
+      return { ast: computedAst, transformedCode: computedCode, error: null };
+
+    } catch (err) {
+      let errorMessage = 'Failed to parse Mermaid code';
+      if (err instanceof SyntaxError) {
+        errorMessage = `Invalid Regular Expression: ${err.message}`;
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+      // If code is invalid, we can't transform it.
+      return { ast: null, transformedCode: code, error: errorMessage };
+    }
+  }, [code, lensYaml]);
 
   // Helper: Convert pipeline operations to Lens object
   const createLensFromPipeline = (ops: TransformOperation[]): Lens => {
@@ -46,30 +105,38 @@ export function usePolagram(code: string): UsePolagramReturn {
     
     // If no enabled ops, return empty layers but keep the name
     if (enabledOps.length === 0) {
-      return { name: 'My Polagram Lens', layers: [] };
+      return { name: 'My Polagraph Lens', layers: [] };
     }
 
-    const layers = enabledOps.map(op => {
-      const layer: any = {};
-      
+    const layers: Layer[] = enabledOps.map(op => {
       if (op.operation === 'focusParticipant') {
-        layer.action = 'focus';
-        layer.selector = { kind: 'participant', name: op.target };
+        return {
+          action: 'focus',
+          selector: { kind: 'participant', name: op.target }
+        };
       } else if (op.operation === 'removeParticipant') {
-        layer.action = 'remove';
-        layer.selector = { kind: 'participant', name: op.target };
+        return {
+          action: 'remove',
+          selector: { kind: 'participant', name: op.target }
+        };
       } else if (op.operation === 'resolveFragment') {
-        layer.action = 'resolve';
-        layer.selector = { kind: 'fragment', condition: op.target };
+        return {
+          action: 'resolve',
+          selector: { kind: 'fragment', condition: op.target }
+        };
       } else if (op.operation === 'removeMessage') {
-        layer.action = 'remove';
-        // Treat message target as regex pattern for flexibility in demo
-        layer.selector = { kind: 'message', text: { pattern: op.target } };
-      } else if (op.operation === 'removeGroup') {
-        layer.action = 'remove';
-        layer.selector = { kind: 'group', name: op.target };
+        return {
+          action: 'remove',
+          // Treat message target as regex pattern for flexibility in demo
+          selector: { kind: 'message', text: { pattern: op.target } }
+        };
+      } else {
+        // removeGroup
+        return {
+          action: 'remove',
+          selector: { kind: 'group', name: op.target }
+        };
       }
-      return layer;
     });
 
     return {
@@ -84,16 +151,18 @@ export function usePolagram(code: string): UsePolagramReturn {
     // Since we don't have the original full object easily accessible here without parsing current YAML again,
     // let's try to parse the current state or default to a skeleton.
     
-    let config: any;
+    let config: unknown;
     try {
         config = yaml.load(lensYaml);
-    } catch (e) {
+    } catch {
         config = null;
     }
 
+    let typedConfig = config as ConfigShape;
+
     // Default structure if missing
-    if (!config || typeof config !== 'object') {
-         config = {
+    if (!typedConfig || typeof typedConfig !== 'object') {
+         typedConfig = {
              version: 1,
              targets: [{
                  input: ["diagram.mmd"],
@@ -104,71 +173,23 @@ export function usePolagram(code: string): UsePolagramReturn {
     }
 
     // Ensure targets[0].lenses[0] exists
-    if (!config.targets || !Array.isArray(config.targets) || config.targets.length === 0) {
-        config.targets = [{
+    if (!typedConfig.targets || !Array.isArray(typedConfig.targets) || typedConfig.targets.length === 0) {
+        typedConfig.targets = [{
              input: ["diagram.mmd"],
              outputDir: "generated",
              lenses: [{ name: "clean-view", layers: [] }]
         }];
     }
-    if (!config.targets[0].lenses || !Array.isArray(config.targets[0].lenses) || config.targets[0].lenses.length === 0) {
-        config.targets[0].lenses = [{ name: "clean-view", layers: [] }];
+    if (!typedConfig.targets[0].lenses || !Array.isArray(typedConfig.targets[0].lenses) || typedConfig.targets[0].lenses.length === 0) {
+        typedConfig.targets[0].lenses = [{ name: "clean-view", layers: [] }];
     }
 
     const newLens = createLensFromPipeline(ops);
     // Update the first lens's layers
-    config.targets[0].lenses[0].layers = newLens.layers;
+    typedConfig.targets[0].lenses[0].layers = newLens.layers;
     
-    return yaml.dump(config);
+    return yaml.dump(typedConfig);
   };
-
-  // Re-run transformation whenever code or lensYaml changes
-  useEffect(() => {
-    if (!code.trim()) {
-      setAst(null);
-      setTransformedCode('');
-      setError(null);
-      return;
-    }
-
-    try {
-      // 1. Always parse the base AST from the source code
-      const builder = Polagram.init(code);
-      setAst(builder.toAST());
-      setError(null);
-
-      // 2. Apply Lens if it exists
-      if (lensYaml.trim()) {
-        try {
-          const config = yaml.load(lensYaml) as any;
-          // Extract the first lens from the first target
-          const lens = config?.targets?.[0]?.lenses?.[0];
-
-          if (lens && lens.layers && lens.layers.length > 0) {
-            const transformedBuilder = builder.applyLens(lens);
-             setTransformedCode(transformedBuilder.toMermaid());
-          } else {
-             setTransformedCode(code);
-          }
-        } catch (yamlErr) {
-           console.warn('Invalid YAML during apply:', yamlErr);
-           setTransformedCode(code); 
-        }
-      } else {
-        setTransformedCode(code);
-      }
-
-    } catch (err) {
-      if (err instanceof SyntaxError) {
-        setError(`Invalid Regular Expression: ${err.message}`);
-      } else {
-        setError(err instanceof Error ? err.message : 'Failed to parse Mermaid code');
-      }
-      // If code is invalid, we can't transform it.
-      setTransformedCode(code); 
-      setAst(null);
-    }
-  }, [code, lensYaml]);
 
   // Update pipeline from YAML input (Best effort sync for UI)
   const updateLensYaml = (yamlStr: string) => {
@@ -180,7 +201,7 @@ export function usePolagram(code: string): UsePolagramReturn {
     }
 
     try {
-      const config = yaml.load(yamlStr) as any;
+      const config = yaml.load(yamlStr) as ConfigShape;
       const lens = config?.targets?.[0]?.lenses?.[0];
 
       if (!lens || !lens.layers) {
@@ -192,7 +213,7 @@ export function usePolagram(code: string): UsePolagramReturn {
       }
 
       // Reconstruct pipeline from Lens
-      const newPipeline: TransformOperation[] = lens.layers.map((layer: any) => {
+      const newPipeline: TransformOperation[] = lens.layers.map((layer: Layer) => {
         let operation: TransformOperation['operation'] = 'focusParticipant';
         let target = '';
 
@@ -209,11 +230,11 @@ export function usePolagram(code: string): UsePolagramReturn {
         }
 
         // Extract target from selector
-        const selector = layer.selector as any;
+        const selector = layer.selector;
         if (selector) {
-            if (selector.name) target = typeof selector.name === 'string' ? selector.name : selector.name.pattern || '';
-            else if (selector.condition) target = typeof selector.condition === 'string' ? selector.condition : selector.condition.pattern || '';
-            else if (selector.text) target = typeof selector.text === 'string' ? selector.text : selector.text.pattern || '';
+            if ('name' in selector) target = getTextMatcherString(selector.name);
+            else if ('condition' in selector) target = getTextMatcherString(selector.condition);
+            else if ('text' in selector) target = getTextMatcherString(selector.text);
         }
 
         return {
@@ -224,7 +245,7 @@ export function usePolagram(code: string): UsePolagramReturn {
       });
 
       setPipeline(newPipeline);
-    } catch (e) {
+    } catch {
       // Ignore YAML validation errors during typing
       // Keep the previous pipeline state to avoid UI jumping
       // console.warn('Invalid YAML during update:', e);
@@ -263,42 +284,34 @@ export function usePolagram(code: string): UsePolagramReturn {
     setLensYaml(generateLensYaml(newPipeline));
   };
 
-
-
   // Get autocomplete suggestions based on operation type
   const getSuggestions = (operationType: 'participant' | 'fragment' | 'group'): string[] => {
     if (!ast) return [];
     
     if (operationType === 'participant') {
       const suggestions: string[] = [];
-      ast.participants?.forEach((p: any) => {
+      ast.participants?.forEach((p: Participant) => {
         if (p.name) suggestions.push(p.name);
-        else if (p.id) suggestions.push(p.id);
+        else if (p.alias) suggestions.push(p.alias);
       });
       return [...new Set(suggestions)];
     } else if (operationType === 'group') {
-      // Assuming AST has groups, usually they are represented in containers or participants
-      // Mermaid AST might not expose groups easily at top level if they are just boxes
-      // But let's check if we can find them. For now, simple extraction if available.
-      // NOTE: Polagram parser might put groups in 'participants' with type 'group' or similar?
-      // Or maybe implicitly. If simple parser doesn't expose it, we might return empty.
-      // Let's assume standard participants scan for now or check 'boxes' if available.
-      // Actually standard mermaid parser puts boxes separately?
-      // Let's rely on manual input if AST doesn't expose clearly, or try experimental scan.
       return []; 
     } else {
       const fragments: string[] = [];
-      const extractFragments = (events: any[]) => {
-        events?.forEach((event: any) => {
+      const extractFragments = (events: EventNode[]) => {
+        events?.forEach((event: EventNode) => {
           if (event.kind === 'fragment') {
-            event.branches?.forEach((branch: any) => {
+            event.branches?.forEach((branch) => {
               if (branch.condition) fragments.push(branch.condition);
               extractFragments(branch.events);
             });
           }
         });
       };
-      extractFragments(ast.events);
+      if (ast.events) {
+          extractFragments(ast.events);
+      }
       return [...new Set(fragments)];
     }
   };

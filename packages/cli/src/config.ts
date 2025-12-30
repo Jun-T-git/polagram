@@ -1,8 +1,8 @@
-import { PolagramConfig, validateConfig } from '@polagram/core';
+import { PolagraphConfig, validateConfig } from '@polagraph/core';
 import { promises as fs } from 'fs';
 import yaml from 'js-yaml';
 
-export async function loadConfig(path: string): Promise<PolagramConfig> {
+export async function loadConfig(path: string): Promise<PolagraphConfig> {
     try {
         const content = await fs.readFile(path, 'utf-8');
         const raw = yaml.load(content);

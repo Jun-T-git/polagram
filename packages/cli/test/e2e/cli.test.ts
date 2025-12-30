@@ -15,7 +15,7 @@ describe('CLI E2E', () => {
         await fs.rm(FIXTURE_DIR, { recursive: true, force: true });
         await fs.mkdir(FIXTURE_DIR, { recursive: true });
 
-        // Create polagram.yml
+        // Create polagraph.yml
         const config = `
 version: 1
 targets:
@@ -28,7 +28,7 @@ targets:
           - action: resolve
             selector: { kind: "fragment", condition: "Success" }
 `;
-        await fs.writeFile(path.join(FIXTURE_DIR, 'polagram.yml'), config);
+        await fs.writeFile(path.join(FIXTURE_DIR, 'polagraph.yml'), config);
 
         // Create Source File
         const mmd = `

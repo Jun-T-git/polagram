@@ -5,9 +5,9 @@ sequenceDiagram
     participant Core
     participant FileSystem
 
-    User->>CLI: Run polagram
+    User->>CLI: Run polagraph
     CLI->>ConfigLoader: loadConfig()
-    ConfigLoader->>FileSystem: readFile(polagram.yml)
+    ConfigLoader->>FileSystem: readFile(polagraph.yml)
     
     alt Success: File Exists
         FileSystem-->>ConfigLoader: content

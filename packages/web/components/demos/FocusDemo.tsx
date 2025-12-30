@@ -14,7 +14,6 @@ const COMPLEX_CODE = `sequenceDiagram
     participant Payment
     
     User->>Web: Order Item
-    Web->>Web: Validate Order
     Web->>API: POST /order
     API->>API: Log: Start processing
     
@@ -70,7 +69,7 @@ layers:
         pattern: 'API|Payment|DB'`
 };
 
-export function LiveDemo() {
+export function FocusDemo() {
   const { transformedCode, error, updateLensYaml, pipeline } = usePolagraph(COMPLEX_CODE);
   const [activeTab, setActiveTab] = useState<'preview' | 'config'>('preview');
   

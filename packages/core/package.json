@@ -1,15 +1,15 @@
 {
-  "name": "@polagram/core",
+  "name": "@polagraph/core",
   "version": "0.0.1",
   "type": "module",
-  "main": "./dist/polagram-core.umd.cjs",
-  "module": "./dist/polagram-core.js",
+  "main": "./dist/polagraph-core.umd.cjs",
+  "module": "./dist/polagraph-core.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/polagram-core.js",
-      "require": "./dist/polagram-core.umd.cjs"
+      "import": "./dist/polagraph-core.js",
+      "require": "./dist/polagraph-core.umd.cjs"
     }
   },
   "files": [
@@ -20,10 +20,9 @@
     "build": "tsc && vite build",
     "test": "vitest run",
     "test:watch": "vitest",
-    "gen:docs": "node ../cli/dist/index.js run -c docs/sequence/polagram.yml"
+    "gen:docs": "node ../cli/dist/index.js run -c docs/sequence/polagraph.yml"
   },
   "devDependencies": {
-    "@polagram/cli": "workspace:^",
     "@types/js-yaml": "^4.0.9",
     "js-yaml": "^4.1.1"
   },

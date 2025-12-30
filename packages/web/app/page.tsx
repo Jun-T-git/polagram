@@ -63,7 +63,7 @@ export default function Home() {
           </h1>
 
           <p className="text-base md:text-lg text-muted-foreground max-w-xl mx-auto mb-8 leading-relaxed">
-            Don't maintain fragmented diagrams. Transform one master diagram into optimised views for every context.
+            Don&apos;t maintain fragmented diagrams. Transform one master diagram into optimised views for every context.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
@@ -125,7 +125,7 @@ export default function Home() {
               <div className="flex-1 bg-background/50 rounded-lg border border-white/5 overflow-hidden flex flex-col">
                 {/* Header bar */}
                 <div className="flex items-center justify-between px-3 py-2 border-b border-white/5 bg-background/30">
-                  <span className="text-[10px] font-mono text-primary">polagram.yml</span>
+                  <span className="text-[10px] font-mono text-primary">polagraph.yml</span>
                 </div>
                 {/* Content area */}
                 <div className="flex-1 p-3 overflow-y-auto">
@@ -195,7 +195,7 @@ export default function Home() {
             <div>
                <h2 className="text-3xl font-bold mb-6 text-foreground">Built for Your Workflow</h2>
                <p className="text-muted-foreground mb-8 leading-relaxed">
-                 Define transformations in <code className="text-primary">polagram.yml</code> and integrate seamlessly into your CI/CD pipeline. Generate focused diagrams automatically on every commit.
+                 Define transformations in <code className="text-primary">polagraph.yml</code> and integrate seamlessly into your CI/CD pipeline. Generate focused diagrams automatically on every commit.
                </p>
                <ul className="space-y-4 text-sm text-muted-foreground">
                  <li className="flex items-center gap-3">

@@ -51,9 +51,9 @@ export default function DocsPage() {
         
       {/* The Problem */}
       <section id="problem" className="scroll-mt-32 mb-24">
-        <h2 className="text-3xl font-bold text-foreground mb-8">The Problem: One Size Doesn't Fit All</h2>
+        <h2 className="text-3xl font-bold text-foreground mb-8">The Problem: One Size Doesn&apos;t Fit All</h2>
         <p className="text-muted-foreground mb-6 leading-7">
-          Sequence diagrams are a powerful tool for visualizing systems, but a single diagram rarely satisfies everyone's needs. The "optimal" level of detail depends entirely on your role:
+          Sequence diagrams are a powerful tool for visualizing systems, but a single diagram rarely satisfies everyone&apos;s needs. The &quot;optimal&quot; level of detail depends entirely on your role:
         </p>
         <ul className="space-y-3 text-muted-foreground mb-8 text-sm">
           <li className="flex gap-3">
@@ -96,7 +96,7 @@ export default function DocsPage() {
       <section id="demo" className="scroll-mt-32 mb-24 animate-fade-in">
         <h2 className="text-3xl font-bold text-foreground mb-8">The Power of Lenses</h2>
         <p className="text-xl text-muted-foreground leading-8 mb-12 font-light">
-          Don't just take our word for it. <strong className="text-foreground font-medium">Lenses</strong> allow you to transform a complex master diagram into specific views for every stakeholder.
+          Don&apos;t just take our word for it. <strong className="text-foreground font-medium">Lenses</strong> allow you to transform a complex master diagram into specific views for every stakeholder.
         </p>
 
         <div className="mb-12">
@@ -145,19 +145,19 @@ export default function DocsPage() {
 
         <CodeBlock 
             language="bash" 
-            code={`npm install -g @polagram/cli
+            code={`npm install -g @polagraph/cli
 # or
-pnpm add -g @polagram/cli`} 
+pnpm add -g @polagraph/cli`} 
         />
 
         <h3 className="text-xl font-bold text-foreground mb-4 mt-8">Quick Start</h3>
         <p className="text-muted-foreground mb-6 text-sm">
-            Create a <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded text-xs">polagram.yml</code> configuration file to define your diagram targets and transformations.
+            Create a <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded text-xs">polagraph.yml</code> configuration file to define your diagram targets and transformations.
         </p>
 
         <CodeBlock 
             language="yaml" 
-            filename="polagram.yml"
+            filename="polagraph.yml"
             code={`version: 1
 targets:
   - input: ["diagram.mmd"]
@@ -193,7 +193,7 @@ targets:
         
         <CodeBlock 
             language="bash" 
-            code={`polagram run`}
+            code={`polagraph run`}
         />
 
         <h3 className="text-xl font-bold text-foreground mb-4 mt-8">CLI Options</h3>
@@ -207,7 +207,7 @@ targets:
                  <code className="text-primary font-bold bg-primary/10 px-2 py-0.5 rounded border border-primary/20">-c, --config &lt;path&gt;</code>
                </div>
                <p className="text-sm text-muted-foreground leading-relaxed">
-                 Specify the path to the configuration file. Defaults to <code className="text-foreground">polagram.yml</code> in the current directory.
+                 Specify the path to the configuration file. Defaults to <code className="text-foreground">polagraph.yml</code> in the current directory.
                </p>
             </div>
             
@@ -242,10 +242,10 @@ jobs:
       - uses: actions/checkout@v3
       - uses: pnpm/action-setup@v2
       - name: Install Polagram
-        run: pnpm add -g @polagram/cli
+        run: pnpm add -g @polagraph/cli
       
       - name: Generate Diagrams
-        run: polagram run
+        run: polagraph run
       
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3
@@ -267,7 +267,7 @@ jobs:
         
         <h2 className="text-3xl font-bold text-foreground mb-8">Specification</h2>
         <p className="text-muted-foreground mb-12">
-            Detailed reference for the <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded text-xs">polagram.yml</code> configuration file. The file format is YAML.
+            Detailed reference for the <code className="text-primary bg-primary/10 px-1.5 py-0.5 rounded text-xs">polagraph.yml</code> configuration file. The file format is YAML.
         </p>
 
         <div className="space-y-16">
@@ -437,7 +437,7 @@ jobs:
                    <div className="bg-card/30 p-4 rounded-lg border border-border">
                       <div className="font-mono text-sm font-bold text-primary mb-2">kind: fragment</div>
                       <ul className="space-y-3">
-                          <li className="text-sm"><code className="font-bold">condition</code> (Matcher): Filter by branch condition text (e.g. "Success").</li>
+                          <li className="text-sm"><code className="font-bold">condition</code> (Matcher): Filter by branch condition text (e.g. &quot;Success&quot;).</li>
                           <li className="text-sm"><code className="font-bold">operator</code> (string | string[]): Filter by loop/alt type.</li>
                       </ul>
                    </div>

@@ -1,18 +1,18 @@
-# @polagram/cli
+# @polagraph/cli
 
-The official CLI for Polagram, enabling CI/CD integration for sequence diagram transformations.
+The official CLI for Polagraph, enabling CI/CD integration for sequence diagram transformations.
 
 ## Installation
 
 ```bash
-pnpm add -D @polagram/cli
+pnpm add -D @polagraph/cli
 ```
 
 ## Usage
 
 ### Configuration
 
-Create a `polagram.yml` in your project root:
+Create a `polagraph.yml` in your project root:
 
 ```yaml
 version: 1
@@ -35,17 +35,17 @@ targets:
 ### Running
 
 ```bash
-pnpm polagram run
+pnpm polagraph run
 ```
 
 Or with a specific config:
 
 ```bash
-pnpm polagram run --config my-config.yml
+pnpm polagraph run --config my-config.yml
 ```
 
 ## Features
 
 - **Glob Support**: Use standard glob patterns to find input files.
 - **Directory Mirroring**: Output files preserve their directory structure relative to the project root (or execution directory) to prevent collisions.
-- **Strict Validation**: Validates `polagram.yml` against the Core schema to prevent errors.
+- **Strict Validation**: Validates `polagraph.yml` against the Core schema to prevent errors.

@@ -1,5 +1,6 @@
 'use client';
 
+import { usePolagraph } from '@/hooks/usePolagraph';
 import Image from 'next/image';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
@@ -7,7 +8,6 @@ import CodeEditor from '../../components/CodeEditor';
 import SequenceDiagram from '../../components/SequenceDiagram';
 import Tabs from '../../components/Tabs';
 import TransformControls from '../../components/TransformControls';
-import { usePolagram } from '../../hooks/usePolagram';
 
 const DEFAULT_MERMAID = `sequenceDiagram
     participant Client as Frontend
@@ -45,7 +45,7 @@ const DEFAULT_MERMAID = `sequenceDiagram
 
 export default function ViewerPage() {
   const [code, setCode] = useState(DEFAULT_MERMAID);
-  const [activeTab, setActiveTab] = useState('polagram.yml');
+  const [activeTab, setActiveTab] = useState('polagraph.yml');
   const [workspaceHeight, setWorkspaceHeight] = useState(600);
   const isResizingRef = useRef(false);
 
@@ -60,7 +60,7 @@ export default function ViewerPage() {
     toggleTransform,
     toggleAll,
     getSuggestions
-  } = usePolagram(code);
+  } = usePolagraph(code);
 
   const startResizing = useCallback(() => {
     isResizingRef.current = true;
@@ -97,7 +97,7 @@ export default function ViewerPage() {
       <header className="px-6 py-4 border-b border-border bg-muted/20 flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold flex items-center gap-2">
-            <Image src="/polagram-logo.png" alt="Polagram" width={24} height={24} />
+            <Image src="/polagraph-logo.png" alt="Polagram" width={24} height={24} />
             <span>Polagram Viewer</span>
           </h1>
           <p className="text-xs text-muted-foreground mt-1">Interactive Sequence Diagram Viewer</p>
@@ -113,7 +113,7 @@ export default function ViewerPage() {
             <Panel defaultSize={40} minSize={20} className="flex flex-col border-r border-border/50">
               <div className="h-full flex flex-col bg-muted/10">
                 <Tabs 
-                  tabs={['polagram.yml', 'diagram.mmd']} 
+                  tabs={['polagraph.yml', 'diagram.mmd']} 
                   activeTab={activeTab} 
                   onTabChange={setActiveTab} 
                 />

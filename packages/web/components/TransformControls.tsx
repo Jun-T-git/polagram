@@ -1,5 +1,5 @@
+import { TransformOperation } from '@/hooks/usePolagraph';
 import { useState } from 'react';
-import type { TransformOperation } from '../hooks/usePolagram';
 
 interface TransformControlsProps {
   pipeline: TransformOperation[];

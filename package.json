@@ -1,5 +1,5 @@
 {
-  "name": "polagram",
+  "name": "polagraph",
   "private": true,
   "scripts": {
     "dev": "turbo run dev",

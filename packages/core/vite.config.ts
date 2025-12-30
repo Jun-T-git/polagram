@@ -6,8 +6,8 @@ export default defineConfig({
   build: {
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
-      name: 'PolagramCore',
-      fileName: 'polagram-core',
+      name: 'PolagraphCore',
+      fileName: 'polagraph-core',
     },
   },
   plugins: [dts({ rollupTypes: true })],

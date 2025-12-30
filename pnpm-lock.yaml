@@ -32,7 +32,7 @@ importers:
 
   packages/cli:
     dependencies:
-      '@polagram/core':
+      '@polagraph/core':
         specifier: workspace:*
         version: link:../core
       commander:
@@ -67,9 +67,6 @@ importers:
         specifier: ^4.2.1
         version: 4.2.1
     devDependencies:
-      '@polagram/cli':
-        specifier: workspace:^
-        version: link:../cli
       '@types/js-yaml':
         specifier: ^4.0.9
         version: 4.0.9
@@ -82,7 +79,7 @@ importers:
       '@base-ui-components/react':
         specifier: 1.0.0-rc.0
         version: 1.0.0-rc.0(@types/react@19.2.7)(react-dom@19.2.3)(react@19.2.3)
-      '@polagram/core':
+      '@polagraph/core':
         specifier: workspace:*
         version: link:../core
       '@types/mdx':

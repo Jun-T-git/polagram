@@ -1,11 +1,11 @@
-# @polagram/core
+# @polagraph/core
 
-`@polagram/core` is the core parsing and AST manipulation library for the Polagram project. It provides functionality to parse diagram languages (currently focusing on Mermaid Sequence Diagrams) into a generic Polagram Abstract Syntax Tree (AST).
+`@polagraph/core` is the core parsing and AST manipulation library for the Polagraph project. It provides functionality to parse diagram languages (currently focusing on Mermaid Sequence Diagrams) into a generic Polagraph Abstract Syntax Tree (AST).
 
 ## Installation
 
 ```bash
-npm install @polagram/core
+npm install @polagraph/core
 ```
 
 ## Usage
@@ -13,7 +13,7 @@ npm install @polagram/core
 The library provides a `ParserFactory` to get the parser for a specific language.
 
 ```typescript
-import { ParserFactory, PolagramRoot } from '@polagram/core';
+import { ParserFactory, PolagraphRoot } from '@polagraph/core';
 
 const mermaidCode = `
 sequenceDiagram
@@ -26,7 +26,7 @@ try {
   const parser = ParserFactory.getParser('mermaid');
 
   // 2. Parse the code into an AST
-  const ast: PolagramRoot = parser.parse(mermaidCode);
+  const ast: PolagraphRoot = parser.parse(mermaidCode);
 
   console.log(JSON.stringify(ast, null, 2));
 } catch (error) {
@@ -39,7 +39,7 @@ try {
 You can traverse the AST using the provided types:
 
 ```typescript
-import { ParserFactory, MessageNode } from '@polagram/core';
+import { ParserFactory, MessageNode } from '@polagraph/core';
 
 // ... obtain ast as above
 

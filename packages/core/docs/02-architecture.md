@@ -1,7 +1,7 @@
 
 # Architecture
 
-`@polagram/core` is designed with extensibility and maintainability in mind, employing standard design patterns to decouple parsing logic, AST structure, and code generation.
+`@polagraph/core` is designed with extensibility and maintainability in mind, employing standard design patterns to decouple parsing logic, AST structure, and code generation.
 
 ## Directory Structure
 
@@ -9,7 +9,7 @@ The internal structure is organized by domain and responsibility:
 
 - `src/index.ts`: Public API entry point.
 - **`src/ast/`**: Defines the "Hub" - the central data structures.
-    - `index.ts`: Type definitions for the Polagram AST (`PolagramRoot`, `MessageNode`, etc.).
+    - `index.ts`: Type definitions for the Polagraph AST (`PolagraphRoot`, `MessageNode`, etc.).
 - **`src/parser/`**: Handles Input (Parsing).
     - `index.ts`: **Factory** (`ParserFactory`) for retrieving parsers.
     - `interface.ts`: **Strategy** Interface (`DiagramParser`).
@@ -17,7 +17,7 @@ The internal structure is organized by domain and responsibility:
     - `languages/`: Implementations for specific languages.
         - `mermaid/`: Mermaid-specific Lexer and Parser.
 - **`src/generator/`**: Handles Output and Traversal.
-    - `interface.ts`: **Visitor** Interface (`PolagramVisitor`).
+    - `interface.ts`: **Visitor** Interface (`PolagraphVisitor`).
     - `base/`: Traversal logic (`Traverser`/Walker).
     - `generators/`: Visitor implementations for code generation.
         - `mermaid.ts`: `MermaidGeneratorVisitor`.
@@ -27,7 +27,7 @@ The internal structure is organized by domain and responsibility:
 ### 1. Parser Factory & Strategy
 To support multiple input languages (Mermaid, PlantUML, etc.) uniformly, we use the **Strategy Pattern** combined with a **Factory**.
 
-- **Strategy**: `DiagramParser` interface defines the contract (`parse(code: string): PolagramRoot`).
+- **Strategy**: `DiagramParser` interface defines the contract (`parse(code: string): PolagraphRoot`).
 - **Factory**: `ParserFactory` manages registration and retrieval of these strategies.
 
 ```mermaid
@@ -39,11 +39,11 @@ classDiagram
 
     class DiagramParser {
         <<interface>>
-        parse(code: string) PolagramRoot
+        parse(code: string) PolagraphRoot
     }
 
     class MermaidParser {
-        parse(code: string) PolagramRoot
+        parse(code: string) PolagraphRoot
     }
 
     ParserFactory ..> DiagramParser : creates
@@ -53,32 +53,32 @@ classDiagram
 ### 2. Visitor Pattern
 To support multiple output formats and operations (Validation, Transformation) without modifying the AST nodes, we use the **Visitor Pattern**.
 
-- **Visitor**: `PolagramVisitor` interface defines methods for visiting each AST node type (`visitMessage`, `visitParticipant`, etc.).
+- **Visitor**: `PolagraphVisitor` interface defines methods for visiting each AST node type (`visitMessage`, `visitParticipant`, etc.).
 - **Traverser**: The `Traverser` class handles the logic of walking the AST tree and dispatching calls to the Visitor.
 - **Concrete Visitors**: `MermaidGeneratorVisitor` implements the interface to generate source code.
 
 ```mermaid
 classDiagram
-    class PolagramVisitor {
+    class PolagraphVisitor {
         <<interface>>
-        visitRoot(node: PolagramRoot)
+        visitRoot(node: PolagraphRoot)
         visitMessage(node: MessageNode)
         ...
     }
 
     class MermaidGeneratorVisitor {
-        string generate(node: PolagramRoot)
-        visitRoot(node: PolagramRoot)
+        string generate(node: PolagraphRoot)
+        visitRoot(node: PolagraphRoot)
         visitMessage(node: MessageNode)
     }
 
     class Traverser {
-        traverse(root: PolagramRoot)
+        traverse(root: PolagraphRoot)
         dispatchEvents(events: EventNode[])
     }
 
-    MermaidGeneratorVisitor ..|> PolagramVisitor : implements
-    Traverser --> PolagramVisitor : dispatched to
+    MermaidGeneratorVisitor ..|> PolagraphVisitor : implements
+    Traverser --> PolagraphVisitor : dispatched to
 ```
 
 ## Adding a New Language
@@ -91,5 +91,5 @@ classDiagram
 
 ### To Add a New Generator (Output)
 1. Create a file `src/generator/generators/<new-format>.ts`.
-2. Implement `PolagramVisitor`.
+2. Implement `PolagraphVisitor`.
 3. Use `Traverser` to help walk the AST if needed.

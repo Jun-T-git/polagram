@@ -12,7 +12,7 @@ interface CodeBlockProps {
   showHeader?: boolean;
 }
 
-export function CodeBlock({ code, language = 'typescript', filename, className, showHeader = true }: CodeBlockProps) {
+export function CodeBlock({ code, filename, className, showHeader = true }: CodeBlockProps) {
   const [copied, setCopied] = useState(false);
 
   const copyToClipboard = () => {

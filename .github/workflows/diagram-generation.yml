@@ -30,13 +30,13 @@ jobs:
         run: pnpm install
 
       - name: Build Core
-        run: pnpm --filter @polagram/core build
+        run: pnpm --filter @polagraph/core build
 
       - name: Build CLI
-        run: pnpm --filter @polagram/cli build
+        run: pnpm --filter @polagraph/cli build
 
       - name: Generate Core Diagrams
-        run: pnpm --filter @polagram/core run gen:docs
+        run: pnpm --filter @polagraph/core run gen:docs
 
       - name: Commit Generated Diagrams
         uses: stefanzweifel/git-auto-commit-action@v5
