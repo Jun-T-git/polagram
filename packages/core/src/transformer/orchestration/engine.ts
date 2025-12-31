@@ -1,5 +1,5 @@
 
-import { PolagraphRoot } from '../../ast';
+import { PolagramRoot } from '../../ast';
 import { StructureCleaner } from '../cleaners/prune-empty';
 import { UnusedCleaner } from '../cleaners/prune-unused';
 import { Layer } from '../types';
@@ -7,7 +7,7 @@ import { transformerRegistry } from './registry';
 
 export class TransformationEngine {
     
-    public transform(root: PolagraphRoot, layers: Layer[]): PolagraphRoot {
+    public transform(root: PolagramRoot, layers: Layer[]): PolagramRoot {
         let currentAst = root;
 
         // Phase 1: Layers (User Intent)

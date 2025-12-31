@@ -1,10 +1,10 @@
 
 import { describe, expect, it } from 'vitest';
-import { FragmentNode, MessageNode, PolagraphRoot } from '../../ast';
+import { FragmentNode, MessageNode, PolagramRoot } from '../../ast';
 import { StructureCleaner } from './prune-empty';
 
 describe('StructureCleaner', () => {
-    const createAst = (events: any[]): PolagraphRoot => ({
+    const createAst = (events: any[]): PolagramRoot => ({
         kind: 'root',
         meta: { version: '1', source: 'unknown' },
         participants: [],

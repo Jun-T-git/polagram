@@ -1,5 +1,5 @@
 
-import { ActivationNode, EventNode, FragmentOperator, MessageNode, NoteNode, ParticipantGroup, PolagraphRoot } from '../../../ast';
+import { ActivationNode, EventNode, FragmentOperator, MessageNode, NoteNode, ParticipantGroup, PolagramRoot } from '../../../ast';
 import { BaseParser } from '../../base/parser';
 import { ARROW_MAPPING } from './constants';
 import { Lexer } from './lexer';
@@ -19,8 +19,8 @@ export class Parser extends BaseParser {
     super(lexer);
   }
 
-  parse(): PolagraphRoot {
-    const root: PolagraphRoot = {
+  parse(): PolagramRoot {
+    const root: PolagramRoot = {
       kind: 'root',
       meta: { version: '1.0.0', source: 'unknown' },
       participants: [],
@@ -33,7 +33,7 @@ export class Parser extends BaseParser {
     return root;
   }
 
-  private parseBlock(root: PolagraphRoot, stopTokens: TokenType[] = []): EventNode[] {
+  private parseBlock(root: PolagramRoot, stopTokens: TokenType[] = []): EventNode[] {
     const events: EventNode[] = [];
 
     while (this.currToken.type !== 'EOF') {
@@ -104,7 +104,7 @@ export class Parser extends BaseParser {
       return tok.type === 'IDENTIFIER' || tok.type === 'STRING';
   }
 
-  private parseGroup(root: PolagraphRoot): EventNode[] {
+  private parseGroup(root: PolagramRoot): EventNode[] {
     this.advance(); // eat 'box'
 
     const rawAttrs = this.readRestOfLine().trim();
@@ -149,7 +149,7 @@ export class Parser extends BaseParser {
     return events;
   }
 
-  private parseFragment(root: PolagraphRoot): EventNode {
+  private parseFragment(root: PolagramRoot): EventNode {
     const type = this.currToken.type as TokenType;
     let operator: FragmentOperator = 'loop';
     if (type === 'ALT') operator = 'alt';
@@ -191,7 +191,7 @@ export class Parser extends BaseParser {
     };
   }
 
-  private parseParticipant(root: PolagraphRoot) {
+  private parseParticipant(root: PolagramRoot) {
     const isActor = this.currToken.type === 'ACTOR';
     this.advance(); // eat 'participant' or 'actor'
 
@@ -234,7 +234,7 @@ export class Parser extends BaseParser {
     }
   }
 
-  private parseNote(root: PolagraphRoot): NoteNode {
+  private parseNote(root: PolagramRoot): NoteNode {
     this.advance(); // eat 'note'
     
     let position: 'left' | 'right' | 'over' = 'over'; // default
@@ -276,7 +276,7 @@ export class Parser extends BaseParser {
     };
   }
 
-  private parseActivation(root: PolagraphRoot): ActivationNode {
+  private parseActivation(root: PolagramRoot): ActivationNode {
      const action = this.currToken.type === 'ACTIVATE' ? 'activate' : 'deactivate';
      this.advance(); // eat command
      
@@ -294,7 +294,7 @@ export class Parser extends BaseParser {
      };
   }
 
-  private parseMessage(root: PolagraphRoot): MessageNode | null {
+  private parseMessage(root: PolagramRoot): MessageNode | null {
     if (this.peekToken.type !== 'ARROW') {
         return null; 
     }
@@ -376,7 +376,7 @@ export class Parser extends BaseParser {
     return (this.lexer as Lexer).getInput().slice(start, end);
   }
 
-  private ensureParticipant(root: PolagraphRoot, id: string) {
+  private ensureParticipant(root: PolagramRoot, id: string) {
     if (!root.participants.find(p => p.id === id)) {
       root.participants.push({
         id,

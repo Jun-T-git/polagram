@@ -21,13 +21,13 @@ export function Navbar() {
           className="flex items-center gap-2 font-bold text-xl text-foreground hover:text-primary transition-colors"
         >
           <Image
-            src="/polagraph-logo.png"
+            src="/polagram-logo.png"
             alt="Logo"
             width={24}
             height={24}
           />
           <span className="bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">
-            Polagraph
+            Polagram
           </span>
         </Link>
 

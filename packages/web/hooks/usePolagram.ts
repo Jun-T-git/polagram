@@ -1,4 +1,4 @@
-import { EventNode, Layer, Lens, Participant, Polagraph, PolagraphRoot, TextMatcher } from '@polagraph/core';
+import { EventNode, Layer, Lens, Participant, Polagram, PolagramRoot, TextMatcher } from '@polagram/core';
 import yaml from 'js-yaml';
 import { useMemo, useState } from 'react';
 
@@ -9,8 +9,8 @@ export interface TransformOperation {
   enabled: boolean;
 }
 
-interface UsePolagraphReturn {
-  ast: PolagraphRoot | null;
+interface UsePolagramReturn {
+  ast: PolagramRoot | null;
   transformedCode: string;
   error: string | null;
   pipeline: TransformOperation[];
@@ -52,7 +52,7 @@ function getTextMatcherString(tm: TextMatcher | undefined): string {
     return '';
 }
 
-export function usePolagraph(code: string): UsePolagraphReturn {
+export function usePolagram(code: string): UsePolagramReturn {
   const [pipeline, setPipeline] = useState<TransformOperation[]>([]);
   const [lensYaml, setLensYaml] = useState<string>(DEFAULT_YAML);
 
@@ -64,7 +64,7 @@ export function usePolagraph(code: string): UsePolagraphReturn {
 
     try {
       // 1. Always parse the base AST from the source code
-      const builder = Polagraph.init(code);
+      const builder = Polagram.init(code);
       const computedAst = builder.toAST();
       let computedCode = code;
 
@@ -105,7 +105,7 @@ export function usePolagraph(code: string): UsePolagraphReturn {
     
     // If no enabled ops, return empty layers but keep the name
     if (enabledOps.length === 0) {
-      return { name: 'My Polagraph Lens', layers: [] };
+      return { name: 'My Polagram Lens', layers: [] };
     }
 
     const layers: Layer[] = enabledOps.map(op => {

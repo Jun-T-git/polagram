@@ -1,4 +1,4 @@
-# Polagraph Core: Lens Interface Specification
+# Polagram Core: Lens Interface Specification
 
 This document defines the interface for **Lens**, a mechanism for transforming Sequence Diagram ASTs to generate specific views.
 
@@ -190,7 +190,7 @@ export interface GroupSelector {
 Example configuration demonstrating the narrative flow of applying layers.
 
 ```yaml
-# polagraph.yml
+# polagram.yml
 
 lenses:
   # Use Case: Extracting the "Happy Path" for Backend Services

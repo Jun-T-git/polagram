@@ -1,5 +1,5 @@
 
-> @polagraph/web@0.0.0 lint /Users/teraokajun/private/polagram/packages/web
+> @polagram/web@0.0.0 lint /Users/teraokajun/private/polagram/packages/web
 > eslint
 
 

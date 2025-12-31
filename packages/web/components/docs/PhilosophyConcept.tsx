@@ -49,7 +49,7 @@ export function PhilosophyConcept() {
         <div className="flex flex-col items-center gap-4 z-10 shrink-0">
              <div className="flex flex-col gap-3 relative p-4 border border-dashed border-border/50 rounded-2xl bg-muted/5">
                  <div className="absolute -top-3 -left-3 w-6 h-6 bg-primary rounded-lg flex items-center justify-center font-bold text-white shadow-lg shadow-primary/20 text-xs z-30">2</div>
-                 <div className="absolute -top-3 left-4 px-2 py-0.5 bg-primary rounded-lg flex items-center justify-center font-bold text-white shadow-lg shadow-primary/20 text-[10px] z-20 font-mono">polagraph.yml</div>
+                 <div className="absolute -top-3 left-4 px-2 py-0.5 bg-primary rounded-lg flex items-center justify-center font-bold text-white shadow-lg shadow-primary/20 text-[10px] z-20 font-mono">polagram.yml</div>
                  
                  {/* Lens 1: Dev (Green) */}
                  <div className="w-48 h-12 bg-card border border-green-500/30 rounded-lg flex items-center px-3 gap-3 shadow-sm hover:translate-x-1 transition-transform group">

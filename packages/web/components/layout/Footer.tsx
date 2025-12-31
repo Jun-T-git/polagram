@@ -12,13 +12,13 @@ export function Footer() {
           <div className="col-span-1 md:col-span-2">
             <Link href="/" className="flex items-center gap-2 font-bold text-xl text-foreground mb-4 w-fit">
               <Image
-                src="/polagraph-logo.png"
-                alt="Polagraph Logo"
+                src="/polagram-logo.png"
+                alt="Polagram Logo"
                 width={24}
                 height={24}
               />
               <span className="bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">
-                Polagraph
+                Polagram
               </span>
             </Link>
             <p className="text-muted-foreground text-sm max-w-sm leading-relaxed">
@@ -54,7 +54,7 @@ export function Footer() {
         
         <div className="border-t border-border mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} Polagraph. All rights reserved.
+            © {new Date().getFullYear()} Polagram. All rights reserved.
           </p>
           <div className="flex gap-4">
             <a 

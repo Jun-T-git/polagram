@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { Polagraph } from '@polagraph/core';
+import { Polagram } from '@polagram/core';
 import { Command } from 'commander';
 import { promises as fs } from 'fs';
 import { glob } from 'glob';
@@ -9,14 +9,14 @@ import { loadConfig } from './config.js';
 const program = new Command();
 
 program
-    .name('polagraph')
-    .description('CLI tool for Polagraph - Sequence Diagram CI/CD')
+    .name('polagram')
+    .description('CLI tool for Polagram - Sequence Diagram CI/CD')
     .version('0.0.1');
 
 program
     .command('run')
-    .description('Run transformations based on polagraph.yml')
-    .option('-c, --config <path>', 'Path to config file', process.env.POLAGRAPH_CONFIG || 'polagraph.yml')
+    .description('Run transformations based on polagram.yml')
+    .option('-c, --config <path>', 'Path to config file', process.env.POLAGRAPH_CONFIG || 'polagram.yml')
     .action(async (options) => {
         try {
             console.log(`Loading config from ${options.config}...`);
@@ -55,11 +55,11 @@ program
                     
                     try {
                         // 1. Initialize Pipeline (Just parsing check essentially)
-                        Polagraph.init(content);
+                        Polagram.init(content);
 
                         // 2. Apply Lenses
                         for (const lens of target.lenses) {
-                            const lensPipeline = Polagraph.init(content);
+                            const lensPipeline = Polagram.init(content);
                             // core expects strict discriminated union, Zod inferred type is loose.
                             // Validation guarantees structure.
                             // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -1,4 +1,4 @@
-import { FragmentOperator, PolagraphRoot } from '../ast';
+import { FragmentOperator, PolagramRoot } from '../ast';
 
 // -- Selectors --
 
@@ -63,5 +63,5 @@ export interface Lens {
 // -- Engine --
 
 export interface Transformer {
-    transform(root: PolagraphRoot): PolagraphRoot;
+    transform(root: PolagramRoot): PolagramRoot;
 }

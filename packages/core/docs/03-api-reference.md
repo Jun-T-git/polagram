@@ -1,6 +1,6 @@
-# Polagraph Core API リファレンス
+# Polagram Core API リファレンス
 
-`@polagraph/core` は、シーケンス図（Mermaid等）をプログラムで操作するためのコアライブラリです。
+`@polagram/core` は、シーケンス図（Mermaid等）をプログラムで操作するためのコアライブラリです。
 「解析(Parse) → 変換(Transform) → 生成(Generate)」のパイプラインを提供します。
 
 ## 目次
@@ -19,7 +19,7 @@
 
 ## 1. コンセプト
 
-Polagraph はシーケンス図を **AST (抽象構文木)** として扱います。テキストとして置換するのではなく、構造を理解して操作するため、壊れにくい安全な変換が可能です。
+Polagram はシーケンス図を **AST (抽象構文木)** として扱います。テキストとして置換するのではなく、構造を理解して操作するため、壊れにくい安全な変換が可能です。
 
 *   **Builder Pattern**: メソッドチェーンで直感的に操作を記述できます。
 *   **Layer (層)**: 変換処理の単位です。`resolve` / `focus` / `remove` の3つのアクションがあります。
@@ -32,11 +32,11 @@ Polagraph はシーケンス図を **AST (抽象構文木)** として扱いま�
 最も標準的な利用方法です。
 
 ```typescript
-import { Polagraph } from '@polagraph/core';
+import { Polagram } from '@polagram/core';
 
 const mermaidCode = `...`; // ソースコード
 
-const output = Polagraph.init(mermaidCode)
+const output = Polagram.init(mermaidCode)
     .resolveFragment('Success')   // "Success" ルートを選択して分岐を解消
     .focusParticipant('DB')       // DBに関連するやり取りのみにフォーカス
     .removeParticipant('Logger')  // Loggerは明示的に除外
@@ -129,7 +129,7 @@ console.log(output);
 事前に定義された **Lens** (Layerの集合) を適用します。
 
 ```typescript
-import { Lens } from '@polagraph/core';
+import { Lens } from '@polagram/core';
 
 const debugLens: Lens = {
     name: 'Debug View',
@@ -140,7 +140,7 @@ const debugLens: Lens = {
     ]
 };
 
-Polagraph.init(code).applyLens(debugLens).toMermaid();
+Polagram.init(code).applyLens(debugLens).toMermaid();
 ```
 
 ---
@@ -148,7 +148,7 @@ Polagraph.init(code).applyLens(debugLens).toMermaid();
 ## 4. セレクター仕様 (Selectors)
 
 ビルダーメソッドの引数 `selector` は、**簡易指定 (Simple Match)** または **詳細オブジェクト** で指定します。
-詳細オブジェクトを使用する場合、`kind` プロパティは必須です（`PolagraphBuilder`経由の一部メソッドでは省略可能な場合もありますが、型定義上は指定を推奨）。
+詳細オブジェクトを使用する場合、`kind` プロパティは必須です（`PolagramBuilder`経由の一部メソッドでは省略可能な場合もありますが、型定義上は指定を推奨）。
 
 ### 共通: `TextMatcher`
 文字列プロパティには以下が使用可能です。

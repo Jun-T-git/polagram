@@ -1,10 +1,10 @@
 
 import { describe, expect, it } from 'vitest';
-import { ActivationNode, MessageNode, NoteNode, PolagraphRoot } from '../../ast';
+import { ActivationNode, MessageNode, NoteNode, PolagramRoot } from '../../ast';
 import { UnusedCleaner } from './prune-unused';
 
 describe('UnusedCleaner', () => {
-    const createAst = (participants: any[], events: any[]): PolagraphRoot => ({
+    const createAst = (participants: any[], events: any[]): PolagramRoot => ({
         kind: 'root',
         meta: { version: '1', source: 'unknown' },
         participants,
@@ -60,7 +60,7 @@ describe('UnusedCleaner', () => {
             type: 'sync', style: { line: 'solid', head: 'arrow' } 
         };
         
-        const root: PolagraphRoot = {
+        const root: PolagramRoot = {
             kind: 'root' as const,
             meta: { version: '1', source: 'unknown' as const },
             participants: [p1, p2],
@@ -79,7 +79,7 @@ describe('UnusedCleaner', () => {
          const p2 = { id: 'B', name: 'Bob', type: 'participant' as const }; // Unused
          const group = { kind: 'group' as const, id: 'g1', name: 'G', participantIds: ['B'] };
          
-         const root: PolagraphRoot = {
+         const root: PolagramRoot = {
              kind: 'root' as const,
              meta: { version: '1', source: 'unknown' as const },
              participants: [p2],

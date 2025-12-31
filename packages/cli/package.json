@@ -1,11 +1,11 @@
 {
-  "name": "@polagraph/cli",
+  "name": "@polagram/cli",
   "version": "0.0.1",
   "type": "module",
-  "description": "CLI tool for Polagraph",
+  "description": "CLI tool for Polagram",
   "main": "dist/index.js",
   "bin": {
-    "polagraph": "dist/index.js"
+    "polagram": "dist/index.js"
   },
   "scripts": {
     "build": "tsc -b",
@@ -13,7 +13,7 @@
     "start": "node dist/index.js"
   },
   "dependencies": {
-    "@polagraph/core": "workspace:*",
+    "@polagram/core": "workspace:*",
     "commander": "^13.0.0",
     "glob": "^11.0.0",
     "js-yaml": "^4.1.0"

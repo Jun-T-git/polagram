@@ -1,4 +1,4 @@
-import { TransformOperation } from '@/hooks/usePolagraph';
+import { TransformOperation } from '@/hooks/usePolagram';
 import { useState } from 'react';
 
 interface TransformControlsProps {

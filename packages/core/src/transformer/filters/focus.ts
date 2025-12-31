@@ -1,5 +1,5 @@
 
-import { ActivationNode, EventNode, MessageNode, NoteNode, PolagraphRoot } from '../../ast';
+import { ActivationNode, EventNode, MessageNode, NoteNode, PolagramRoot } from '../../ast';
 import { Matcher } from '../selector/matcher';
 import { Walker } from '../traverse/walker';
 import { FocusLayer } from '../types';
@@ -12,12 +12,12 @@ export class FocusFilter extends Walker {
         super();
     }
 
-    public transform(root: PolagraphRoot): PolagraphRoot {
+    public transform(root: PolagramRoot): PolagramRoot {
         this.resolveTargetParticipants(root);
         return super.transform(root);
     }
 
-    private resolveTargetParticipants(root: PolagraphRoot) {
+    private resolveTargetParticipants(root: PolagramRoot) {
         this.targetParticipantIds.clear();
         const selector = this.layer.selector;
         

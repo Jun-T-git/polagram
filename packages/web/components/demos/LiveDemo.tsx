@@ -1,6 +1,6 @@
 'use client';
 
-import { usePolagraph } from '@/hooks/usePolagraph';
+import { usePolagram } from '@/hooks/usePolagram';
 import { useState } from 'react';
 import { cn } from '../../lib/utils';
 import SequenceDiagram from '../SequenceDiagram';
@@ -36,7 +36,7 @@ const COMPLEX_CODE = `sequenceDiagram
 
 const PRESETS = {
   original: '',
-  pm: `# polagraph.yml (Lens Definition)
+  pm: `# polagram.yml (Lens Definition)
 name: PM View
 layers:
   # 1. Remove internal logs to reduce noise
@@ -59,7 +59,7 @@ layers:
       name:
         pattern: 'User|Web|API|Payment'`,
         
-  dev: `# polagraph.yml (Lens Definition)
+  dev: `# polagram.yml (Lens Definition)
 name: Dev View
 layers:
   # Focus strictly on backend services
@@ -71,7 +71,7 @@ layers:
 };
 
 export function LiveDemo() {
-  const { transformedCode, error, updateLensYaml, pipeline } = usePolagraph(COMPLEX_CODE);
+  const { transformedCode, error, updateLensYaml, pipeline } = usePolagram(COMPLEX_CODE);
   const [activeTab, setActiveTab] = useState<'preview' | 'config'>('preview');
   
   const handlePreset = (preset: keyof typeof PRESETS) => {
@@ -164,7 +164,7 @@ export function LiveDemo() {
               : "border-transparent text-muted-foreground hover:text-foreground"
           )}
         >
-          polagraph.yml
+          polagram.yml
         </button>
       </div>
 

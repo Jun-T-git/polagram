@@ -72,21 +72,21 @@ const TargetConfigSchema = z.object({
     lenses: z.array(LensSchema)
 });
 
-export const PolagraphConfigSchema = z.object({
+export const PolagramConfigSchema = z.object({
     version: z.number(),
     targets: z.array(TargetConfigSchema)
 });
 
-export type PolagraphConfig = z.infer<typeof PolagraphConfigSchema>;
+export type PolagramConfig = z.infer<typeof PolagramConfigSchema>;
 export type TargetConfig = z.infer<typeof TargetConfigSchema>;
 export type LensConfig = z.infer<typeof LensSchema>;
 
 /**
- * Validates the input object against the Polagraph Config Schema.
+ * Validates the input object against the Polagram Config Schema.
  * Throws a formatted error message if validation fails.
  */
-export function validateConfig(input: unknown): PolagraphConfig {
-    const result = PolagraphConfigSchema.safeParse(input);
+export function validateConfig(input: unknown): PolagramConfig {
+    const result = PolagramConfigSchema.safeParse(input);
 
     if (!result.success) {
         const errorMessages = result.error.issues.map(issue => {
@@ -94,7 +94,7 @@ export function validateConfig(input: unknown): PolagraphConfig {
             return `[${path}]: ${issue.message}`;
         }).join('\n');
         
-        throw new Error(`Invalid Polagraph Configuration:\n${errorMessages}`);
+        throw new Error(`Invalid Polagram Configuration:\n${errorMessages}`);
     }
 
     return result.data;

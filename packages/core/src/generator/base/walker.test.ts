@@ -1,12 +1,12 @@
 
 import { describe, expect, it, vi } from 'vitest';
-import { MessageNode, PolagraphRoot } from '../../ast';
-import { PolagraphVisitor } from '../interface';
+import { MessageNode, PolagramRoot } from '../../ast';
+import { PolagramVisitor } from '../interface';
 import { Traverser } from './walker';
 
 describe('Traverser', () => {
     it('should dispatch visitRoot', () => {
-        const mockVisitor: PolagraphVisitor = {
+        const mockVisitor: PolagramVisitor = {
             visitRoot: vi.fn(),
             visitParticipant: vi.fn(),
             visitParticipantGroup: vi.fn(),
@@ -20,7 +20,7 @@ describe('Traverser', () => {
         };
         
         const traverser = new Traverser(mockVisitor);
-        const root: PolagraphRoot = { kind: 'root', meta: { version: '1.0.0', source: 'unknown' }, participants: [], groups: [], events: [] };
+        const root: PolagramRoot = { kind: 'root', meta: { version: '1.0.0', source: 'unknown' }, participants: [], groups: [], events: [] };
         
         traverser.traverse(root);
         
@@ -28,7 +28,7 @@ describe('Traverser', () => {
     });
 
     it('should dispatch events based on kind', () => {
-        const mockVisitor: PolagraphVisitor = {
+        const mockVisitor: PolagramVisitor = {
             visitRoot: vi.fn(), // Root visitor might internally call dispatchEvents
             visitParticipant: vi.fn(),
             visitParticipantGroup: vi.fn(),

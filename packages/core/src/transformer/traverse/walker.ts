@@ -1,5 +1,5 @@
 
-import { EventNode, FragmentBranch, FragmentNode, PolagraphRoot } from '../../ast';
+import { EventNode, FragmentBranch, FragmentNode, PolagramRoot } from '../../ast';
 
 /**
  * Abstract base class for tree transformations.
@@ -9,7 +9,7 @@ import { EventNode, FragmentBranch, FragmentNode, PolagraphRoot } from '../../as
  */
 export abstract class Walker {
   
-  public transform(root: PolagraphRoot): PolagraphRoot {
+  public transform(root: PolagramRoot): PolagramRoot {
     // 1. Map Events (Recursively)
     const newEvents = this.mapEvents(root.events);
     
@@ -36,7 +36,7 @@ export abstract class Walker {
     }
     
     // Groups are tricky because they are defined in root.groups AND sometimes used as containers in other ASTs.
-    // In Polagraph AST, `Box` is currently represented as `Group` in `ParticipantGroup`? 
+    // In Polagram AST, `Box` is currently represented as `Group` in `ParticipantGroup`? 
     // Wait, let's check AST. `groups` is at root. `events` contains `Spacer`, `Note` etc.
     // Ah, AST definition has `groups` at root, but does it have Group as an Event?
     // Looking at parser.ts: `root.groups.push(group)` and `events` are just events.

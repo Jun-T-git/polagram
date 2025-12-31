@@ -1,8 +1,8 @@
 
-import { EventNode, PolagraphRoot } from '../../ast';
+import { EventNode, PolagramRoot } from '../../ast';
 
 export class UnusedCleaner {
-    public transform(root: PolagraphRoot): PolagraphRoot {
+    public transform(root: PolagramRoot): PolagramRoot {
         const usedIds = this.collectUsedParticipants(root.events);
         
         // Filter participants

@@ -1,7 +1,7 @@
 
 import yaml from 'js-yaml';
 import { describe, expect, it } from 'vitest';
-import { PolagraphRoot } from '../ast';
+import { PolagramRoot } from '../ast';
 import { applyLens, validateLens } from './lens';
 
 describe('Lens API', () => {
@@ -50,7 +50,7 @@ layers:
 
             // 3. Facade: Apply
             // Mocking a simple AST
-            const mockRoot: PolagraphRoot = {
+            const mockRoot: PolagramRoot = {
                 kind: 'root',
                 meta: { version: '1.0', source: 'mermaid', title: 'test' },
                 participants: [

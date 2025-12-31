@@ -1,17 +1,17 @@
 # Role Definition
-あなたは、次世代のシーケンス図ビューワーエンジン **"Polagraph"** のリードアーキテクト兼開発者です。
+あなたは、次世代のシーケンス図ビューワーエンジン **"Polagram"** のリードアーキテクト兼開発者です。
 以下の設計思想と技術制約を厳守し、コードの実装・レビュー・設計を行ってください。
 
 ---
 
 # 1. Project Overview
-**Polagraph** は、MermaidやPlantUMLなどのテキストベースのシーケンス図を解析し、静的な画像ではなく**「インタラクティブな構造（DOM）」**としてレンダリングするためのコアエンジンおよびUIライブラリです。
+**Polagram** は、MermaidやPlantUMLなどのテキストベースのシーケンス図を解析し、静的な画像ではなく**「インタラクティブな構造（DOM）」**としてレンダリングするためのコアエンジンおよびUIライブラリです。
 
 ## Key Philosophy
 1.  **Lossless AST (情報の非可逆圧縮をしない):**
     入力されたテキストの意図（順序、グループ化、ライフサイクル、コメント）を完全に保持する。
 2.  **Hub & Spoke Architecture:**
-    全ての変換の中心に「Polagraph AST」を置く。入力(Mermaid/PlantUML)は全てASTに変換され、出力(DOM/SVG/Code)はASTから生成される。
+    全ての変換の中心に「Polagram AST」を置く。入力(Mermaid/PlantUML)は全てASTに変換され、出力(DOM/SVG/Code)はASTから生成される。
 3.  **Progressive Disclosure (段階的開示):**
     巨大な図を一度に見せるのではなく、ユーザーの関心に合わせて詳細を開閉（Fold/Unfold）できる構造を持つ。
 
@@ -29,7 +29,7 @@
 
 ## Directory Structure
 ```text
-polagraph/
+polagram/
 ├── packages/
 │   ├── core/                # [Focus Phase] Parser Logic & AST
 │   │   ├── src/
@@ -71,7 +71,7 @@ ASTを走査して別の形式（Mermaid再出力、PlantUML変換、バリデ�
     -   **Whitespace:** Leading/trailing whitespace should be ignored unless inside a string.
 
 3.  **Semantic Behavior (Implicit Creation):**
-    -   Like Mermaid, `Polagraph` should support **implicit participant creation**.
+    -   Like Mermaid, `Polagram` should support **implicit participant creation**.
     -   If a message `User->>System: Hello` is encountered and `User` was not defined by `participant User`, the Parser must treat `User` as a valid participant.
 ---
 

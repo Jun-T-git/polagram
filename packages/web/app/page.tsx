@@ -121,11 +121,11 @@ export default function Home() {
             {/* Step 2: Lens */}
             <div className="flex-1 w-full bg-card border border-primary/20 rounded-2xl p-6 relative group hover:border-primary/40 transition-colors bg-gradient-to-b from-primary/5 to-transparent shadow-lg h-[420px] flex flex-col">
                <div className="absolute -top-3 -left-3 w-8 h-8 bg-primary rounded-lg flex items-center justify-center font-bold text-white shadow-xl shadow-primary/20 z-20 text-sm">2</div>
-              <h3 className="text-lg font-semibold mb-3 text-primary text-center">Polagraph Lens</h3>
+              <h3 className="text-lg font-semibold mb-3 text-primary text-center">Polagram Lens</h3>
               <div className="flex-1 bg-background/50 rounded-lg border border-white/5 overflow-hidden flex flex-col">
                 {/* Header bar */}
                 <div className="flex items-center justify-between px-3 py-2 border-b border-white/5 bg-background/30">
-                  <span className="text-[10px] font-mono text-primary">polagraph.yml</span>
+                  <span className="text-[10px] font-mono text-primary">polagram.yml</span>
                 </div>
                 {/* Content area */}
                 <div className="flex-1 p-3 overflow-y-auto">
@@ -195,7 +195,7 @@ export default function Home() {
             <div>
                <h2 className="text-3xl font-bold mb-6 text-foreground">Built for Your Workflow</h2>
                <p className="text-muted-foreground mb-8 leading-relaxed">
-                 Define transformations in <code className="text-primary">polagraph.yml</code> and integrate seamlessly into your CI/CD pipeline. Generate focused diagrams automatically on every commit.
+                 Define transformations in <code className="text-primary">polagram.yml</code> and integrate seamlessly into your CI/CD pipeline. Generate focused diagrams automatically on every commit.
                </p>
                <ul className="space-y-4 text-sm text-muted-foreground">
                  <li className="flex items-center gap-3">

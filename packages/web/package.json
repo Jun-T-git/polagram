@@ -1,5 +1,5 @@
 {
-  "name": "@polagraph/web",
+  "name": "@polagram/web",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@base-ui-components/react": "1.0.0-rc.0",
-    "@polagraph/core": "workspace:*",
+    "@polagram/core": "workspace:*",
     "@types/mdx": "^2.0.13",
     "clsx": "^2.1.1",
     "js-yaml": "^4.1.1",
