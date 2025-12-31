@@ -2,6 +2,19 @@
   "name": "@polagram/core",
   "version": "0.0.1",
   "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jun-T-git/polagram.git"
+  },
+  "license": "MIT",
+  "keywords": [
+    "polagram",
+    "diagram",
+    "visualization"
+  ],
   "main": "./dist/polagram-core.umd.cjs",
   "module": "./dist/polagram-core.js",
   "types": "./dist/index.d.ts",

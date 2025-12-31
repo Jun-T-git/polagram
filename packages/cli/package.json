@@ -2,6 +2,22 @@
   "name": "@polagram/cli",
   "version": "0.0.1",
   "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jun-T-git/polagram.git"
+  },
+  "license": "MIT",
+  "keywords": [
+    "polagram",
+    "cli"
+  ],
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "description": "CLI tool for Polagram",
   "main": "dist/index.js",
   "bin": {

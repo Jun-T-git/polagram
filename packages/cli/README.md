@@ -24,12 +24,17 @@ targets:
       - name: "success"
         suffix: ".success"
         layers:
-          # Resolve "Success" alt blocks
+          # Resolve "Success" alt blocks (Show only the success case)
           - action: resolve
             selector: { kind: "fragment", condition: "Success" }
-          # Remove infrastructure details
+          
+          # Remove infrastructure details (Logger, Metrics)
           - action: remove
             selector: { kind: "participant", stereotype: "infra" }
+            
+          # Focus on specific interactions
+          - action: focus
+            selector: { kind: "participant", name: { pattern: "Client.*" } }
 ```
 
 ### Running

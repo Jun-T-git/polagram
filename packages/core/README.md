@@ -53,24 +53,71 @@ ast.events.forEach(event => {
 
 ## Features
 
+- **Transformation Engine**: A powerful pipeline to transform diagrams based on user intent.
+    - **Lenses**: Create multiple views (e.g., "Overview", "Client Focus") from a single source diagram.
+    - **Layers**: Composable transformation steps (remove, focus, resolve).
 - **Mermaid Parsing**: Supports standard Mermaid sequence diagram syntax.
-  - Participants & Actors
-  - Messages (sync, async, different arrow types)
-  - Activations & Notes
-  - Fragments (loop, alt, opt, etc.)
-  - Grouping (box)
-- **AST Definition**: A standardized AST structure for sequence diagrams.
-- **Generators**: Re-generation of source code from AST (Visitor pattern).
+    - Participants & Actors
+    - Messages (sync, async, different arrow types)
+    - Activations & Notes
+    - Fragments (loop, alt, opt, etc.)
+    - Grouping (box)
+- **Robust AST**: A standardized Abstract Syntax Tree for sequence diagrams.
+- **Generators**: Re-generate valid Mermaid code from the transformed AST.
+
+## Diagram Transformation
+
+Polagram's core strength is its ability to transform diagrams. You can define **Lenses** to create different perspectives of the same complex diagram.
+
+### Concepts
+
+- **Action**: A primitive operation on the AST (e.g., `remove`, `focus`, `resolve`).
+- **Selector**: A criteria to select nodes (e.g., `participant: { name: "Logger" }`).
+- **Layer**: A combination of an Action and a Selector.
+- **Lens**: A collection of Layers applied sequentially.
+
+### Example: Creating a "Client View"
+
+```typescript
+import { Transformer, Lens, Layer } from '@polagram/core';
+
+// 1. Define Layers
+const removeLogger = new Layer('remove', {
+    kind: 'participant',
+    name: 'Logger' // Text or Regex
+});
+
+const resolveSuccess = new Layer('resolve', {
+    kind: 'fragment',
+    condition: 'Success' // Keeps only the 'Success' branch of alt/opt
+});
+
+// 2. Create a Lens
+const clientViewLens = new Lens('client-view', [
+    removeLogger,
+    resolveSuccess
+]);
+
+// 3. Transform
+const transformer = new Transformer(ast);
+const newAst = transformer.apply(clientViewLens);
+
+// 4. Generate Code
+const newCode = GeneratorFactory.getGenerator('mermaid').generate(newAst);
+```
 
 ## Development
 
-- `npm run build`: Build the package.
-- `npm run test`: Run unit tests.
+- `pnpm build`: Build the package.
+- `pnpm test`: Run unit tests.
 
 ## Architecture
 
-This package uses a modular architecture with **Factory**, **Strategy**, and **Visitor** patterns.
-See [docs/02-architecture.md](./docs/02-architecture.md) for details.
+This package uses a modular architecture:
+- **Parser**: Lexer/Parser based architecture for robust syntax handling.
+- **AST**: Strictly typed AST nodes.
+- **Transformer**: Layered transformation pipeline using Visitor pattern.
+
 
 ## License
 
