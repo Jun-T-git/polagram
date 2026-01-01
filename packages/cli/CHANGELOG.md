@@ -1,5 +1,11 @@
 # @polagram/cli
 
+## 0.0.4
+
+### Patch Changes
+
+- bugfix EMV
+
 ## 0.0.3
 
 ### Patch Changes
