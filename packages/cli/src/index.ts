@@ -16,7 +16,7 @@ program
 program
     .command('run')
     .description('Run transformations based on polagram.yml')
-    .option('-c, --config <path>', 'Path to config file', process.env.POLAGRAPH_CONFIG || 'polagram.yml')
+    .option('-c, --config <path>', 'Path to config file', process.env.POLAGRAM_CONFIG || 'polagram.yml')
     .action(async (options) => {
         try {
             console.log(`Loading config from ${options.config}...`);
