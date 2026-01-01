@@ -1,5 +1,13 @@
 # @polagram/cli
 
+## 0.0.3
+
+### Patch Changes
+
+- 612e54c: Update README
+- Updated dependencies [612e54c]
+  - @polagram/core@0.0.3
+
 ## 0.0.2
 
 ### Patch Changes
