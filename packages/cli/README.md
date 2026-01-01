@@ -42,13 +42,13 @@ targets:
 ### Running
 
 ```bash
-pnpm polagram run
+pnpm polagram generate
 ```
 
 Or with a specific config:
 
 ```bash
-pnpm polagram run --config my-config.yml
+pnpm polagram generate --config my-config.yml
 ```
 
 ## Features

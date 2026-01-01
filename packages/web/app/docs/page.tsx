@@ -193,7 +193,7 @@ targets:
         
         <CodeBlock 
             language="bash" 
-            code={`polagram run`}
+            code={`polagram generate`}
         />
 
         <h3 className="text-xl font-bold text-foreground mb-4 mt-8">CLI Options</h3>
@@ -245,7 +245,7 @@ jobs:
         run: pnpm add -g @polagram/cli
       
       - name: Generate Diagrams
-        run: polagram run
+        run: polagram generate
       
       - name: Upload Artifacts
         uses: actions/upload-artifact@v3

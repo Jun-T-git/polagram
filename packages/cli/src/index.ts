@@ -14,8 +14,8 @@ program
     .version('0.0.1');
 
 program
-    .command('run')
-    .description('Run transformations based on polagram.yml')
+    .command('generate')
+    .description('Generate diagrams based on polagram.yml')
     .option('-c, --config <path>', 'Path to config file', process.env.POLAGRAM_CONFIG || 'polagram.yml')
     .action(async (options) => {
         try {
