@@ -147,3 +147,39 @@ sequenceDiagram
         expect(result).toContain('A->>A: Read Cache');
     });
 });
+
+describe('Feature Matrix: Chained Actions', () => {
+    const CODE_CHAIN = `
+sequenceDiagram
+    participant A
+    participant B
+    loop Retry
+        A->>B: Try
+        note over B: Error
+    end
+    A->>A: Self
+`;
+
+    it('should handle chained transformations (resolve -> remove)', () => {
+        const result = Polagram.init(CODE_CHAIN)
+            // 1. Resolve loop (unwrap A->>B and note)
+            .resolveFragment({ operator: 'loop', condition: 'Retry' })
+            // 2. Remove B (should remove A->>B and note over B)
+            .removeParticipant({ name: 'B' })
+            .toMermaid();
+        
+        expect(result).not.toContain('loop Retry'); // Resolved
+        expect(result).not.toContain('participant B'); // Removed
+        
+        // Interaction A->>B should be removed because B is gone
+        expect(result).not.toContain('A->>B: Try');
+        
+        // Note over B should be removed because B is gone
+        expect(result).not.toContain('note over B');
+        
+        // A should remain
+        expect(result).toContain('participant A');
+        expect(result).toContain('A->>A: Self');
+    });
+});
+
