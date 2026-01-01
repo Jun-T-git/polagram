@@ -2,6 +2,8 @@
 
 The official CLI for Polagram, enabling CI/CD integration for sequence diagram transformations.
 
+**Official Website:** [https://polagram.org/](https://polagram.org/)
+
 ## Installation
 
 ```bash

@@ -9,6 +9,7 @@
     "type": "git",
     "url": "git+https://github.com/Jun-T-git/polagram.git"
   },
+  "homepage": "https://polagram.org/",
   "license": "MIT",
   "keywords": [
     "polagram",

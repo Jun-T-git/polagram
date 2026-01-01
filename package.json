@@ -11,6 +11,7 @@
     "version-packages": "changeset version",
     "release": "turbo run build && changeset publish"
   },
+  "homepage": "https://polagram.org/",
   "devDependencies": {
     "@biomejs/biome": "^2.3.10",
     "@changesets/cli": "^2.29.8",

@@ -2,6 +2,8 @@
 
 `@polagram/core` is the core parsing and AST manipulation library for the Polagram project. It provides functionality to parse diagram languages (currently focusing on Mermaid Sequence Diagrams) into a generic Polagram Abstract Syntax Tree (AST).
 
+**Official Website:** [https://polagram.org/](https://polagram.org/)
+
 ## Installation
 
 ```bash

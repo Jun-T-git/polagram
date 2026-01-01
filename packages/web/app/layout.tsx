@@ -7,8 +7,26 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'Polagram - Interactive Sequence Diagrams',
-  description: 'Interactive sequence diagram viewer and transformation engine.',
+  metadataBase: new URL('https://polagram.org/'), // Replace with actual domain if different
+  title: {
+    default: 'Polagram - Interactive Sequence Diagrams',
+    template: '%s | Polagram',
+  },
+  description: 'Interactive sequence diagram viewer and transformation engine. Visualize complex flows with ease.',
+  openGraph: {
+    title: 'Polagram - Interactive Sequence Diagrams',
+    description: 'Interactive sequence diagram viewer and transformation engine. Visualize complex flows with ease.',
+    url: 'https://polagram.org/',
+    siteName: 'Polagram',
+    locale: 'ja_JP', // Or 'en_US' depending on target audience, code says 'ja' html lang
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Polagram - Interactive Sequence Diagrams',
+    description: 'Interactive sequence diagram viewer and transformation engine.',
+    creator: '@polagram', // Replace with actual handle if available
+  },
 };
 
 export default function RootLayout({
