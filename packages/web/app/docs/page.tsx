@@ -213,7 +213,7 @@ targets:
             
              <div className="bg-card/30 p-4 rounded-lg border border-border">
                <div className="flex items-center gap-3 mb-2">
-                 <code className="text-foreground font-bold bg-muted px-2 py-0.5 rounded border border-border">POLAGRAph_CONFIG</code>
+                 <code className="text-foreground font-bold bg-muted px-2 py-0.5 rounded border border-border">POLAGRAM_CONFIG</code>
                  <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground border border-border px-1.5 py-0.5 rounded">Env Var</span>
                </div>
                <p className="text-sm text-muted-foreground leading-relaxed">
