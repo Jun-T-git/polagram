@@ -30,7 +30,11 @@ const items = [
   },
 ];
 
-export function DocsSidebar() {
+interface DocsSidebarProps {
+  className?: string;
+}
+
+export function DocsSidebar({ className }: DocsSidebarProps) {
   const [activeId, setActiveId] = useState<string>('');
 
   useEffect(() => {
@@ -55,7 +59,7 @@ export function DocsSidebar() {
   }, []);
 
   return (
-    <div className="w-full h-[calc(100vh-5rem)] sticky top-20 overflow-y-auto">
+    <div className={cn("w-full h-[calc(100vh-5rem)] sticky top-20 overflow-y-auto", className)}>
       {items.map((group, i) => (
         <div key={i} className="mb-6">
           <h4 className="mb-2 px-3 text-[11px] font-bold text-muted-foreground/60 uppercase tracking-widest">

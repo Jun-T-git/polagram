@@ -36,38 +36,48 @@ const COMPLEX_CODE = `sequenceDiagram
 
 const PRESETS = {
   original: '',
-  pm: `# polagram.yml (Lens Definition)
-name: PM View
-layers:
-  # 1. Remove internal logs to reduce noise
-  - action: remove
-    selector:
-      kind: message
-      text: 
-        pattern: '^Log:'
-
-  # 2. Show only the happy path
-  - action: resolve
-    selector:
-      kind: fragment
-      condition: 'Payment Success'
-
-  # 3. Focus on high-level user journey
-  - action: focus
-    selector:
-      kind: participant
-      name:
-        pattern: 'User|Web|API|Payment'`,
+  pm: `# polagram.yml
+version: 1
+targets:
+  - input: ["diagram.mmd"]
+    outputDir: "generated"
+    lenses:
+      - name: PM View
+        layers:
+          # 1. Remove internal logs to reduce noise
+          - action: remove
+            selector:
+              kind: message
+              text: 
+                pattern: '^Log:'
         
-  dev: `# polagram.yml (Lens Definition)
-name: Dev View
-layers:
-  # Focus strictly on backend services
-  - action: focus
-    selector:
-      kind: participant
-      name:
-        pattern: 'API|Payment|DB'`
+          # 2. Show only the happy path
+          - action: resolve
+            selector:
+              kind: fragment
+              condition: 'Payment Success'
+        
+          # 3. Focus on high-level user journey
+          - action: focus
+            selector:
+              kind: participant
+              name:
+                pattern: 'User|Web|API|Payment'`,
+        
+  dev: `# polagram.yml
+version: 1
+targets:
+  - input: ["diagram.mmd"]
+    outputDir: "generated"
+    lenses:
+      - name: Dev View
+        layers:
+          # Focus strictly on backend services
+          - action: focus
+            selector:
+              kind: participant
+              name:
+                pattern: 'API|Payment|DB'`
 };
 
 export function LiveDemo() {
@@ -143,11 +153,11 @@ export function LiveDemo() {
       </div>
 
       {/* 3. Tab Navigation */}
-      <div className="flex items-center px-4 border-b border-border/40 bg-muted/10">
+      <div className="flex items-center px-4 border-b border-border/40 bg-muted/10 relative z-20">
         <button
           onClick={() => setActiveTab('preview')}
           className={cn(
-            "py-3 px-4 text-xs font-medium transition-colors border-b-2 translate-y-[1px]",
+            "py-3 px-4 text-xs font-medium transition-colors border-b-2 translate-y-[1px] relative z-10",
             activeTab === 'preview' 
               ? "border-primary text-foreground" 
               : "border-transparent text-muted-foreground hover:text-foreground"
@@ -158,7 +168,7 @@ export function LiveDemo() {
         <button
           onClick={() => setActiveTab('config')}
           className={cn(
-            "py-3 px-4 text-xs font-medium transition-colors border-b-2 translate-y-[1px]",
+            "py-3 px-4 text-xs font-medium transition-colors border-b-2 translate-y-[1px] relative z-10",
             activeTab === 'config' 
               ? "border-primary text-foreground" 
               : "border-transparent text-muted-foreground hover:text-foreground"

@@ -6,6 +6,7 @@ import { useMemo, useState } from 'react';
 export interface TransformOperation {
   operation: 'focusParticipant' | 'removeParticipant' | 'resolveFragment' | 'removeMessage' | 'removeGroup';
   target: string;
+  isRegex?: boolean;
   enabled: boolean;
 }
 
@@ -16,11 +17,11 @@ interface UsePolagramReturn {
   pipeline: TransformOperation[];
   lensYaml: string;
   updateLensYaml: (yamlStr: string) => void;
-  addTransform: (operation: TransformOperation['operation'], target: string) => void;
+  addTransform: (operation: TransformOperation['operation'], target: string, isRegex?: boolean) => void;
   removeTransform: (index: number) => void;
   toggleTransform: (index: number) => void;
   toggleAll: () => void;
-  getSuggestions: (operationType: 'participant' | 'fragment' | 'group') => string[];
+  getSuggestions: (operationType: 'participant' | 'fragment' | 'group' | 'message') => string[];
 }
 
 // Internal Config Shape for YAML parsing
@@ -43,13 +44,13 @@ targets:
         layers: []
 `;
 
-// Helper to extract string representation from TextMatcher
-function getTextMatcherString(tm: TextMatcher | undefined): string {
-    if (!tm) return '';
-    if (typeof tm === 'string') return tm;
-    if (tm instanceof RegExp) return tm.source;
-    if ('pattern' in tm) return tm.pattern;
-    return '';
+// Helper to extract string and regex status from TextMatcher
+function getTextMatcherInfo(tm: TextMatcher | undefined): { target: string, isRegex: boolean } {
+    if (!tm) return { target: '', isRegex: false };
+    if (typeof tm === 'string') return { target: tm, isRegex: false };
+    if (tm instanceof RegExp) return { target: tm.source, isRegex: true };
+    if ('pattern' in tm) return { target: tm.pattern, isRegex: true };
+    return { target: '', isRegex: false };
 }
 
 export function usePolagram(code: string): UsePolagramReturn {
@@ -109,32 +110,33 @@ export function usePolagram(code: string): UsePolagramReturn {
     }
 
     const layers: Layer[] = enabledOps.map(op => {
+      const matcher = op.isRegex ? { pattern: op.target } : op.target;
+
       if (op.operation === 'focusParticipant') {
         return {
           action: 'focus',
-          selector: { kind: 'participant', name: op.target }
+          selector: { kind: 'participant', name: matcher }
         };
       } else if (op.operation === 'removeParticipant') {
         return {
           action: 'remove',
-          selector: { kind: 'participant', name: op.target }
+          selector: { kind: 'participant', name: matcher }
         };
       } else if (op.operation === 'resolveFragment') {
         return {
           action: 'resolve',
-          selector: { kind: 'fragment', condition: op.target }
+          selector: { kind: 'fragment', condition: matcher }
         };
       } else if (op.operation === 'removeMessage') {
         return {
           action: 'remove',
-          // Treat message target as regex pattern for flexibility in demo
-          selector: { kind: 'message', text: { pattern: op.target } }
+          selector: { kind: 'message', text: matcher }
         };
       } else {
         // removeGroup
         return {
           action: 'remove',
-          selector: { kind: 'group', name: op.target }
+          selector: { kind: 'group', name: matcher }
         };
       }
     });
@@ -215,7 +217,6 @@ export function usePolagram(code: string): UsePolagramReturn {
       // Reconstruct pipeline from Lens
       const newPipeline: TransformOperation[] = lens.layers.map((layer: Layer) => {
         let operation: TransformOperation['operation'] = 'focusParticipant';
-        let target = '';
 
         if (layer.action === 'focus' && layer.selector?.kind === 'participant') {
              operation = 'focusParticipant';
@@ -231,15 +232,22 @@ export function usePolagram(code: string): UsePolagramReturn {
 
         // Extract target from selector
         const selector = layer.selector;
+        let target = '';
+        let isRegex = false;
+
         if (selector) {
-            if ('name' in selector) target = getTextMatcherString(selector.name);
-            else if ('condition' in selector) target = getTextMatcherString(selector.condition);
-            else if ('text' in selector) target = getTextMatcherString(selector.text);
+            let info = { target: '', isRegex: false };
+            if ('name' in selector) info = getTextMatcherInfo(selector.name);
+            else if ('condition' in selector) info = getTextMatcherInfo(selector.condition);
+            else if ('text' in selector) info = getTextMatcherInfo(selector.text);
+            target = info.target;
+            isRegex = info.isRegex;
         }
 
         return {
           operation,
           target,
+          isRegex,
           enabled: true // YAML rules are always enabled
         };
       });
@@ -253,8 +261,8 @@ export function usePolagram(code: string): UsePolagramReturn {
   };
 
   // Add a new transformation to the pipeline
-  const addTransform = (operation: TransformOperation['operation'], target: string) => {
-    const newPipeline = [...pipeline, { operation, target, enabled: true }];
+  const addTransform = (operation: TransformOperation['operation'], target: string, isRegex?: boolean) => {
+    const newPipeline = [...pipeline, { operation, target, isRegex, enabled: true }];
     setPipeline(newPipeline);
     setLensYaml(generateLensYaml(newPipeline));
   };
@@ -285,7 +293,7 @@ export function usePolagram(code: string): UsePolagramReturn {
   };
 
   // Get autocomplete suggestions based on operation type
-  const getSuggestions = (operationType: 'participant' | 'fragment' | 'group'): string[] => {
+  const getSuggestions = (operationType: 'participant' | 'fragment' | 'group' | 'message'): string[] => {
     if (!ast) return [];
     
     if (operationType === 'participant') {
@@ -296,7 +304,26 @@ export function usePolagram(code: string): UsePolagramReturn {
       });
       return [...new Set(suggestions)];
     } else if (operationType === 'group') {
-      return []; 
+      const groups: string[] = [];
+      ast.groups?.forEach(g => {
+        if (g.name) groups.push(g.name);
+      });
+      return [...new Set(groups)];
+    } else if (operationType === 'message') {
+      const messages: string[] = [];
+      const extractMessages = (events: EventNode[]) => {
+        events?.forEach((event: EventNode) => {
+          if (event.kind === 'message') {
+            if (event.text) messages.push(event.text);
+          } else if (event.kind === 'fragment') {
+            event.branches?.forEach((branch) => {
+              extractMessages(branch.events);
+            });
+          }
+        });
+      };
+      if (ast.events) extractMessages(ast.events);
+      return [...new Set(messages)];
     } else {
       const fragments: string[] = [];
       const extractFragments = (events: EventNode[]) => {

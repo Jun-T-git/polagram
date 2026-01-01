@@ -51,7 +51,7 @@ export default function Home() {
       </div>
 
       {/* Hero + Philosophy Section */}
-      <section className="relative z-10 pt-20 pb-16 px-6 max-w-6xl mx-auto animate-fade-in">
+      <section className="relative z-10 pt-12 pb-12 md:pt-20 md:pb-16 px-6 max-w-6xl mx-auto animate-fade-in">
         {/* Hero Content */}
         <div className="text-center mb-16">
           <div className="inline-block mb-6 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-semibold tracking-wide uppercase animate-fade-in-up">
@@ -99,11 +99,11 @@ export default function Home() {
                 </div>
                 {/* Content area */}
                 {masterView === 'diagram' ? (
-                  <div className="flex-1 p-4 flex items-center justify-center overflow-hidden">
+                  <div className="flex-1 p-4 flex items-center justify-center overflow-auto custom-scrollbar">
                     <MermaidDiagram chart={masterDiagram} className="scale-95 origin-center" />
                   </div>
                 ) : (
-                  <div className="flex-1 p-3 overflow-y-auto bg-[#101010]">
+                  <div className="flex-1 p-3 overflow-y-auto bg-[#101010] custom-scrollbar">
                     <pre className="text-[9px] font-mono text-muted-foreground leading-relaxed">{masterDiagram}</pre>
                   </div>
                 )}
@@ -114,7 +114,7 @@ export default function Home() {
             </div>
 
             {/* Operator: Multiply */}
-            <div className="flex justify-center items-center text-muted-foreground/40 shrink-0">
+            <div className="flex justify-center items-center text-muted-foreground/40 shrink-0 py-2 md:py-0">
                <span className="text-4xl font-light">×</span>
             </div>
 
@@ -128,7 +128,7 @@ export default function Home() {
                   <span className="text-[10px] font-mono text-primary">polagram.yml</span>
                 </div>
                 {/* Content area */}
-                <div className="flex-1 p-3 overflow-y-auto">
+                <div className="flex-1 p-3 overflow-y-auto custom-scrollbar">
                   <pre className="text-[9px] font-mono text-primary/90 leading-relaxed">
                     <span className="text-muted-foreground/40">...</span>
 {`
@@ -153,7 +153,7 @@ export default function Home() {
             </div>
 
              {/* Operator: Equals */}
-            <div className="flex justify-center items-center text-muted-foreground/40 shrink-0">
+            <div className="flex justify-center items-center text-muted-foreground/40 shrink-0 py-2 md:py-0">
                <span className="text-4xl font-light">=</span>
             </div>
 
@@ -172,11 +172,11 @@ export default function Home() {
                 </div>
                 {/* Content area */}
                 {optimizedView === 'diagram' ? (
-                  <div className="flex-1 p-4 flex items-center justify-center overflow-hidden">
+                  <div className="flex-1 p-4 flex items-center justify-center overflow-auto custom-scrollbar">
                     <MermaidDiagram chart={optimizedDiagram} className="scale-100 origin-center" />
                   </div>
                 ) : (
-                  <div className="flex-1 p-3 overflow-y-auto bg-[#101010]">
+                  <div className="flex-1 p-3 overflow-y-auto bg-[#101010] custom-scrollbar">
                     <pre className="text-[9px] font-mono text-muted-foreground leading-relaxed">{optimizedDiagram}</pre>
                   </div>
                 )}
