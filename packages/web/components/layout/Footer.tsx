@@ -17,9 +17,14 @@ export function Footer() {
                 width={24}
                 height={24}
               />
-              <span className="bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">
-                Polagram
-              </span>
+              <div className="flex items-center gap-1.5">
+                <span className="bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">
+                  Polagram
+                </span>
+                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
+                  Beta
+                </span>
+              </div>
             </Link>
             <p className="text-muted-foreground text-sm max-w-sm leading-relaxed">
               Generate beautiful, interactive, and resilient sequence diagrams from text. 
