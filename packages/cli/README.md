@@ -32,7 +32,7 @@ targets:
           
           # Remove infrastructure details (Logger, Metrics)
           - action: remove
-            selector: { kind: "participant", stereotype: "infra" }
+            selector: { kind: "participant", name: { pattern: ".*(Logger|Metrics).*" } }
             
           # Focus on specific interactions
           - action: focus

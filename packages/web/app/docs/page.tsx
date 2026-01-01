@@ -421,7 +421,6 @@ jobs:
                       <ul className="space-y-3">
                           <li className="text-sm"><code className="font-bold">name</code> (Matcher): Filter by participant name.</li>
                           <li className="text-sm"><code className="font-bold">id</code> (Matcher): Filter by participant ID (alias).</li>
-                          <li className="text-sm"><code className="font-bold">stereotype</code> (Matcher): Filter by stereotype (e.g. <code>&lt;&lt;Service&gt;&gt;</code>).</li>
                       </ul>
                    </div>
                    
