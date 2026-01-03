@@ -60,4 +60,25 @@ describe('Matcher', () => {
       expect(matcher.matchMessage(msg, { kind: 'message', to: 'db' })).toBe(false);
     });
   });
+
+  describe('Branch Matching', () => {
+    const branch = { id: 'b1', condition: 'valid', events: [] };
+
+    it('matches by operator', () => {
+      // Operator matching is against the PARENT fragment's operator
+      expect(matcher.matchBranch(branch, { kind: 'fragment', operator: 'alt' }, 'alt')).toBe(true);
+      expect(matcher.matchBranch(branch, { kind: 'fragment', operator: 'loop' }, 'alt')).toBe(false);
+      expect(matcher.matchBranch(branch, { kind: 'fragment', operator: ['alt', 'opt'] }, 'alt')).toBe(true);
+    });
+
+    it('matches by condition', () => {
+      expect(matcher.matchBranch(branch, { kind: 'fragment', condition: 'valid' }, 'alt')).toBe(true);
+      expect(matcher.matchBranch(branch, { kind: 'fragment', condition: 'invalid' }, 'alt')).toBe(false);
+    });
+
+    it('returns false if branch has no condition but selector requires one', () => {
+        const noCondBranch = { id: 'b2', events: [] };
+        expect(matcher.matchBranch(noCondBranch, { kind: 'fragment', condition: 'needed' }, 'alt')).toBe(false);
+    });
+  });
 });

@@ -1,5 +1,5 @@
 
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { FragmentNode, MessageNode, PolagramRoot } from '../../ast';
 import { FocusLayer } from '../types';
 import { TransformationEngine } from './engine';
@@ -50,5 +50,20 @@ describe('TransformationEngine (Pipeline Integration)', () => {
 
         // 3. Cleaner (Unused) should have removed C and D
         expect(result.participants.map(p => p.id).sort()).toEqual(['A0', 'B0']);
+    });
+
+    it('handles unknown actions gracefully (identity)', () => {
+        const root = createAst([pA], [msgAB]);
+        const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+        // @ts-ignore - purposefully passing invalid action
+        const result = new TransformationEngine().transform(root, [{ action: 'invalid' }]);
+
+        expect(result).toEqual(root); // Logic remains identity, but object reference changes due to CoW cleaners
+        // Actually structure cleaner typically returns new object.
+        // But main point is it didn't crash.
+        
+        expect(warnSpy).toHaveBeenCalledWith('Unknown action: invalid');
+        warnSpy.mockRestore();
     });
 });
