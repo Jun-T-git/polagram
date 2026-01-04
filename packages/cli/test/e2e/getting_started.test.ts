@@ -104,5 +104,10 @@ sequenceDiagram
         expect(content).toContain('API-->>User: 200 OK');
         // Error case should be gone
         expect(content).not.toContain('API-->>User: 404 Not Found');
+
+
+        // Strict Verification: Snapshot ensures NO other unintended changes occurred
+        // (e.g. formatting, comments, ordering, unrelated nodes)
+        await expect(content).toMatchFileSnapshot(path.resolve(__dirname, 'getting_started.snapshot.mmd'));
     });
 });
