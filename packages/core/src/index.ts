@@ -16,6 +16,8 @@ export type { PolagramVisitor } from './generator/interface';
 
 // Default Implementations (Optional, or force users to use Factory)
 // We export Mermaid Generator specifically as it might be used directly or via a future Factory
+// Config & Validation
+export * from './config/schema';
 export { MermaidGeneratorVisitor } from './generator/generators/mermaid';
 export { PlantUMLGeneratorVisitor } from './generator/generators/plantuml';
 

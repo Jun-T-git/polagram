@@ -10,6 +10,10 @@ The official CLI for Polagram, enabling CI/CD integration for sequence diagram t
 pnpm add -D @polagram/cli
 ```
 
+## Supported Formats
+- **Mermaid**: `.mmd`, `.mermaid`
+- **PlantUML**: `.puml`, `.plantuml`, `.pu`
+
 ## Usage
 
 ### Configuration
