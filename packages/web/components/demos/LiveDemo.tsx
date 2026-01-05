@@ -36,8 +36,7 @@ const COMPLEX_CODE = `sequenceDiagram
 
 const PRESETS = {
   original: '',
-  pm: `# polagram.yml
-version: 1
+  pm: `version: 1
 targets:
   - input: ["diagram.mmd"]
     outputDir: "generated"
@@ -64,8 +63,7 @@ targets:
               name:
                 pattern: 'User|Web|API|Payment'`,
         
-  dev: `# polagram.yml
-version: 1
+  dev: `version: 1
 targets:
   - input: ["diagram.mmd"]
     outputDir: "generated"

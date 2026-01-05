@@ -1,4 +1,4 @@
-import { EventNode, Layer, Lens, Participant, Polagram, PolagramRoot, TextMatcher } from '@polagram/core';
+import { EventNode, Layer, Lens, Participant, Polagram, PolagramConfig, PolagramRoot, TextMatcher } from '@polagram/core';
 import yaml from 'js-yaml';
 import { useMemo, useState } from 'react';
 
@@ -24,15 +24,7 @@ interface UsePolagramReturn {
   getSuggestions: (operationType: 'participant' | 'fragment' | 'group' | 'message') => string[];
 }
 
-// Internal Config Shape for YAML parsing
-interface ConfigShape {
-    version?: number;
-    targets?: {
-        input: string[];
-        outputDir: string;
-        lenses: Lens[];
-    }[];
-}
+
 
 // Default YAML content
 const DEFAULT_YAML = `version: 1
@@ -64,15 +56,16 @@ export function usePolagram(code: string): UsePolagramReturn {
     }
 
     try {
-      // 1. Always parse the base AST from the source code
-      const builder = Polagram.init(code);
+      // 1. Parse the base AST from the source code (Mermaid only for Web Viewer)
+      const builder = Polagram.init(code, 'mermaid');
       const computedAst = builder.toAST();
       let computedCode = code;
 
       // 2. Apply Lens if it exists
       if (lensYaml.trim()) {
         try {
-          const config = yaml.load(lensYaml) as ConfigShape;
+          const rawConfig = yaml.load(lensYaml) as any;
+          const config = rawConfig;
           // Extract the first lens from the first target
           const lens = config?.targets?.[0]?.lenses?.[0];
 
@@ -80,9 +73,8 @@ export function usePolagram(code: string): UsePolagramReturn {
             const transformedBuilder = builder.applyLens(lens);
             computedCode = transformedBuilder.toMermaid();
           }
-        } catch (yamlErr) {
-           console.warn('Invalid YAML during apply:', yamlErr);
-           // Keep original code on YAML error, but don't fail the whole hook
+        } catch {
+           // Keep original code on YAML error
         }
       }
 
@@ -149,22 +141,17 @@ export function usePolagram(code: string): UsePolagramReturn {
 
   // Helper: Generate YAML from pipeline
   const generateLensYaml = (ops: TransformOperation[]) => {
-    // We need to preserve the full config structure
-    // Since we don't have the original full object easily accessible here without parsing current YAML again,
-    // let's try to parse the current state or default to a skeleton.
-    
-    let config: unknown;
+    let config: PolagramConfig | null;
     try {
-        config = yaml.load(lensYaml);
+        const raw = yaml.load(lensYaml);
+        config = raw as PolagramConfig;
     } catch {
         config = null;
     }
 
-    let typedConfig = config as ConfigShape;
-
     // Default structure if missing
-    if (!typedConfig || typeof typedConfig !== 'object') {
-         typedConfig = {
+    if (!config) {
+         config = {
              version: 1,
              targets: [{
                  input: ["diagram.mmd"],
@@ -174,23 +161,11 @@ export function usePolagram(code: string): UsePolagramReturn {
          };
     }
 
-    // Ensure targets[0].lenses[0] exists
-    if (!typedConfig.targets || !Array.isArray(typedConfig.targets) || typedConfig.targets.length === 0) {
-        typedConfig.targets = [{
-             input: ["diagram.mmd"],
-             outputDir: "generated",
-             lenses: [{ name: "clean-view", layers: [] }]
-        }];
-    }
-    if (!typedConfig.targets[0].lenses || !Array.isArray(typedConfig.targets[0].lenses) || typedConfig.targets[0].lenses.length === 0) {
-        typedConfig.targets[0].lenses = [{ name: "clean-view", layers: [] }];
-    }
-
     const newLens = createLensFromPipeline(ops);
     // Update the first lens's layers
-    typedConfig.targets[0].lenses[0].layers = newLens.layers;
+    config.targets[0].lenses[0].layers = newLens.layers;
     
-    return yaml.dump(typedConfig);
+    return yaml.dump(config);
   };
 
   // Update pipeline from YAML input (Best effort sync for UI)
@@ -203,13 +178,12 @@ export function usePolagram(code: string): UsePolagramReturn {
     }
 
     try {
-      const config = yaml.load(yamlStr) as ConfigShape;
+      const rawConfig = yaml.load(yamlStr) as any;
+      // We might fail validation while typing, which is fine
+      const config = rawConfig;
       const lens = config?.targets?.[0]?.lenses?.[0];
 
       if (!lens || !lens.layers) {
-        // If YAML is valid but structure is empty/missing lenses, clear pipeline
-        // But if it's just partial, maybe we should be careful. 
-        // For now, if we can parse it but find no lens, it effectively means no ops.
         setPipeline([]); 
         return;
       }
@@ -256,7 +230,6 @@ export function usePolagram(code: string): UsePolagramReturn {
     } catch {
       // Ignore YAML validation errors during typing
       // Keep the previous pipeline state to avoid UI jumping
-      // console.warn('Invalid YAML during update:', e);
     }
   };
 

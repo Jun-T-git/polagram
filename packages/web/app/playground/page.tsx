@@ -60,6 +60,8 @@ export default function ViewerPage() {
     getSuggestions
   } = usePolagram(code);
 
+
+
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -100,20 +102,20 @@ export default function ViewerPage() {
         <div className="w-full bg-card/50 flex-1 flex flex-col min-h-0">
           {isMobile ? (
             <div className="flex flex-col h-full">
-              <Tabs 
-                tabs={['diagram.mmd', 'polagram.yml', 'Preview']} 
-                activeTab={mobileTab} 
-                onTabChange={setMobileTab} 
-              />
-              <div className="flex-1 relative overflow-hidden bg-muted/10">
-                {mobileTab === 'diagram.mmd' && (
-                  <CodeEditor 
-                    value={code} 
-                    onChange={setCode} 
-                    error={error} 
-                    placeholder="Enter sequence diagram code (Mermaid)..."
+                  <Tabs 
+                    tabs={['diagram.mmd', 'polagram.yml', 'Preview']} 
+                    activeTab={mobileTab} 
+                    onTabChange={setMobileTab} 
                   />
-                )}
+                  <div className="flex-1 relative overflow-hidden bg-muted/10">
+                    {mobileTab === 'diagram.mmd' && (
+                      <CodeEditor 
+                        value={code} 
+                        onChange={setCode} 
+                        error={error} 
+                        placeholder="Enter sequence diagram code (Mermaid)..."
+                      />
+                    )}
                 {mobileTab === 'polagram.yml' && (
                   <CodeEditor 
                     value={lensYaml} 

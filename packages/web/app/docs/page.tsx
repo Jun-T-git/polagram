@@ -1,5 +1,5 @@
 
-import { Filter, PackageOpen, ScanSearch, Sprout, Zap } from 'lucide-react';
+import { Filter, PackageOpen, ScanSearch, Zap } from 'lucide-react';
 
 import { LiveDemo } from '../../components/demos/LiveDemo';
 import { PhilosophyConcept } from '../../components/docs/PhilosophyConcept';
@@ -452,23 +452,38 @@ jobs:
       </section>
 
       {/* Roadmap */}
-      <section id="roadmap" className="scroll-mt-32 mb-24 border-t border-border pt-12 opacity-80">
-        <h2 className="text-3xl font-bold text-foreground mb-8">Coming Soon</h2>
-        <div className="bg-card/30 border border-border/50 rounded-xl p-6">
-            <div className="flex items-start gap-4">
-               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
-                  <Sprout className="w-5 h-5" />
-               </div>
-               <div>
-                 <h3 className="text-lg font-semibold text-foreground mb-2">PlantUML Support</h3>
-                 <p className="text-sm text-muted-foreground leading-relaxed">
-                   We are currently developing support for PlantUML diagrams. 
-                   Soon you will be able to apply the same powerful transformations to your existing PlantUML files (.puml).
-                 </p>
-                 <div className="mt-4 inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-yellow-500/10 border border-yellow-500/20 text-[10px] font-medium text-yellow-500 uppercase tracking-wider">
-                   In Development
+      <section id="formats" className="scroll-mt-32 mb-24 border-t border-border pt-12">
+        <h2 className="text-3xl font-bold text-foreground mb-8">Supported Formats</h2>
+        <div className="grid md:grid-cols-2 gap-6">
+            <div className="bg-card/30 border border-border rounded-xl p-6">
+                 <div className="flex items-center gap-3 mb-4">
+                    <div className="w-8 h-8 rounded-full bg-pink-500/10 flex items-center justify-center text-pink-500 font-bold text-xs">M</div>
+                    <h3 className="text-lg font-semibold text-foreground">Mermaid</h3>
                  </div>
-               </div>
+                 <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                   Fully supported for both <strong>Automation</strong> (CI/CD) and <strong>Live Preview</strong>.
+                 </p>
+                 <div className="flex gap-2">
+                    <span className="text-xs bg-muted px-2 py-1 rounded border border-border whitespace-nowrap">.mmd</span>
+                    <span className="text-xs bg-muted px-2 py-1 rounded border border-border whitespace-nowrap">.mermaid</span>
+                 </div>
+            </div>
+
+            <div className="bg-card/30 border border-border rounded-xl p-6">
+                 <div className="flex items-center gap-3 mb-4">
+                    <div className="w-8 h-8 rounded-full bg-green-500/10 flex items-center justify-center text-green-500 font-bold text-xs">P</div>
+                    <h3 className="text-lg font-semibold text-foreground">PlantUML</h3>
+                 </div>
+                 <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                   Supported for <strong>Automation</strong> and transformation pipelines.
+                   <br/>
+                   <span className="text-xs opacity-70">(Note: Live Preview in the browser is currently limited to Mermaid.)</span>
+                 </p>
+                 <div className="flex gap-2">
+                    <span className="text-xs bg-muted px-2 py-1 rounded border border-border whitespace-nowrap">.puml</span>
+                    <span className="text-xs bg-muted px-2 py-1 rounded border border-border whitespace-nowrap">.plantuml</span>
+                    <span className="text-xs bg-muted px-2 py-1 rounded border border-border whitespace-nowrap">.pu</span>
+                 </div>
             </div>
         </div>
       </section>
