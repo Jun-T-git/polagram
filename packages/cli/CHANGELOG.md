@@ -1,5 +1,14 @@
 # @polagram/cli
 
+## 0.0.7
+
+### Patch Changes
+
+- Support for PlantUML format inputs
+- Export config schema from core and update supported formats in cli readme
+- Updated dependencies
+  - @polagram/core@0.0.4
+
 ## 0.0.6
 
 ### Patch Changes
