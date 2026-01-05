@@ -1,0 +1,16 @@
+@startuml
+actor User
+participant "Web App" as Web
+participant "API Gateway" as API
+database "User DB" as DB
+
+User -> Web: Login
+Web -> API: POST /auth
+API -> DB: Validate credentials
+DB --> API: User data
+API --> Web: JWT token
+Web --> User: Welcome
+
+note right of User: User authenticated
+note over API, DB: Secure connection
+@enduml

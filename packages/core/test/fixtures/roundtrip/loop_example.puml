@@ -1,0 +1,18 @@
+@startuml
+participant Client
+participant Gateway
+participant Service
+participant Database
+
+loop Health Check
+    Gateway -> Service: Ping
+    Service --> Gateway: Pong
+end
+
+Client -> Gateway: Request
+Gateway -> Service: Forward
+Service -> Database: Query
+Database --> Service: Data
+Service --> Gateway: Response
+Gateway --> Client: Response
+@enduml

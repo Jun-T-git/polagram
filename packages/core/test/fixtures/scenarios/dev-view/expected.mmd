@@ -1,0 +1,22 @@
+sequenceDiagram
+    participant WebUI
+    participant API
+    participant Cache
+    participant Database
+    participant Logger
+
+    WebUI->>API: GET /data
+
+    opt Cache Hit
+        API->>Cache: Check cache
+        Cache-->>API: Data found
+        API-->>WebUI: 200 OK
+    end
+
+    API->>Cache: Check cache
+    Cache-->>API: Not found
+    API->>Database: Query data
+    Database-->>API: Data
+    API->>Cache: Store cache
+    API-->>WebUI: 200 OK
+    API->>Logger: Log request

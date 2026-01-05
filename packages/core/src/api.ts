@@ -1,5 +1,6 @@
 import { PolagramRoot } from './ast';
 import { MermaidGeneratorVisitor } from './generator/generators/mermaid';
+import { PlantUMLGeneratorVisitor } from './generator/generators/plantuml';
 import { ParserFactory } from './parser';
 import { TransformationEngine } from './transformer/orchestration/engine';
 import {
@@ -29,12 +30,12 @@ export class Polagram {
     /**
      * Initialize a new Polagram transformation pipeline.
      * @param code Source diagram code
-     * @param format Input format (currently only 'mermaid' is supported)
+     * @param format Input format ('mermaid' or 'plantuml')
      */
-    static init(code: string, format: 'mermaid' = 'mermaid'): PolagramBuilder {
+    static init(code: string, format: 'mermaid' | 'plantuml' = 'mermaid'): PolagramBuilder {
         const parser = ParserFactory.getParser(format);
         const ast = parser.parse(code);
-        return new PolagramBuilder(ast);
+        return new PolagramBuilder(ast, format);
     }
 }
 
@@ -44,9 +45,11 @@ export class Polagram {
 export class PolagramBuilder {
     private ast: PolagramRoot;
     private layers: Layer[] = [];
+    private sourceFormat: 'mermaid' | 'plantuml';
 
-    constructor(ast: PolagramRoot) {
+    constructor(ast: PolagramRoot, sourceFormat: 'mermaid' | 'plantuml' = 'mermaid') {
         this.ast = ast;
+        this.sourceFormat = sourceFormat;
     }
 
     // -- Entity Filtering --
@@ -139,11 +142,28 @@ export class PolagramBuilder {
     }
 
     /**
+     * Generate PlantUML code from the transformed AST.
+     */
+    toPlantUML(): string {
+        const engine = new TransformationEngine();
+        const transformedAst = engine.transform(this.ast, this.layers);
+        const generator = new PlantUMLGeneratorVisitor();
+        return generator.generate(transformedAst);
+    }
+
+    /**
      * Get the transformed AST (for advanced use cases).
      */
     toAST(): PolagramRoot {
         const engine = new TransformationEngine();
         return engine.transform(this.ast, this.layers);
+    }
+
+    /**
+     * Get the source format detected/specified during init.
+     */
+    getSourceFormat(): 'mermaid' | 'plantuml' {
+        return this.sourceFormat;
     }
 
     // -- Helper Methods --

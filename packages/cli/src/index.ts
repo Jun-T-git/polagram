@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { Polagram } from '@polagram/core';
+import { FormatDetector, Polagram, type DiagramFormat } from '@polagram/core';
 import { Command } from 'commander';
 import { promises as fs } from 'fs';
 import { glob } from 'glob';
@@ -54,25 +54,39 @@ program
                     const relativePath = path.relative(configDir, file);
                     
                     try {
-                        // 1. Initialize Pipeline (Just parsing check essentially)
-                        Polagram.init(content);
+                        // Determine input format
+                        const inputFormat: DiagramFormat | null = target.format || FormatDetector.detect(file, content);
+                        if (!inputFormat) {
+                            console.error(`  Cannot detect format for ${relativePath}. Please specify 'format' in config.`);
+                            process.exitCode = 1;
+                            continue;
+                        }
+                        
+                        // Determine output format (defaults to input format)
+                        const outputFormat: DiagramFormat = target.outputFormat || inputFormat;
+                        
+                        // 1. Initialize Pipeline with detected format (parsing check)
+                        Polagram.init(content, inputFormat);
 
                         // 2. Apply Lenses
                         for (const lens of target.lenses) {
-                            const lensPipeline = Polagram.init(content);
+                            const lensPipeline = Polagram.init(content, inputFormat);
                             // core expects strict discriminated union, Zod inferred type is loose.
                             // Validation guarantees structure.
                             // eslint-disable-next-line @typescript-eslint/no-explicit-any
                             lensPipeline.applyLens(lens as any);
                             
-                            // 3. Generate
-                            const result = lensPipeline.toMermaid();
+                            // 3. Generate based on output format
+                            const result = outputFormat === 'plantuml' 
+                                ? lensPipeline.toPlantUML() 
+                                : lensPipeline.toMermaid();
                             
                             // 4. Output
                             const originalExt = path.extname(file);
                             const basename = path.basename(file, originalExt);
                             const suffix = lens.suffix || `.${lens.name}`;
-                            const newFilename = `${basename}${suffix}.mmd`;
+                            const outputExt = FormatDetector.getDefaultExtension(outputFormat);
+                            const newFilename = `${basename}${suffix}${outputExt}`;
                             
                             // Mirroring Logic:
                             // input: src/foo/bar.mmd -> relativePath: src/foo/bar.mmd (relative to configDir)
@@ -105,3 +119,4 @@ program
     });
 
 program.parse();
+

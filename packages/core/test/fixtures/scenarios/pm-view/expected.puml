@@ -1,0 +1,13 @@
+@startuml
+participant User
+participant WebUI
+participant API
+participant Database
+
+User -> WebUI: Click Buy
+WebUI -> API: POST /purchase
+API -> Database: Save order
+Database --> API: Order ID
+API --> WebUI: 200 OK
+WebUI --> User: Success message
+@enduml

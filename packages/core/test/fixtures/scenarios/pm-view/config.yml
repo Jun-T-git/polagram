@@ -1,0 +1,15 @@
+name: PM View
+layers:
+  - action: remove
+    selector:
+      kind: message
+      text:
+        pattern: "^Log:"
+  - action: resolve
+    selector:
+      kind: fragment
+      condition: "Payment Success"
+  - action: remove
+    selector:
+      kind: participant
+      name: Logger

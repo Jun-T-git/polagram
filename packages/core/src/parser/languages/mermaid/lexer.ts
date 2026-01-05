@@ -2,7 +2,7 @@
 import { BaseLexer } from '../../base/lexer';
 import { Token, TokenType } from './tokens';
 
-export class Lexer extends BaseLexer {
+export class Lexer extends BaseLexer<Token> {
   
   constructor(input: string) {
     super(input);

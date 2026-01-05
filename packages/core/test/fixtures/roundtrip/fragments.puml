@@ -1,0 +1,26 @@
+@startuml
+participant A
+participant B
+participant C
+
+alt Success Case
+    A -> B: Request
+    B -> C: Process
+    C --> B: Success
+    B --> A: 200 OK
+else Error Case
+    A -> B: Request
+    B -> C: Process
+    C --> B: Error
+    B --> A: 500 Error
+end
+
+loop Retry
+    A -> B: Ping
+    B --> A: Pong
+end
+
+opt Cache Available
+    A -> A: Read Cache
+end
+@enduml

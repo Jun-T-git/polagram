@@ -1,15 +1,15 @@
 
 import {
-  ActivationNode,
-  DividerNode,
-  FragmentNode,
-  MessageNode,
-  NoteNode,
-  Participant,
-  ParticipantGroup,
-  PolagramRoot,
-  ReferenceNode,
-  SpacerNode,
+    ActivationNode,
+    DividerNode,
+    FragmentNode,
+    MessageNode,
+    NoteNode,
+    Participant,
+    ParticipantGroup,
+    PolagramRoot,
+    ReferenceNode,
+    SpacerNode,
 } from '../../ast';
 import { getArrowString } from '../../parser/languages/mermaid/constants';
 import { Traverser } from '../base/walker';

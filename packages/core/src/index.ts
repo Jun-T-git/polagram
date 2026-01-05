@@ -6,6 +6,8 @@ export * from './ast';
 
 // Parsers (Factory & Strategy)
 export { ParserFactory } from './parser';
+export { FormatDetector } from './parser/format-detector';
+export type { DiagramFormat } from './parser/format-detector';
 export type { DiagramParser } from './parser/interface';
 
 // Generators
@@ -15,6 +17,7 @@ export type { PolagramVisitor } from './generator/interface';
 // Default Implementations (Optional, or force users to use Factory)
 // We export Mermaid Generator specifically as it might be used directly or via a future Factory
 export { MermaidGeneratorVisitor } from './generator/generators/mermaid';
+export { PlantUMLGeneratorVisitor } from './generator/generators/plantuml';
 
 // Transformation Engine
 export * from './transformer';

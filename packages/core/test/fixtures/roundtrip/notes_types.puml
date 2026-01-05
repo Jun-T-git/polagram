@@ -1,0 +1,13 @@
+@startuml
+participant "Service A" as A
+actor User
+database DB
+
+note left of User: User initiates
+User -> A: Login
+note over A: Validate
+A -> DB: Check credentials
+note right of DB: Database lookup
+DB --> A: User found
+A --> User: Success
+@enduml

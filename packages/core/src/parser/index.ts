@@ -1,6 +1,7 @@
 
 import { DiagramParser } from './interface';
 import { mermaidParser } from './languages/mermaid';
+import { plantumlParser } from './languages/plantuml';
 
 /**
  * Parser Factory
@@ -12,6 +13,7 @@ export class ParserFactory {
   static {
       // Register built-in parsers
       this.register('mermaid', mermaidParser);
+      this.register('plantuml', plantumlParser);
   }
 
   static register(language: string, parser: DiagramParser) {
@@ -26,3 +28,6 @@ export class ParserFactory {
     return parser;
   }
 }
+
+// Re-export format detector
+export { FormatDetector, type DiagramFormat } from './format-detector';

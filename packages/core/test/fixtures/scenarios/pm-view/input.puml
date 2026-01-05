@@ -1,0 +1,26 @@
+@startuml
+participant User
+participant WebUI
+participant API
+participant Logger
+participant Database
+
+User -> WebUI: Click Buy
+WebUI -> API: POST /purchase
+API -> Logger: Log: Purchase initiated
+Logger --> API: OK
+
+alt Payment Success
+    API -> Database: Save order
+    Database --> API: Order ID
+    API --> WebUI: 200 OK
+    WebUI --> User: Success message
+else Payment Failed
+    API -> Database: Log failure
+    Database --> API: OK
+    API --> WebUI: 400 Error
+    WebUI --> User: Error message
+end
+
+API -> Logger: Log: Purchase completed
+@enduml

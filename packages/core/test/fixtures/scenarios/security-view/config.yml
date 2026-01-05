@@ -1,0 +1,7 @@
+name: Security View
+layers:
+  - action: focus
+    selector:
+      kind: participant
+      name:
+        pattern: "Gateway|Auth|AuditLog"

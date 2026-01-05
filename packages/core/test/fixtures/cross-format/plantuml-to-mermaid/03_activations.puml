@@ -1,0 +1,9 @@
+@startuml
+participant A
+participant B
+
+A -> B: Request
+activate B
+B --> A: Response
+deactivate B
+@enduml

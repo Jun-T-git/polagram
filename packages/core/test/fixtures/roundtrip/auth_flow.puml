@@ -1,0 +1,23 @@
+@startuml
+participant Client
+participant API
+participant Database
+
+Client -> API: Login Request
+activate API
+API -> Database: Validate Credentials
+activate Database
+Database --> API: User Data
+deactivate Database
+API --> Client: JWT Token
+deactivate API
+
+Client -> API: Get Profile
+activate API
+API -> Database: Query User
+activate Database
+Database --> API: Profile Data
+deactivate Database
+API --> Client: Profile Response
+deactivate API
+@enduml

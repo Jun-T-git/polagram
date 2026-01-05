@@ -5,7 +5,7 @@ import { ARROW_MAPPING } from './constants';
 import { Lexer } from './lexer';
 import { Token, TokenType } from './tokens';
 
-export class Parser extends BaseParser {
+export class Parser extends BaseParser<Token> {
   private currentGroup: ParticipantGroup | null = null;
   private idCounters = {
     evt: 0,

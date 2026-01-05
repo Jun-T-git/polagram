@@ -1,12 +1,12 @@
 import { PolagramRoot } from '../../ast';
-import { Token, TokenType } from '../languages/mermaid/tokens'; // Should generalize
 import { BaseLexer } from './lexer';
+import { BaseToken } from './token';
 
-export abstract class BaseParser {
-  protected currToken!: Token;
-  protected peekToken!: Token;
+export abstract class BaseParser<T extends BaseToken = BaseToken> {
+  protected currToken!: T;
+  protected peekToken!: T;
 
-  constructor(protected lexer: BaseLexer) {
+  constructor(protected lexer: BaseLexer<T>) {
     this.advance();
     this.advance();
   }
@@ -18,15 +18,15 @@ export abstract class BaseParser {
 
   public abstract parse(): PolagramRoot;
 
-  protected curTokenIs(t: TokenType): boolean {
+  protected curTokenIs(t: string): boolean {
     return this.currToken.type === t;
   }
 
-  protected peekTokenIs(t: TokenType): boolean {
+  protected peekTokenIs(t: string): boolean {
     return this.peekToken.type === t;
   }
 
-  protected expectPeek(t: TokenType): boolean {
+  protected expectPeek(t: string): boolean {
     if (this.peekTokenIs(t)) {
       this.advance();
       return true;

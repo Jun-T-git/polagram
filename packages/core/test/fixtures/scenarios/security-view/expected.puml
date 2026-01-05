@@ -1,0 +1,25 @@
+@startuml
+participant Client
+participant Gateway
+participant Auth
+participant API
+participant Database
+participant AuditLog
+
+Client -> Gateway: Request with token
+Gateway -> Auth: Validate token
+Auth -> Database: Check token
+Database --> Auth: Valid
+
+alt Token Valid
+    Auth --> Gateway: Authorized
+    Gateway -> API: Forward request
+    API --> Gateway: Response
+    Gateway --> Client: 200 OK
+    Gateway -> AuditLog: Log: Success
+else Token Invalid
+    Auth --> Gateway: Unauthorized
+    Gateway --> Client: 401 Error
+    Gateway -> AuditLog: Log: Failed auth
+end
+@enduml

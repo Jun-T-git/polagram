@@ -1,7 +1,8 @@
 
-import { Token } from '../languages/mermaid/tokens'; // Note: Should eventually move TokenType to common if shared
+import { BaseToken } from './token';
 
-export abstract class BaseLexer {
+
+export abstract class BaseLexer<T extends BaseToken = BaseToken> {
   protected position = 0;
   protected readPosition = 0;
   protected ch = '';
@@ -16,7 +17,7 @@ export abstract class BaseLexer {
       return this.input;
   }
 
-  public abstract nextToken(): Token;
+  public abstract nextToken(): T;
 
   protected readChar() {
     if (this.readPosition >= this.input.length) {

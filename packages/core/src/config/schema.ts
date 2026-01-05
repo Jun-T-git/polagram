@@ -63,13 +63,19 @@ const LensSchema = z.object({
     layers: z.array(LayerSchema)
 });
 
+// -- Format --
+
+const DiagramFormatSchema = z.enum(['mermaid', 'plantuml']);
+
 // -- Config --
 
 const TargetConfigSchema = z.object({
     input: z.array(z.string()),
     outputDir: z.string(),
     ignore: z.array(z.string()).optional(),
-    lenses: z.array(LensSchema)
+    lenses: z.array(LensSchema),
+    format: DiagramFormatSchema.optional(), // Input format (auto-detected if omitted)
+    outputFormat: DiagramFormatSchema.optional() // Output format (same as input if omitted)
 });
 
 export const PolagramConfigSchema = z.object({
