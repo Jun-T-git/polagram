@@ -73,9 +73,8 @@ describe('TransformationEngine (Pipeline Integration)', () => {
     const root = createAst([pA], [msgAB]);
     const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
-    // @ts-expect-error - purposefully passing invalid action
     const result = new TransformationEngine().transform(root, [
-      { action: 'invalid' },
+      { action: 'invalid' } as any,
     ]);
 
     expect(result).toEqual(root); // Logic remains identity, but object reference changes due to CoW cleaners
