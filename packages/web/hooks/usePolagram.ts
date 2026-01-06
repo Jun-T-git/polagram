@@ -163,7 +163,7 @@ export function usePolagram(code: string): UsePolagramReturn {
 
     const newLens = createLensFromPipeline(ops);
     // Update the first lens's layers
-    config.targets[0].lenses[0].layers = newLens.layers;
+    config.targets[0].lenses[0].layers = newLens.layers as any;
     
     return yaml.dump(config);
   };

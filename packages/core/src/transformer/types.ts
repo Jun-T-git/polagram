@@ -5,20 +5,20 @@ import { FragmentOperator, PolagramRoot } from '../ast';
 export type TextMatcher = string | RegExp | { pattern: string; flags?: string };
 
 export interface FragmentSelector {
-    kind?: 'fragment';
+    kind: 'fragment';
     condition?: TextMatcher;
     operator?: FragmentOperator | FragmentOperator[];
 }
 
 export interface ParticipantSelector {
-    kind?: 'participant';
+    kind: 'participant';
     name?: TextMatcher;
     id?: TextMatcher;
     stereotype?: TextMatcher;
 }
 
 export interface MessageSelector {
-    kind?: 'message';
+    kind: 'message';
     text?: TextMatcher;
     from?: TextMatcher;
     to?: TextMatcher;
@@ -26,7 +26,7 @@ export interface MessageSelector {
 }
 
 export interface GroupSelector {
-    kind?: 'group';
+    kind: 'group';
     name?: TextMatcher;
 }
 
