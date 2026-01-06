@@ -44,6 +44,7 @@ export default async function Image() {
             src={logoSrc}
             width="120"
             height="120"
+            alt="Polagram Logo"
             style={{ marginRight: '24px' }}
           />
           <div style={{ display: 'flex', alignItems: 'center' }}>
