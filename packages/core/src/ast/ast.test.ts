@@ -6,7 +6,7 @@ describe('Polagram AST Definition', () => {
   it('should support a complex lossless scenario', () => {
     // This "Rosetta Stone" object attempts to use ALL new features
     // to prove they are correctly typed and coexist.
-    
+
     const complexAst: PolagramRoot = {
       kind: 'root',
       meta: {
@@ -14,8 +14,8 @@ describe('Polagram AST Definition', () => {
         source: 'plantuml',
         title: 'Complex Order System',
         theme: {
-          participantPadding: '10'
-        }
+          participantPadding: '10',
+        },
       },
       groups: [
         {
@@ -24,30 +24,30 @@ describe('Polagram AST Definition', () => {
           name: 'AWS Cloud',
           type: 'box',
           participantIds: ['p_db', 'p_sqs'],
-          style: { backgroundColor: '#f0f0f0' }
-        }
+          style: { backgroundColor: '#f0f0f0' },
+        },
       ],
       participants: [
         {
           id: 'p_user',
           name: 'User',
-          type: 'actor'
+          type: 'actor',
         },
         {
           id: 'p_api',
           name: 'API Gateway',
-          type: 'control'
+          type: 'control',
         },
         {
           id: 'p_sqs',
           name: 'Order Queue',
-          type: 'queue'
+          type: 'queue',
         },
         {
           id: 'p_db',
           name: 'DynamoDB',
-          type: 'database'
-        }
+          type: 'database',
+        },
       ],
       events: [
         // 1. Found message (from unknown)
@@ -58,13 +58,13 @@ describe('Polagram AST Definition', () => {
           to: 'p_user',
           text: 'User lands on page',
           type: 'sync',
-          style: { line: 'solid', head: 'arrow' }
+          style: { line: 'solid', head: 'arrow' },
         },
         // 2. Activation independent of message
         {
           kind: 'activation',
           participantId: 'p_user',
-          action: 'activate'
+          action: 'activate',
         },
         // 3. Message with lifecycle
         {
@@ -75,7 +75,7 @@ describe('Polagram AST Definition', () => {
           text: 'POST /order',
           type: 'sync',
           style: { line: 'solid', head: 'arrow' },
-          lifecycle: { activateTarget: true }
+          lifecycle: { activateTarget: true },
         },
         // 4. Create message (Lifecycle)
         {
@@ -85,19 +85,19 @@ describe('Polagram AST Definition', () => {
           to: 'p_sqs',
           text: 'new OrderMessage()',
           type: 'create', // Explicit create
-          style: { line: 'dotted', head: 'arrow' }
+          style: { line: 'dotted', head: 'arrow' },
         },
         // 5. Visual Divider
         {
           kind: 'divider',
           id: 'd_1',
-          text: 'Async Processing'
+          text: 'Async Processing',
         },
         // 6. Visual Spacer (Delay)
         {
           kind: 'spacer',
           id: 's_1',
-          text: '... 5 seconds later ...'
+          text: '... 5 seconds later ...',
         },
         // 7. Grouping/Fragment (Loop)
         {
@@ -116,11 +116,11 @@ describe('Polagram AST Definition', () => {
                   to: 'p_sqs',
                   text: 'Check items',
                   type: 'sync',
-                  style: { line: 'solid', head: 'arrow' }
-                }
-              ]
-            }
-          ]
+                  style: { line: 'solid', head: 'arrow' },
+                },
+              ],
+            },
+          ],
         },
         // 8. Reference (Ref)
         {
@@ -128,7 +128,7 @@ describe('Polagram AST Definition', () => {
           id: 'r_1',
           text: 'Payment Processing',
           link: 'payment.mermaid',
-          participantIds: ['p_api', 'p_db']
+          participantIds: ['p_api', 'p_db'],
         },
         // 9. Destroy (Lifecycle)
         {
@@ -138,11 +138,11 @@ describe('Polagram AST Definition', () => {
           to: 'p_sqs',
           text: 'delete',
           type: 'destroy',
-          style: { line: 'solid', head: 'cross' } // X marker
-        }
-      ]
+          style: { line: 'solid', head: 'cross' }, // X marker
+        },
+      ],
     };
-    
+
     expect(complexAst).toBeTruthy();
     expect(complexAst.participants.length).toBe(4);
     expect(complexAst.events.length).toBe(9);

@@ -45,9 +45,21 @@ participant "Service Wrapper" as Svc
       const ast = parse(input);
 
       expect(ast.participants).toHaveLength(3);
-      expect(ast.participants[0]).toMatchObject({ id: 'User', name: 'User', type: 'actor' });
-      expect(ast.participants[1]).toMatchObject({ id: 'DB', name: 'DB', type: 'database' });
-      expect(ast.participants[2]).toMatchObject({ id: 'Svc', name: 'Service Wrapper', type: 'participant' });
+      expect(ast.participants[0]).toMatchObject({
+        id: 'User',
+        name: 'User',
+        type: 'actor',
+      });
+      expect(ast.participants[1]).toMatchObject({
+        id: 'DB',
+        name: 'DB',
+        type: 'database',
+      });
+      expect(ast.participants[2]).toMatchObject({
+        id: 'Svc',
+        name: 'Service Wrapper',
+        type: 'participant',
+      });
     });
   });
 
@@ -63,14 +75,14 @@ A -> A : Internal
       const ast = parse(input);
 
       expect(ast.events).toHaveLength(3);
-      
+
       expect(ast.events[0]).toMatchObject({
         kind: 'message',
         from: 'A',
         to: 'B',
         text: 'Sync Call',
         type: 'sync',
-        style: { line: 'solid', head: 'arrow' }
+        style: { line: 'solid', head: 'arrow' },
       });
 
       expect(ast.events[1]).toMatchObject({
@@ -79,14 +91,14 @@ A -> A : Internal
         to: 'A',
         text: 'Reply',
         type: 'reply',
-        style: { line: 'dotted', head: 'arrow' } // PlantUML --> is dotted arrow
+        style: { line: 'dotted', head: 'arrow' }, // PlantUML --> is dotted arrow
       });
 
       expect(ast.events[2]).toMatchObject({
         kind: 'message',
         from: 'A',
         to: 'A',
-        text: 'Internal'
+        text: 'Internal',
       });
     });
   });
@@ -102,9 +114,21 @@ deactivate A
 `;
       const ast = parse(input);
       expect(ast.events).toHaveLength(3);
-      expect(ast.events[0]).toMatchObject({ kind: 'activation', participantId: 'A', action: 'activate' });
-      expect(ast.events[1]).toMatchObject({ kind: 'message', from: 'A', to: 'B' });
-      expect(ast.events[2]).toMatchObject({ kind: 'activation', participantId: 'A', action: 'deactivate' });
+      expect(ast.events[0]).toMatchObject({
+        kind: 'activation',
+        participantId: 'A',
+        action: 'activate',
+      });
+      expect(ast.events[1]).toMatchObject({
+        kind: 'message',
+        from: 'A',
+        to: 'B',
+      });
+      expect(ast.events[2]).toMatchObject({
+        kind: 'activation',
+        participantId: 'A',
+        action: 'deactivate',
+      });
     });
   });
 
@@ -120,10 +144,30 @@ note over A, B : Shared Note
 `;
       const ast = parse(input);
       expect(ast.events).toHaveLength(4);
-      expect(ast.events[0]).toMatchObject({ kind: 'note', position: 'left', participantIds: ['A'], text: 'Note Left' });
-      expect(ast.events[1]).toMatchObject({ kind: 'note', position: 'right', participantIds: ['A'], text: 'Note Right' });
-      expect(ast.events[2]).toMatchObject({ kind: 'note', position: 'over', participantIds: ['A'], text: 'Note Over' });
-      expect(ast.events[3]).toMatchObject({ kind: 'note', position: 'over', participantIds: ['A', 'B'], text: 'Shared Note' });
+      expect(ast.events[0]).toMatchObject({
+        kind: 'note',
+        position: 'left',
+        participantIds: ['A'],
+        text: 'Note Left',
+      });
+      expect(ast.events[1]).toMatchObject({
+        kind: 'note',
+        position: 'right',
+        participantIds: ['A'],
+        text: 'Note Right',
+      });
+      expect(ast.events[2]).toMatchObject({
+        kind: 'note',
+        position: 'over',
+        participantIds: ['A'],
+        text: 'Note Over',
+      });
+      expect(ast.events[3]).toMatchObject({
+        kind: 'note',
+        position: 'over',
+        participantIds: ['A', 'B'],
+        text: 'Shared Note',
+      });
     });
   });
 
@@ -188,7 +232,7 @@ participant C
       expect(box.name).toBe('Internal Service');
       expect(box.style?.backgroundColor).toBe('#LightBlue');
       expect(box.participantIds).toEqual(['A', 'B']);
-      
+
       expect(ast.participants).toHaveLength(3);
     });
   });
@@ -204,7 +248,9 @@ A -> B : Hello ' Another comment? No, this is part of string usually?
 `;
       const ast = parse(input);
       expect(ast.events).toHaveLength(1);
-      expect(ast.events[0]).toMatchObject({ text: "Hello ' Another comment? No, this is part of string usually?" });
+      expect(ast.events[0]).toMatchObject({
+        text: "Hello ' Another comment? No, this is part of string usually?",
+      });
     });
 
     it('should parse nested fragments', () => {
@@ -222,11 +268,11 @@ end
       expect(ast.events).toHaveLength(1);
       const outer = ast.events[0] as any;
       expect(outer.operator).toBe('alt');
-      
+
       const outerEvents = outer.branches[0].events;
       expect(outerEvents).toHaveLength(2);
       expect(outerEvents[0].kind).toBe('message');
-      
+
       const inner = outerEvents[1];
       expect(inner.kind).toBe('fragment');
       expect(inner.operator).toBe('loop');

@@ -1,4 +1,3 @@
-
 export interface BaseToken {
   type: string;
   literal: string;

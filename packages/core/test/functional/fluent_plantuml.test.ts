@@ -13,8 +13,8 @@ C -> A: Message 3
 function normalize(code: string): string {
   return code
     .split('\n')
-    .map(line => line.trim())
-    .filter(line => line.length > 0 && !line.startsWith("'"))
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0 && !line.startsWith("'"))
     .join('\n');
 }
 
@@ -24,7 +24,7 @@ describe('PlantUML Fluent API Tests', () => {
       const result = Polagram.init(samplePlantUML, 'plantuml')
         .focusParticipant('B')
         .toPlantUML();
-      
+
       expect(normalize(result)).toContain('participant B');
       expect(normalize(result)).toContain('A -> B: Message 1');
       expect(normalize(result)).toContain('B -> C: Message 2');
@@ -34,7 +34,7 @@ describe('PlantUML Fluent API Tests', () => {
       const result = Polagram.init(samplePlantUML, 'plantuml')
         .removeParticipant('B')
         .toPlantUML();
-      
+
       const normalized = normalize(result);
       expect(normalized).not.toContain('participant B');
       expect(normalized).toContain('C -> A: Message 3');
@@ -53,7 +53,7 @@ PaymentService -> InventoryService: Check stock
       const result = Polagram.init(code, 'plantuml')
         .focusParticipant(/.*Service$/)
         .toPlantUML();
-      
+
       const normalized = normalize(result);
       expect(normalized).toContain('PaymentService');
       expect(normalized).toContain('InventoryService');
@@ -72,7 +72,7 @@ PaymentService -> ErrorLogger: Error
       const result = Polagram.init(code, 'plantuml')
         .removeParticipant(/^Debug.*/)
         .toPlantUML();
-      
+
       const normalized = normalize(result);
       expect(normalized).not.toContain('DebugLogger');
       expect(normalized).toContain('PaymentService');
@@ -85,7 +85,7 @@ PaymentService -> ErrorLogger: Error
       const result = Polagram.init(samplePlantUML, 'plantuml')
         .focusParticipant({ name: 'B' })
         .toPlantUML();
-      
+
       expect(normalize(result)).toContain('participant B');
     });
   });
@@ -107,7 +107,7 @@ D -> A: Message 4
         .removeParticipant('D')
         .focusParticipant('B')
         .toPlantUML();
-      
+
       const normalized = normalize(result);
       expect(normalized).toContain('participant B');
       expect(normalized).not.toContain('participant D');
@@ -127,7 +127,7 @@ end
       const result = Polagram.init(code, 'plantuml')
         .resolveFragment('Option')
         .toPlantUML();
-      
+
       const normalized = normalize(result);
       expect(normalized).not.toContain('opt');
       expect(normalized).toContain('A -> B: Message');
@@ -147,7 +147,7 @@ end
       const result = Polagram.init(code, 'plantuml')
         .resolveFragment({ condition: 'Success' })
         .toPlantUML();
-      
+
       const normalized = normalize(result);
       expect(normalized).not.toContain('alt Success');
       expect(normalized).toContain('A -> B: OK');
@@ -160,7 +160,7 @@ end
       const ast = Polagram.init(samplePlantUML, 'plantuml')
         .focusParticipant('B')
         .toAST();
-      
+
       expect(ast).toBeDefined();
       expect(ast.participants).toBeDefined();
       expect(ast.events).toBeDefined();
@@ -172,14 +172,17 @@ end
       const lens = {
         name: 'Test Lens',
         layers: [
-          { action: 'remove' as const, selector: { kind: 'participant' as const, name: 'B' } }
-        ]
+          {
+            action: 'remove' as const,
+            selector: { kind: 'participant' as const, name: 'B' },
+          },
+        ],
       };
 
       const result = Polagram.init(samplePlantUML, 'plantuml')
         .applyLens(lens)
         .toPlantUML();
-      
+
       const normalized = normalize(result);
       expect(normalized).not.toContain('participant B');
       expect(normalized).toContain('C -> A: Message 3');
@@ -189,8 +192,11 @@ end
       const lens = {
         name: 'Focus Lens',
         layers: [
-          { action: 'focus' as const, selector: { kind: 'participant' as const, name: 'B' } }
-        ]
+          {
+            action: 'focus' as const,
+            selector: { kind: 'participant' as const, name: 'B' },
+          },
+        ],
       };
 
       const result = Polagram.init(samplePlantUML, 'plantuml')
@@ -220,7 +226,7 @@ end
       const result = Polagram.init(complexCode, 'plantuml')
         .resolveFragment({ condition: 'Retry' })
         .toPlantUML();
-      
+
       const normalized = normalize(result);
       expect(normalized).not.toContain('loop Retry');
       expect(normalized).toContain('Logic -> DB: Query');
@@ -240,7 +246,7 @@ Logic -> DB: Query
       const result = Polagram.init(complexCode, 'plantuml')
         .removeParticipant('Auth')
         .toPlantUML();
-      
+
       const normalized = normalize(result);
       expect(normalized).not.toContain('participant Auth');
       expect(normalized).not.toContain('User -> Auth: Login');
@@ -265,7 +271,7 @@ end
         .resolveFragment({ condition: 'Retry' })
         .removeParticipant('Auth')
         .toPlantUML();
-      
+
       const normalized = normalize(result);
       expect(normalized).not.toContain('loop Retry');
       expect(normalized).not.toContain('participant Auth');
@@ -295,25 +301,28 @@ Logic -> Logic: Debug: Calculation done
       const complexLens = {
         name: 'Clean Logic View',
         layers: [
-          { 
-            action: 'resolve' as const, 
-            selector: { kind: 'fragment' as const, condition: 'Retry' } 
+          {
+            action: 'resolve' as const,
+            selector: { kind: 'fragment' as const, condition: 'Retry' },
           },
-          { 
-            action: 'remove' as const, 
-            selector: { kind: 'participant' as const, name: 'Auth' } 
+          {
+            action: 'remove' as const,
+            selector: { kind: 'participant' as const, name: 'Auth' },
           },
-          { 
-            action: 'remove' as const, 
-            selector: { kind: 'message' as const, text: { pattern: '^Debug:' } } 
-          }
-        ]
+          {
+            action: 'remove' as const,
+            selector: {
+              kind: 'message' as const,
+              text: { pattern: '^Debug:' },
+            },
+          },
+        ],
       };
 
       const result = Polagram.init(complexCode, 'plantuml')
         .applyLens(complexLens)
         .toPlantUML();
-      
+
       const normalized = normalize(result);
       expect(normalized).toContain('Logic -> DB: Query');
       expect(normalized).not.toContain('loop Retry');
@@ -326,7 +335,7 @@ Logic -> Logic: Debug: Calculation done
       const result = Polagram.init(samplePlantUML, 'plantuml')
         .removeParticipant('B')
         .toMermaid();
-      
+
       const normalized = normalize(result);
       expect(normalized).toContain('sequenceDiagram');
       expect(normalized).not.toContain('participant B');
@@ -348,7 +357,7 @@ API --> User: Response
       const result = Polagram.init(code, 'plantuml')
         .removeParticipant('Logger')
         .toMermaid();
-      
+
       const normalized = normalize(result);
       expect(normalized).toContain('sequenceDiagram');
       expect(normalized).not.toContain('Logger');

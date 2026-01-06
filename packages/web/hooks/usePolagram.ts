@@ -64,6 +64,7 @@ export function usePolagram(code: string): UsePolagramReturn {
       // 2. Apply Lens if it exists
       if (lensYaml.trim()) {
         try {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const rawConfig = yaml.load(lensYaml) as any;
           const config = rawConfig;
           // Extract the first lens from the first target
@@ -163,7 +164,8 @@ export function usePolagram(code: string): UsePolagramReturn {
 
     const newLens = createLensFromPipeline(ops);
     // Update the first lens's layers
-    config.targets[0].lenses[0].layers = newLens.layers;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    config.targets[0].lenses[0].layers = newLens.layers as any;
     
     return yaml.dump(config);
   };
@@ -178,6 +180,7 @@ export function usePolagram(code: string): UsePolagramReturn {
     }
 
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const rawConfig = yaml.load(yamlStr) as any;
       // We might fail validation while typing, which is fine
       const config = rawConfig;

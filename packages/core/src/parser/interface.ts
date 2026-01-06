@@ -1,5 +1,4 @@
-
-import { PolagramRoot } from '../ast';
+import type { PolagramRoot } from '../ast';
 
 /**
  * Strategy Interface for Diagram Parsing.

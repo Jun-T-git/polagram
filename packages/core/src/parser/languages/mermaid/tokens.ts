@@ -1,4 +1,4 @@
-export type TokenType = 
+export type TokenType =
   | 'SEQUENCE_DIAGRAM'
   | 'NEWLINE'
   | 'EOF'

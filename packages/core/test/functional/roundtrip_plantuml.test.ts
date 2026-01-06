@@ -1,6 +1,5 @@
-
-import { readFileSync, readdirSync } from 'fs';
-import { join } from 'path';
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { PlantUMLGeneratorVisitor } from '../../src/generator/generators/plantuml';
 import { ParserFactory } from '../../src/parser';
@@ -16,18 +15,18 @@ const FIXTURES_DIR = join(__dirname, '../fixtures/roundtrip');
 function normalize(code: string): string {
   return code
     .split('\n')
-    .map(line => line.trim())
-    .filter(line => line.length > 0 && !line.startsWith("'")) // Ignore PlantUML comments
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0 && !line.startsWith("'")) // Ignore PlantUML comments
     .join('\n');
 }
 
 describe('PlantUML Roundtrip Tests', () => {
-  const files = readdirSync(FIXTURES_DIR).filter(f => f.endsWith('.puml'));
+  const files = readdirSync(FIXTURES_DIR).filter((f) => f.endsWith('.puml'));
 
-  files.forEach(file => {
+  files.forEach((file) => {
     it(`should roundtrip ${file} without information loss`, () => {
       const originalCode = readFileSync(join(FIXTURES_DIR, file), 'utf-8');
-      
+
       // 1. Parse: Factory -> Strategy -> AST
       const parser = ParserFactory.getParser('plantuml');
       const ast = parser.parse(originalCode);

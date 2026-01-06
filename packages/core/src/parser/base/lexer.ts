@@ -1,6 +1,4 @@
-
-import { BaseToken } from './token';
-
+import type { BaseToken } from './token';
 
 export abstract class BaseLexer<T extends BaseToken = BaseToken> {
   protected position = 0;
@@ -14,7 +12,7 @@ export abstract class BaseLexer<T extends BaseToken = BaseToken> {
   }
 
   public getInput(): string {
-      return this.input;
+    return this.input;
   }
 
   public abstract nextToken(): T;
@@ -61,7 +59,7 @@ export abstract class BaseLexer<T extends BaseToken = BaseToken> {
     if (('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z') || ch === '_') {
       return true;
     }
-    
+
     // Support Unicode letters (including Japanese, Chinese, Korean, etc.)
     // This uses a simple check: if the character code is > 127 (non-ASCII)
     // and it's not a digit or whitespace, treat it as a letter
@@ -70,7 +68,7 @@ export abstract class BaseLexer<T extends BaseToken = BaseToken> {
       // Exclude Unicode digits and whitespace
       return !/[\s\d]/.test(ch);
     }
-    
+
     return false;
   }
 
