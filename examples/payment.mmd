@@ -1,0 +1,22 @@
+sequenceDiagram
+    participant Client
+    participant API
+    participant PaymentService
+    participant Logger
+    participant Database
+    
+    Client->>API: POST /payment
+    API->>Logger: Log request
+    API->>PaymentService: Process payment
+    
+    alt Success
+        PaymentService->>Database: Save transaction
+        Database-->>PaymentService: OK
+        PaymentService-->>API: Payment successful
+        API->>Logger: Log success
+        API-->>Client: 200 OK
+    else Error
+        PaymentService-->>API: Payment failed
+        API->>Logger: Log error
+        API-->>Client: 400 Error
+    end

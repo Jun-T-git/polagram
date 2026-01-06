@@ -1,0 +1,25 @@
+sequenceDiagram
+    participant User
+    participant Frontend
+    participant AuthService
+    participant Database
+    participant Logger
+    
+    User->>Frontend: Enter credentials
+    Frontend->>AuthService: POST /login
+    AuthService->>Logger: Log attempt
+    AuthService->>Database: Verify credentials
+    
+    alt Valid credentials
+        Database-->>AuthService: User found
+        AuthService->>Database: Create session
+        Database-->>AuthService: Session created
+        AuthService->>Logger: Log success
+        AuthService-->>Frontend: Token
+        Frontend-->>User: Login successful
+    else Invalid credentials
+        Database-->>AuthService: User not found
+        AuthService->>Logger: Log failure
+        AuthService-->>Frontend: 401 Unauthorized
+        Frontend-->>User: Login failed
+    end

@@ -118,5 +118,34 @@ program
         }
     });
 
+program
+    .command('preview')
+    .description('Build or serve static spec viewer for diagrams')
+    .argument('[action]', 'Action to perform: build or serve', 'build')
+    .option('-c, --config <path>', 'Path to config file', 'polagram.yml')
+    .option('-o, --outDir <path>', 'Output directory for build', 'polagram-preview')
+    .option('-p, --port <number>', 'Port for serve', '4173')
+    .action(async (action, options) => {
+        try {
+            // Dynamic import to avoid loading preview package when not needed
+            const { build, serve } = await import('@polagram/preview');
+            
+            if (action === 'serve') {
+                await serve({
+                    config: options.config,
+                    port: parseInt(options.port, 10)
+                });
+            } else {
+                await build({
+                    config: options.config,
+                    outDir: options.outDir
+                });
+            }
+        } catch (error: unknown) {
+            console.error('Preview error:', error instanceof Error ? error.message : String(error));
+            process.exit(1);
+        }
+    });
+
 program.parse();
 

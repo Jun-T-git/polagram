@@ -10,6 +10,8 @@ pnpm-debug.log*
 dist
 dist-ssr
 *.local
+preview-test/
+.polagram-preview-tmp/
 
 # Turborepo cache
 .turbo

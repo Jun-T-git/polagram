@@ -1,0 +1,40 @@
+{
+  "name": "@polagram/preview",
+  "version": "0.0.1",
+  "type": "module",
+  "private": true,
+  "description": "Static spec viewer for Polagram diagrams",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "build:lib": "tsc",
+    "preview": "vite preview",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@polagram/core": "workspace:*",
+    "glob": "^11.0.0",
+    "js-yaml": "^4.1.0",
+    "mermaid": "^11.12.2",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@vitejs/plugin-react": "^4.5.2",
+    "typescript": "^5.7.2",
+    "vite": "^7.3.0",
+    "vitest": "^4.0.16"
+  }
+}

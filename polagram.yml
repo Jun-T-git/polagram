@@ -1,0 +1,33 @@
+version: 1
+targets:
+  - input: ["examples/**/*.mmd"]
+    outputDir: "generated"
+    lenses:
+      - name: "success"
+        layers:
+          - action: resolve
+            selector:
+              kind: fragment
+              condition: "Success"
+          - action: remove
+            selector:
+              kind: participant
+              name: "Logger"
+      
+      - name: "error"
+        layers:
+          - action: resolve
+            selector:
+              kind: fragment
+              condition: "Error"
+          - action: remove
+            selector:
+              kind: participant
+              name: "Logger"
+      
+      - name: "clean"
+        layers:
+          - action: remove
+            selector:
+              kind: participant
+              name: "Logger"
