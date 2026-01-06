@@ -12,8 +12,8 @@ const sampleCode = `sequenceDiagram
 function normalize(code: string): string {
   return code
     .split('\n')
-    .map(line => line.trim())
-    .filter(line => line.length > 0 && !line.startsWith('%%'))
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0 && !line.startsWith('%%'))
     .join('\n');
 }
 
@@ -23,7 +23,7 @@ describe('Fluent API Tests', () => {
       const result = Polagram.init(sampleCode)
         .focusParticipant('B')
         .toMermaid();
-      
+
       expect(normalize(result)).toContain('participant B');
       expect(normalize(result)).toContain('A->>B: Message 1');
       expect(normalize(result)).toContain('B->>C: Message 2');
@@ -33,7 +33,7 @@ describe('Fluent API Tests', () => {
       const result = Polagram.init(sampleCode)
         .removeParticipant('B')
         .toMermaid();
-      
+
       const normalized = normalize(result);
       expect(normalized).not.toContain('participant B');
       expect(normalized).toContain('C->>A: Message 3');
@@ -51,7 +51,7 @@ describe('Fluent API Tests', () => {
       const result = Polagram.init(code)
         .focusParticipant(/.*Service$/)
         .toMermaid();
-      
+
       const normalized = normalize(result);
       expect(normalized).toContain('PaymentService');
       expect(normalized).toContain('InventoryService');
@@ -69,7 +69,7 @@ describe('Fluent API Tests', () => {
       const result = Polagram.init(code)
         .removeParticipant(/^Debug.*/)
         .toMermaid();
-      
+
       const normalized = normalize(result);
       expect(normalized).not.toContain('DebugLogger');
       expect(normalized).toContain('PaymentService');
@@ -82,7 +82,7 @@ describe('Fluent API Tests', () => {
       const result = Polagram.init(sampleCode)
         .focusParticipant({ name: 'B' })
         .toMermaid();
-      
+
       expect(normalize(result)).toContain('participant B');
     });
   });
@@ -103,7 +103,7 @@ describe('Fluent API Tests', () => {
         .removeParticipant('D')
         .focusParticipant('B')
         .toMermaid();
-      
+
       const normalized = normalize(result);
       expect(normalized).toContain('participant B');
       expect(normalized).not.toContain('participant D');
@@ -119,10 +119,8 @@ describe('Fluent API Tests', () => {
         A->>B: Message
     end`;
 
-      const result = Polagram.init(code)
-        .resolveFragment('Option')
-        .toMermaid();
-      
+      const result = Polagram.init(code).resolveFragment('Option').toMermaid();
+
       const normalized = normalize(result);
       expect(normalized).not.toContain('opt');
       expect(normalized).toContain('A->>B: Message');
@@ -131,10 +129,8 @@ describe('Fluent API Tests', () => {
 
   describe('toAST', () => {
     it('should return transformed AST', () => {
-      const ast = Polagram.init(sampleCode)
-        .focusParticipant('B')
-        .toAST();
-      
+      const ast = Polagram.init(sampleCode).focusParticipant('B').toAST();
+
       expect(ast).toBeDefined();
       expect(ast.participants).toBeDefined();
       expect(ast.events).toBeDefined();
@@ -146,14 +142,15 @@ describe('Fluent API Tests', () => {
       const lens = {
         name: 'Test Lens',
         layers: [
-          { action: 'remove' as const, selector: { kind: 'participant' as const, name: 'B' } }
-        ]
+          {
+            action: 'remove' as const,
+            selector: { kind: 'participant' as const, name: 'B' },
+          },
+        ],
       };
 
-      const result = Polagram.init(sampleCode)
-        .applyLens(lens)
-        .toMermaid();
-      
+      const result = Polagram.init(sampleCode).applyLens(lens).toMermaid();
+
       const normalized = normalize(result);
       expect(normalized).not.toContain('participant B');
       expect(normalized).toContain('C->>A: Message 3');
@@ -163,8 +160,11 @@ describe('Fluent API Tests', () => {
       const lens = {
         name: 'Focus Lens',
         layers: [
-          { action: 'focus' as const, selector: { kind: 'participant' as const, name: 'B' } }
-        ]
+          {
+            action: 'focus' as const,
+            selector: { kind: 'participant' as const, name: 'B' },
+          },
+        ],
       };
 
       // Original: A->B, B->C, C->A
@@ -178,10 +178,10 @@ describe('Fluent API Tests', () => {
         .toMermaid();
 
       const normalized = normalize(result);
-      
+
       // Focus B effects
       expect(normalized).toContain('participant B');
-      expect(normalized).not.toContain('C->>A: Message 3'); 
+      expect(normalized).not.toContain('C->>A: Message 3');
 
       // Remove Message 1 effects
       expect(normalized).not.toContain('A->>B: Message 1');
@@ -205,14 +205,14 @@ describe('Fluent API Tests', () => {
       const result = Polagram.init(complexCode)
         .resolveFragment({ condition: 'Retry' })
         .toMermaid();
-      
+
       const normalized = normalize(result);
       expect(normalized).not.toContain('loop Retry');
       expect(normalized).toContain('Logic->>DB: Query');
     });
 
     it('should remove participant in complex diagram', () => {
-        const complexCode = `sequenceDiagram
+      const complexCode = `sequenceDiagram
       participant User
       participant Auth
       participant Logic
@@ -220,16 +220,16 @@ describe('Fluent API Tests', () => {
       
       User->>Auth: Login
       Logic->>DB: Query`;
-  
-        // Debug: Just remove Auth
-        const result = Polagram.init(complexCode)
-          .removeParticipant('Auth')
-          .toMermaid();
-        
-        const normalized = normalize(result);
-        expect(normalized).not.toContain('participant Auth');
-        expect(normalized).not.toContain('User->>Auth: Login');
-        expect(normalized).toContain('Logic->>DB: Query');
+
+      // Debug: Just remove Auth
+      const result = Polagram.init(complexCode)
+        .removeParticipant('Auth')
+        .toMermaid();
+
+      const normalized = normalize(result);
+      expect(normalized).not.toContain('participant Auth');
+      expect(normalized).not.toContain('User->>Auth: Login');
+      expect(normalized).toContain('Logic->>DB: Query');
     });
 
     it('should resolve loop AND remove participant', () => {
@@ -250,9 +250,9 @@ describe('Fluent API Tests', () => {
         .resolveFragment({ condition: 'Retry' })
         .removeParticipant('Auth')
         .toMermaid();
-      
+
       const normalized = normalize(result);
-      
+
       expect(normalized).not.toContain('loop Retry'); // Resolved
       expect(normalized).not.toContain('participant Auth'); // Removed
       expect(normalized).not.toContain('User->>Auth: Login'); // Interaction Removed
@@ -281,29 +281,32 @@ describe('Fluent API Tests', () => {
         name: 'Clean Logic View',
         layers: [
           // 1. Unwrap the retry loop
-          { 
-            action: 'resolve' as const, 
-            selector: { kind: 'fragment' as const, condition: 'Retry' } 
+          {
+            action: 'resolve' as const,
+            selector: { kind: 'fragment' as const, condition: 'Retry' },
           },
           // 2. Remove Auth layer
-          { 
-            action: 'remove' as const, 
-            selector: { kind: 'participant' as const, name: 'Auth' } 
+          {
+            action: 'remove' as const,
+            selector: { kind: 'participant' as const, name: 'Auth' },
           },
           // 3. Remove Debug logs
-          { 
-            action: 'remove' as const, 
-            selector: { kind: 'message' as const, text: { pattern: '^Debug:' } } 
-          }
-        ]
+          {
+            action: 'remove' as const,
+            selector: {
+              kind: 'message' as const,
+              text: { pattern: '^Debug:' },
+            },
+          },
+        ],
       };
 
       const result = Polagram.init(complexCode)
         .applyLens(complexLens)
         .toMermaid();
-      
+
       const normalized = normalize(result);
-      
+
       // If this fails again, the individual tests above will hint why.
       expect(normalized).toContain('Logic->>DB: Query');
       expect(normalized).not.toContain('loop Retry');
@@ -326,7 +329,7 @@ System->>System: Self update`;
       const result = Polagram.init(code)
         .removeParticipant('System')
         .toMermaid();
-      
+
       const normalized = normalize(result);
 
       // Verify Removal
@@ -336,15 +339,15 @@ System->>System: Self update`;
 
       // Verify Preservation (Side Effect Check)
       expect(normalized).toContain('participant User');
-      
+
       // TODO: Parser/Generator bug causes Note to be malformed as 'note over:' (missing content).
       // Verify that at least the node exists (even if text is lost - known issue)
       // expect(normalized).toContain('Note left of User: Keep this note');
-      expect(normalized).toContain('note over:'); 
-      
+      expect(normalized).toContain('note over:');
+
       expect(normalized).toContain('User->>User: Local action');
-      
-      const indexParticipant = normalized.indexOf('participant User');
+
+      const _indexParticipant = normalized.indexOf('participant User');
       // const indexNote = normalized.indexOf('Note left of User');
       // expect(indexParticipant).toBeLessThan(indexNote);
     });

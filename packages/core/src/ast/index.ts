@@ -35,11 +35,11 @@ export interface MetaData {
 
 export interface Participant {
   id: string;
-  name: string;        // Display name
-  alias?: string;      // Code alias (e.g., "A" for "Alice")
+  name: string; // Display name
+  alias?: string; // Code alias (e.g., "A" for "Alice")
   type: ParticipantType;
   stereotype?: string; // <<Service>> etc.
-  style?: StyleProps;  // Specific color/style overrides
+  style?: StyleProps; // Specific color/style overrides
 }
 
 export type ParticipantType =
@@ -50,15 +50,15 @@ export type ParticipantType =
   | 'entity'
   | 'database'
   | 'collections' // PlantUML collections
-  | 'queue';      // PlantUML queue
+  | 'queue'; // PlantUML queue
 
 export interface ParticipantGroup {
   kind: 'group';
   id: string;
-  name?: string;       // Label for the box (e.g., "AWS Cloud")
-  type?: string;       // "box", "package", etc.
+  name?: string; // Label for the box (e.g., "AWS Cloud")
+  type?: string; // "box", "package", etc.
   participantIds: string[]; // Participants inside this group
-  style?: StyleProps;  // Background color (e.g., box "Green")
+  style?: StyleProps; // Background color (e.g., box "Green")
 }
 
 // ------------------------------------------------------------------
@@ -88,7 +88,7 @@ export interface MessageNode {
   from: MessageEndpoint;
   to: MessageEndpoint;
   text: string;
-  
+
   // Semantic Type
   // - sync: Solid line, standard call
   // - async: Open arrow, async message
@@ -102,7 +102,7 @@ export interface MessageNode {
     head: 'arrow' | 'async' | 'open' | 'cross'; // cross for lost messages sometimes
     color?: string;
   };
-  
+
   // Lifecycle effects attached to this message (Syntactic sugar)
   // e.g., mermaid "User->>+System: Call" implies activateTarget
   lifecycle?: {
@@ -120,19 +120,19 @@ export interface FragmentNode {
   branches: FragmentBranch[];
 }
 
-export type FragmentOperator = 
-  | 'alt' 
-  | 'opt' 
-  | 'loop' 
-  | 'par' 
-  | 'break' 
-  | 'critical' 
-  | 'rect'    // Visual grouping often used in Mermaid
-  | 'group';  // Generic group in PlantUML
+export type FragmentOperator =
+  | 'alt'
+  | 'opt'
+  | 'loop'
+  | 'par'
+  | 'break'
+  | 'critical'
+  | 'rect' // Visual grouping often used in Mermaid
+  | 'group'; // Generic group in PlantUML
 
 export interface FragmentBranch {
   id: string;
-  condition?: string;   // e.g., "Success", "[x > 5]"
+  condition?: string; // e.g., "Success", "[x > 5]"
   events: EventNode[];
 }
 
@@ -186,7 +186,7 @@ export interface SpacerNode {
   kind: 'spacer';
   id: string;
   height?: number; // Pixel hint (PlantUML "|||")
-  text?: string;   // Delay text (Mermaid "...")
+  text?: string; // Delay text (Mermaid "...")
 }
 
 // ------------------------------------------------------------------
