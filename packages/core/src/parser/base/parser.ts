@@ -1,6 +1,6 @@
-import { PolagramRoot } from '../../ast';
-import { BaseLexer } from './lexer';
-import { BaseToken } from './token';
+import type { PolagramRoot } from '../../ast';
+import type { BaseLexer } from './lexer';
+import type { BaseToken } from './token';
 
 export abstract class BaseParser<T extends BaseToken = BaseToken> {
   protected currToken!: T;

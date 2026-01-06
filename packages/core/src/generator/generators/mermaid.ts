@@ -1,19 +1,18 @@
-
-import {
-    ActivationNode,
-    DividerNode,
-    FragmentNode,
-    MessageNode,
-    NoteNode,
-    Participant,
-    ParticipantGroup,
-    PolagramRoot,
-    ReferenceNode,
-    SpacerNode,
+import type {
+  ActivationNode,
+  DividerNode,
+  FragmentNode,
+  MessageNode,
+  NoteNode,
+  Participant,
+  ParticipantGroup,
+  PolagramRoot,
+  ReferenceNode,
+  SpacerNode,
 } from '../../ast';
 import { getArrowString } from '../../parser/languages/mermaid/constants';
 import { Traverser } from '../base/walker';
-import { PolagramVisitor } from '../interface';
+import type { PolagramVisitor } from '../interface';
 
 /**
  * Visitor implementation that generates Mermaid code.
@@ -39,17 +38,17 @@ export class MermaidGeneratorVisitor implements PolagramVisitor {
     this.indentLevel++;
 
     if (node.meta?.title) {
-        this.add(`title ${node.meta.title}`);
+      this.add(`title ${node.meta.title}`);
     }
 
     // Participants
-    // Note: We iterate participants in defined order. 
+    // Note: We iterate participants in defined order.
     // Currently, AST does not preserve the interleaving of Box definitions and Participants,
     // so we cannot reliably reconstruct Box blocks wrapping specific ordered participants
-    // without potentially reordering them. 
+    // without potentially reordering them.
     // For now, we revert to simple iteration (ignoring boxes) to preserve order and existing behavior.
     for (const p of node.participants) {
-        this.visitParticipant(p);
+      this.visitParticipant(p);
     }
 
     // Events
@@ -59,7 +58,7 @@ export class MermaidGeneratorVisitor implements PolagramVisitor {
   visitParticipant(node: Participant): void {
     const typeKeyword = node.type === 'actor' ? 'actor' : 'participant';
     const safeName = node.name;
-    
+
     if (node.id === node.name) {
       this.add(`${typeKeyword} ${node.id}`);
     } else {
@@ -70,83 +69,83 @@ export class MermaidGeneratorVisitor implements PolagramVisitor {
   visitParticipantGroup(node: ParticipantGroup): void {
     let line = `box`;
     if (node.style?.backgroundColor) {
-        line += ` ${node.style.backgroundColor}`;
+      line += ` ${node.style.backgroundColor}`;
     }
     if (node.name) {
-        line += ` ${node.name}`;
+      line += ` ${node.name}`;
     }
     this.add(line);
   }
 
   visitMessage(node: MessageNode): void {
-      const from = node.from ?? '[*]'; 
-      const to = node.to ?? '[*]';
-    
-      const arrow = getArrowString(node.type, node.style);
-      
-      let suffix = '';
-      if (node.lifecycle?.activateTarget) {
-        suffix += '+';
-      }
-      if (node.lifecycle?.deactivateSource) {
-        suffix += '-';
-      }
-    
-      this.add(`${from}${arrow}${suffix}${to}: ${node.text}`);
+    const from = node.from ?? '[*]';
+    const to = node.to ?? '[*]';
+
+    const arrow = getArrowString(node.type, node.style);
+
+    let suffix = '';
+    if (node.lifecycle?.activateTarget) {
+      suffix += '+';
+    }
+    if (node.lifecycle?.deactivateSource) {
+      suffix += '-';
+    }
+
+    this.add(`${from}${arrow}${suffix}${to}: ${node.text}`);
   }
 
   visitFragment(node: FragmentNode): void {
-      if (node.branches.length === 0) return;
+    if (node.branches.length === 0) return;
 
-      const first = node.branches[0];
-      const firstCondition = first.condition ? ` ${first.condition}` : '';
-      this.add(`${node.operator}${firstCondition}`);
-      
+    const first = node.branches[0];
+    const firstCondition = first.condition ? ` ${first.condition}` : '';
+    this.add(`${node.operator}${firstCondition}`);
+
+    this.indent(() => {
+      this.traverser.dispatchEvents(first.events);
+    });
+
+    for (let i = 1; i < node.branches.length; i++) {
+      const b = node.branches[i];
+      const cond = b.condition ? ` ${b.condition}` : '';
+      this.add(`else${cond}`);
       this.indent(() => {
-          this.traverser.dispatchEvents(first.events);
+        this.traverser.dispatchEvents(b.events);
       });
+    }
 
-      for (let i = 1; i < node.branches.length; i++) {
-        const b = node.branches[i];
-        const cond = b.condition ? ` ${b.condition}` : '';
-        this.add(`else${cond}`);
-        this.indent(() => {
-            this.traverser.dispatchEvents(b.events);
-        });
-      }
-
-      this.add('end');
+    this.add('end');
   }
 
   visitNote(node: NoteNode): void {
-      const pos = node.position;
-      let target = '';
-      if (node.participantIds.length > 0) {
-        target = node.participantIds.join(',');
-        if (pos !== 'over') {
-          target = ` of ${target}`; 
-        } else {
-          target = ` ${target}`;
-        }
+    const pos = node.position;
+    let target = '';
+    if (node.participantIds.length > 0) {
+      target = node.participantIds.join(',');
+      if (pos !== 'over') {
+        target = ` of ${target}`;
+      } else {
+        target = ` ${target}`;
       }
-    
-      this.add(`note ${pos}${target}: ${node.text}`);
+    }
+
+    this.add(`note ${pos}${target}: ${node.text}`);
   }
 
   visitActivation(node: ActivationNode): void {
-      this.add(`${node.action} ${node.participantId}`);
+    this.add(`${node.action} ${node.participantId}`);
   }
 
   visitDivider(node: DividerNode): void {
-      this.add(`%% == ${node.text || ''} ==`);
+    this.add(`%% == ${node.text || ''} ==`);
   }
 
   visitSpacer(node: SpacerNode): void {
-      this.add(`...${node.text || ''}...`);
+    this.add(`...${node.text || ''}...`);
   }
 
   visitReference(node: ReferenceNode): void {
-      this.add(`%% ref: ${node.text}`);
+    this.add(`%% ref: ${node.text}`);
   }
 
   // --- Helpers ---
@@ -157,8 +156,8 @@ export class MermaidGeneratorVisitor implements PolagramVisitor {
   }
 
   private indent(fn: () => void) {
-      this.indentLevel++;
-      fn();
-      this.indentLevel--;
+    this.indentLevel++;
+    fn();
+    this.indentLevel--;
   }
 }

@@ -1,5 +1,4 @@
-
-export type TokenType = 
+export type TokenType =
   | 'START_UML'
   | 'END_UML'
   | 'NEWLINE'

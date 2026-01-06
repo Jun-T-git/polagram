@@ -1,6 +1,5 @@
-
-import { readFileSync, readdirSync } from 'fs';
-import { join } from 'path';
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { MermaidGeneratorVisitor } from '../../src/generator/generators/mermaid';
 import { ParserFactory } from '../../src/parser';
@@ -17,18 +16,18 @@ const FIXTURES_DIR = join(__dirname, '../fixtures/roundtrip');
 function normalize(code: string): string {
   return code
     .split('\n')
-    .map(line => line.trim())
-    .filter(line => line.length > 0 && !line.startsWith('%%')) // Ignore detailed comments, but keep semantics
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0 && !line.startsWith('%%')) // Ignore detailed comments, but keep semantics
     .join('\n');
 }
 
 describe('Mermaid Roundtrip Tests', () => {
-  const files = readdirSync(FIXTURES_DIR).filter(f => f.endsWith('.mmd'));
+  const files = readdirSync(FIXTURES_DIR).filter((f) => f.endsWith('.mmd'));
 
-  files.forEach(file => {
+  files.forEach((file) => {
     it(`should roundtrip ${file} without information loss`, () => {
       const originalCode = readFileSync(join(FIXTURES_DIR, file), 'utf-8');
-      
+
       // 1. Parse: Factory -> Strategy -> AST
       const parser = ParserFactory.getParser('mermaid');
       const ast = parser.parse(originalCode);

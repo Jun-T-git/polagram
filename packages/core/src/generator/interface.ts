@@ -1,15 +1,14 @@
-
-import {
-    ActivationNode,
-    DividerNode,
-    FragmentNode,
-    MessageNode,
-    NoteNode,
-    Participant,
-    ParticipantGroup,
-    PolagramRoot,
-    ReferenceNode,
-    SpacerNode,
+import type {
+  ActivationNode,
+  DividerNode,
+  FragmentNode,
+  MessageNode,
+  NoteNode,
+  Participant,
+  ParticipantGroup,
+  PolagramRoot,
+  ReferenceNode,
+  SpacerNode,
 } from '../ast';
 
 /**
@@ -18,10 +17,10 @@ import {
  */
 export interface PolagramVisitor {
   visitRoot(node: PolagramRoot): void;
-  
+
   visitParticipant(node: Participant): void;
   visitParticipantGroup(node: ParticipantGroup): void;
-  
+
   visitMessage(node: MessageNode): void;
   visitFragment(node: FragmentNode): void;
   visitNote(node: NoteNode): void;

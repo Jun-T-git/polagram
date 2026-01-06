@@ -4,8 +4,8 @@ import { Polagram } from '../../src/api';
 function normalize(code: string): string {
   return code
     .split('\n')
-    .map(line => line.trim())
-    .filter(line => line.length > 0 && !line.startsWith("'"))
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0 && !line.startsWith("'"))
     .join('\n');
 }
 
@@ -44,17 +44,17 @@ API -> Logger: Log: Purchase completed
         .resolveFragment({ condition: 'Payment Success' })
         .removeParticipant('Logger')
         .toPlantUML();
-      
+
       const normalized = normalize(result);
-      
+
       // Technical details removed
       expect(normalized).not.toContain('Logger');
       expect(normalized).not.toContain('Log:');
-      
+
       // Happy path preserved
       expect(normalized).toContain('API -> Database: Save order');
       expect(normalized).toContain('Success message');
-      
+
       // Error path removed
       expect(normalized).not.toContain('Payment Failed');
       expect(normalized).not.toContain('Error message');
@@ -66,9 +66,9 @@ API -> Logger: Log: Purchase completed
         .resolveFragment({ condition: 'Payment Success' })
         .focusParticipant(/User|WebUI|API/)
         .toPlantUML();
-      
+
       const normalized = normalize(result);
-      
+
       expect(normalized).toContain('User');
       expect(normalized).toContain('WebUI');
       expect(normalized).toContain('API');
@@ -115,19 +115,19 @@ API -> Logger: Log request
         .focusParticipant(/API|Cache|Database/)
         .resolveFragment({ condition: 'Cache Miss' })
         .toPlantUML();
-      
+
       const normalized = normalize(result);
-      
+
       // Backend components preserved
       expect(normalized).toContain('API');
       expect(normalized).toContain('Cache');
       expect(normalized).toContain('Database');
-      
+
       // WebUI is kept because API interacts with it
       expect(normalized).toContain('WebUI');
       // User removed (no direct interaction with focused participants)
       expect(normalized).not.toContain('User');
-      
+
       // Cache miss flow preserved
       expect(normalized).toContain('API -> Database: Query data');
       expect(normalized).toContain('API -> Cache: Store cache');
@@ -137,9 +137,9 @@ API -> Logger: Log request
       const result = Polagram.init(devDiagram, 'plantuml')
         .focusParticipant(/API|Database|Logger/)
         .toPlantUML();
-      
+
       const normalized = normalize(result);
-      
+
       expect(normalized).toContain('Logger');
       expect(normalized).toContain('API -> Logger: Log request');
     });
@@ -178,9 +178,9 @@ end
       const result = Polagram.init(securityDiagram, 'plantuml')
         .focusParticipant(/Gateway|Auth|AuditLog/)
         .toPlantUML();
-      
+
       const normalized = normalize(result);
-      
+
       expect(normalized).toContain('Gateway');
       expect(normalized).toContain('Auth');
       expect(normalized).toContain('AuditLog');
@@ -209,9 +209,9 @@ API --> User: Response
       const result = Polagram.init(diagram, 'plantuml')
         .removeParticipant('Logger')
         .toMermaid();
-      
+
       const normalized = normalize(result);
-      
+
       expect(normalized).toContain('sequenceDiagram');
       expect(normalized).not.toContain('Logger');
       expect(normalized).toContain('User->>API: Request');
@@ -267,17 +267,17 @@ LoadBalancer -> Logger: Log request
         .removeParticipant(/Logger|Metrics/)
         .focusParticipant(/AppServer1|Cache|Database/)
         .toPlantUML();
-      
+
       const normalized = normalize(result);
-      
+
       // Fragments resolved
       expect(normalized).not.toContain('alt Server 1');
       expect(normalized).not.toContain('opt Cache Miss');
-      
+
       // Monitoring removed
       expect(normalized).not.toContain('Logger');
       expect(normalized).not.toContain('Metrics');
-      
+
       // Core flow preserved
       expect(normalized).toContain('AppServer1');
       expect(normalized).toContain('Cache');

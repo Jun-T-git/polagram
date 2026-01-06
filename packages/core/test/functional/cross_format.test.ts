@@ -1,4 +1,3 @@
-
 import { describe, expect, it } from 'vitest';
 import { Polagram } from '../../src/api';
 
@@ -13,9 +12,9 @@ A -> B: Hello
 B --> A: World
 @enduml
 `;
-      
+
       const result = Polagram.init(plantuml, 'plantuml').toMermaid();
-      
+
       expect(result).toContain('sequenceDiagram');
       expect(result).toContain('participant A');
       expect(result).toContain('participant B');
@@ -38,9 +37,9 @@ else Error
 end
 @enduml
 `;
-      
+
       const result = Polagram.init(plantuml, 'plantuml').toMermaid();
-      
+
       expect(result).toContain('alt Success');
       expect(result).toContain('else Error');
       expect(result).toContain('end');
@@ -58,9 +57,9 @@ B --> A: Response
 deactivate B
 @enduml
 `;
-      
+
       const result = Polagram.init(plantuml, 'plantuml').toMermaid();
-      
+
       expect(result).toContain('activate B');
       expect(result).toContain('deactivate B');
     });
@@ -75,9 +74,9 @@ sequenceDiagram
     A->>B: Hello
     B-->>A: World
 `;
-      
+
       const result = Polagram.init(mermaid, 'mermaid').toPlantUML();
-      
+
       expect(result).toContain('@startuml');
       expect(result).toContain('@enduml');
       expect(result).toContain('participant A');
@@ -97,9 +96,9 @@ sequenceDiagram
         B-->>A: Pong
     end
 `;
-      
+
       const result = Polagram.init(mermaid, 'mermaid').toPlantUML();
-      
+
       expect(result).toContain('loop Retry');
       expect(result).toContain('end');
     });
@@ -119,11 +118,11 @@ Logger --> API: OK
 API --> Client: Response
 @enduml
 `;
-      
+
       const result = Polagram.init(plantuml, 'plantuml')
         .removeParticipant({ name: 'Logger' })
         .toMermaid();
-      
+
       expect(result).toContain('sequenceDiagram');
       expect(result).not.toContain('Logger');
       expect(result).toContain('Client->>API: Request');
@@ -142,11 +141,11 @@ sequenceDiagram
     Logger-->>API: OK
     API-->>Client: Response
 `;
-      
+
       const result = Polagram.init(mermaid, 'mermaid')
         .removeParticipant({ name: 'Logger' })
         .toPlantUML();
-      
+
       expect(result).toContain('@startuml');
       expect(result).not.toContain('Logger');
       expect(result).toContain('Client -> API: Request');
