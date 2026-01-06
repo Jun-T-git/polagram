@@ -10,7 +10,12 @@ export default function Header({ isDark, onToggleDark }: HeaderProps) {
         <span>📘</span>
         <span>Polagram Spec</span>
       </div>
-      <button className="header-toggle" onClick={onToggleDark} title="Toggle theme">
+      <button
+        type="button"
+        className="header-toggle"
+        onClick={onToggleDark}
+        title="Toggle theme"
+      >
         {isDark ? '☀️' : '🌙'}
       </button>
     </header>

@@ -16,10 +16,10 @@ export async function serve(options: ServeOptions): Promise<void> {
 
   console.log(`Starting preview server on port ${port}...`);
   console.log(`Preview available at http://localhost:${port}`);
-  
+
   // Use npx serve to serve the built files
   const serverProcess = exec(`npx -y serve -l ${port} ${outDir}`, {
-    cwd: process.cwd()
+    cwd: process.cwd(),
   });
 
   serverProcess.stdout?.pipe(process.stdout);

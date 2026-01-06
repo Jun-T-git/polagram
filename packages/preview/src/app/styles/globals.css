@@ -25,7 +25,8 @@
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background: var(--bg-primary);
   color: var(--text-primary);
 }
@@ -302,7 +303,7 @@ body {
 }
 
 .code-drawer pre {
-  font-family: 'SF Mono', Monaco, Consolas, monospace;
+  font-family: "SF Mono", Monaco, Consolas, monospace;
   font-size: 12px;
   line-height: 1.5;
   white-space: pre-wrap;

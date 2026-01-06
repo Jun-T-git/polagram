@@ -2,8 +2,10 @@
   "name": "@polagram/preview",
   "version": "0.0.1",
   "type": "module",
-  "private": true,
-  "description": "Static spec viewer for Polagram diagrams",
+  "publishConfig": {
+    "access": "public"
+  },
+  "description": "Internal static spec viewer for Polagram (used by @polagram/cli)",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
@@ -12,12 +14,18 @@
       "import": "./dist/index.js"
     }
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
     "build:lib": "tsc",
-    "preview": "vite preview",
-    "test": "vitest run"
+    "preview": "pnpm gen:data && vite preview",
+    "gen:data": "node scripts/generate-data.js",
+    "test": "vitest run",
+    "lint": "biome lint .",
+    "check": "biome check ."
   },
   "dependencies": {
     "@polagram/core": "workspace:*",

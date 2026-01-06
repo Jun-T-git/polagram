@@ -59,14 +59,20 @@ export default function Sidebar({ cases, selectedId, onSelect }: SidebarProps) {
     if (node.type === 'lens' && node.case) {
       const isSelected = node.case.id === selectedId;
       return (
-        <div
+        <button
+          type="button"
           key={node.case.id}
           className={`sidebar-item sidebar-item-lens ${isSelected ? 'selected' : ''}`}
           onClick={() => onSelect(node.case!)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              onSelect(node.case!);
+            }
+          }}
         >
           <span>🔍</span>
           <span>{node.label}</span>
-        </div>
+        </button>
       );
     }
 
@@ -83,8 +89,6 @@ export default function Sidebar({ cases, selectedId, onSelect }: SidebarProps) {
   };
 
   return (
-    <aside className="sidebar">
-      {tree.map((node) => renderNode(node))}
-    </aside>
+    <aside className="sidebar">{tree.map((node) => renderNode(node))}</aside>
   );
 }

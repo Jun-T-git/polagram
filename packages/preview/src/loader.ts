@@ -10,7 +10,9 @@ import yaml from 'js-yaml';
 import path from 'path';
 import type { PreviewCase, PreviewData } from './types.js';
 
-export async function loadPreviewData(configPath: string): Promise<PreviewData> {
+export async function loadPreviewData(
+  configPath: string,
+): Promise<PreviewData> {
   const configDir = path.dirname(path.resolve(configPath));
   const configContent = await fs.readFile(configPath, 'utf-8');
   const rawConfig = yaml.load(configContent) as unknown;
@@ -18,24 +20,29 @@ export async function loadPreviewData(configPath: string): Promise<PreviewData> 
 
   const cases: PreviewCase[] = [];
 
-  for (let targetIndex = 0; targetIndex < config.targets.length; targetIndex++) {
+  for (
+    let targetIndex = 0;
+    targetIndex < config.targets.length;
+    targetIndex++
+  ) {
     const target = config.targets[targetIndex];
     const ignores = [
       '**/node_modules/**',
       '**/dist/**',
-      ...(target.ignore || [])
+      ...(target.ignore || []),
     ];
 
     const files = await glob(target.input, {
       ignore: ignores,
       cwd: configDir,
-      absolute: true
+      absolute: true,
     });
 
     for (const file of files) {
       const sourceCode = await fs.readFile(file, 'utf-8');
       const relativePath = path.relative(configDir, file);
-      const inputFormat = target.format || FormatDetector.detect(file, sourceCode);
+      const inputFormat =
+        target.format || FormatDetector.detect(file, sourceCode);
 
       if (!inputFormat) {
         console.warn(`Cannot detect format for ${relativePath}, skipping.`);
@@ -55,11 +62,14 @@ export async function loadPreviewData(configPath: string): Promise<PreviewData> 
           lensName: '(original)',
           sourceCode,
           transformedCode,
-          lens: originalLens
+          lens: originalLens,
         };
         cases.push(originalCase);
       } catch (error) {
-        console.error(`Error processing ${relativePath} with original lens:`, error);
+        console.error(
+          `Error processing ${relativePath} with original lens:`,
+          error,
+        );
       }
 
       for (const lens of target.lenses) {
@@ -76,12 +86,15 @@ export async function loadPreviewData(configPath: string): Promise<PreviewData> 
             lensName: lens.name,
             sourceCode,
             transformedCode,
-            lens
+            lens,
           };
 
           cases.push(previewCase);
         } catch (error) {
-          console.error(`Error processing ${relativePath} with lens ${lens.name}:`, error);
+          console.error(
+            `Error processing ${relativePath} with lens ${lens.name}:`,
+            error,
+          );
         }
       }
     }

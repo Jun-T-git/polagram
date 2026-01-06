@@ -9,7 +9,11 @@ interface DiagramViewProps {
   enabledLayers: Set<number>;
 }
 
-export default function DiagramView({ sourceCode, lens, enabledLayers }: DiagramViewProps) {
+export default function DiagramView({
+  sourceCode,
+  lens,
+  enabledLayers,
+}: DiagramViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
@@ -21,14 +25,16 @@ export default function DiagramView({ sourceCode, lens, enabledLayers }: Diagram
   const transformedCode = useMemo(() => {
     try {
       const builder = Polagram.init(sourceCode, 'mermaid');
-      
+
       // Apply only enabled layers
-      const activeLayers = lens.layers.filter((_, index) => enabledLayers.has(index));
+      const activeLayers = lens.layers.filter((_, index) =>
+        enabledLayers.has(index),
+      );
       if (activeLayers.length > 0) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         builder.applyLens({ name: lens.name, layers: activeLayers } as any);
       }
-      
+
       return builder.toMermaid();
     } catch (error) {
       console.error('Transform error:', error);
@@ -42,7 +48,9 @@ export default function DiagramView({ sourceCode, lens, enabledLayers }: Diagram
 
     mermaid.initialize({
       startOnLoad: false,
-      theme: document.documentElement.classList.contains('dark') ? 'dark' : 'default',
+      theme: document.documentElement.classList.contains('dark')
+        ? 'dark'
+        : 'default',
     });
 
     const render = async () => {
@@ -93,7 +101,8 @@ export default function DiagramView({ sourceCode, lens, enabledLayers }: Diagram
   };
 
   return (
-    <div 
+    // biome-ignore lint/a11y/noStaticElementInteractions: Canvas interaction
+    <div
       className="diagram-view-container"
       ref={containerRef}
       onWheel={handleWheel}
@@ -103,16 +112,34 @@ export default function DiagramView({ sourceCode, lens, enabledLayers }: Diagram
       onMouseLeave={handleMouseUp}
     >
       <div className="diagram-controls">
-        <button onClick={() => setScale(s => Math.min(s * 1.2, 5))}>+</button>
-        <button onClick={() => { setScale(1); setPosition({ x: 0, y: 0 }); }}>Reset</button>
-        <button onClick={() => setScale(s => Math.max(s * 0.8, 0.1))}>-</button>
+        <button
+          type="button"
+          onClick={() => setScale((s) => Math.min(s * 1.2, 5))}
+        >
+          +
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setScale(1);
+            setPosition({ x: 0, y: 0 });
+          }}
+        >
+          Reset
+        </button>
+        <button
+          type="button"
+          onClick={() => setScale((s) => Math.max(s * 0.8, 0.1))}
+        >
+          -
+        </button>
       </div>
-      <div 
-        ref={contentRef} 
+      <div
+        ref={contentRef}
         className="diagram-view-content"
         style={{
           transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
-          cursor: isDragging ? 'grabbing' : 'grab'
+          cursor: isDragging ? 'grabbing' : 'grab',
         }}
       />
     </div>

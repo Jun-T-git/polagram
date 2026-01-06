@@ -34,7 +34,7 @@ export async function build(options: BuildOptions): Promise<void> {
   console.log('Building preview app...');
   execSync(`npx vite build --config ${viteConfig} --outDir ${absoluteOutDir}`, {
     cwd: packageRoot,
-    stdio: 'inherit'
+    stdio: 'inherit',
   });
 
   // Move preview-data.json into the built assets
