@@ -1,5 +1,11 @@
 # @polagram/core
 
+## 0.1.2
+
+### Patch Changes
+
+- d6a874b: fix: ensure participant order is preserved in PlantUML and Mermaid generators by using stack-based group management logic
+
 ## 0.1.1
 
 ### Patch Changes
