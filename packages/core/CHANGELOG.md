@@ -1,5 +1,11 @@
 # @polagram/core
 
+## 0.1.1
+
+### Patch Changes
+
+- d85a7cc: fix: PlantUML generator now correctly handles multi-line and floating notes by using block syntax consistently.
+
 ## 0.1.0
 
 ### Minor Changes

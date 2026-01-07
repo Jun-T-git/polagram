@@ -1,5 +1,12 @@
 # @polagram/cli
 
+## 0.0.10
+
+### Patch Changes
+
+- Updated dependencies [d85a7cc]
+  - @polagram/core@0.1.1
+
 ## 0.0.9
 
 ### Patch Changes
