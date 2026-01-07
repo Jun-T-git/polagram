@@ -157,11 +157,30 @@ describe('PlantUML Generator', () => {
           position: 'over',
           participantIds: ['A'],
         },
+        {
+          kind: 'note',
+          id: 'n3',
+          text: 'Line 1\nLine 2',
+          position: 'left',
+          participantIds: ['A'],
+        },
       ],
     };
     const code = generator.generate(ast);
-    expect(code).toContain('note right of A: My Note');
-    expect(code).toContain('note over A: Over Note');
+    
+    // Check block syntax
+    expect(code).toContain('note right of A');
+    expect(code).toContain('    My Note');
+    expect(code).toContain('end note');
+
+    expect(code).toContain('note over A');
+    expect(code).toContain('    Over Note');
+    // end note is repeated
+
+    // Check multi-line
+    expect(code).toContain('note left of A');
+    expect(code).toContain('    Line 1');
+    expect(code).toContain('    Line 2');
   });
 
   it('should generate lifecycle events', () => {

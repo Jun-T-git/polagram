@@ -1,14 +1,14 @@
 import type {
-    ActivationNode,
-    DividerNode,
-    FragmentNode,
-    MessageNode,
-    NoteNode,
-    Participant,
-    ParticipantGroup,
-    PolagramRoot,
-    ReferenceNode,
-    SpacerNode,
+  ActivationNode,
+  DividerNode,
+  FragmentNode,
+  MessageNode,
+  NoteNode,
+  Participant,
+  ParticipantGroup,
+  PolagramRoot,
+  ReferenceNode,
+  SpacerNode,
 } from '../../ast';
 import { Traverser } from '../base/walker';
 import type { PolagramVisitor } from '../interface';
@@ -128,9 +128,23 @@ export class PlantUMLGeneratorVisitor implements PolagramVisitor {
     const position = node.position || 'over';
     const participants = node.participantIds.join(', ');
 
-    const positionStr =
-      position === 'left' || position === 'right' ? `${position} of` : position;
-    this.add(`note ${positionStr} ${participants}: ${node.text}`);
+    let header = '';
+    if (node.participantIds.length > 0) {
+      if (position === 'over') {
+        header = `note over ${participants}`;
+      } else {
+        header = `note ${position} of ${participants}`;
+      }
+    } else {
+      header = `note ${position}`;
+    }
+
+    this.add(header);
+    // Split text by newlines and add each line indented
+    node.text.split('\n').forEach((line) => {
+      this.add(`    ${line}`);
+    });
+    this.add('end note');
   }
 
   visitActivation(node: ActivationNode): void {
