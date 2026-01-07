@@ -1,0 +1,27 @@
+sequenceDiagram
+title Complex Nested Example
+participant A
+participant B
+participant C
+A->>B: Initial request
+loop Retry logic
+  alt Success
+    B->>C: Forward
+    par Parallel tasks
+      C->>A: Task 1
+    and Task 2
+      C->>B: Task 2
+    end
+  else Failure
+    B->>A: Error
+    break on critical failure
+      A->>B: Abort
+    end
+  end
+end
+critical Transaction
+  B->>C: Begin
+option Rollback
+  C->>B: Rollback
+end
+A->>B: Complete

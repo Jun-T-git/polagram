@@ -1,0 +1,8 @@
+sequenceDiagram
+participant A
+participant B
+A->>B: Request
+break when error occurs
+  B->>A: Error response
+end
+A->>B: Continue

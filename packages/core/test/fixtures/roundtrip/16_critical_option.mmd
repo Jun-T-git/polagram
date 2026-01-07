@@ -1,0 +1,10 @@
+sequenceDiagram
+participant A
+participant B
+critical Establish connection
+  A->>B: Connect
+option Network error
+  A->>B: Retry
+option Timeout
+  A->>B: Abort
+end

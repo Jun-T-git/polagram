@@ -1,0 +1,9 @@
+@startuml
+collections Workers
+queue JobQueue
+participant Processor
+Workers -> JobQueue: enqueue(job)
+JobQueue -> Processor: process
+Processor --> JobQueue: complete
+JobQueue --> Workers: result
+@enduml

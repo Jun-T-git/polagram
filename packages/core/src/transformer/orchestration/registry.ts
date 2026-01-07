@@ -1,31 +1,66 @@
 import { FocusFilter } from '../filters/focus';
 import { RemoveFilter } from '../filters/remove';
 import { ResolveFilter } from '../filters/resolve';
-import type { Layer, Transformer } from '../types';
+import type {
+    FocusLayer,
+    Layer,
+    RemoveLayer,
+    ResolveLayer,
+    Transformer,
+} from '../types';
 
-type TransformerFactory = (layer: Layer) => Transformer;
+/**
+ * Type-safe factory function type for creating transformers.
+ */
+type TransformerFactory<T extends Layer = Layer> = (layer: T) => Transformer;
 
+/**
+ * Registry for transformer factories.
+ * Provides type-safe registration and retrieval of transformers.
+ */
 class TransformerRegistry {
   private factories = new Map<string, TransformerFactory>();
 
   constructor() {
-    // Register defaults
-    // biome-ignore lint/suspicious/noExplicitAny: Casting Layer union to specific subtypes for factories
-    this.register('resolve', (layer) => new ResolveFilter(layer as any));
-    // biome-ignore lint/suspicious/noExplicitAny: Casting Layer union to specific subtypes for factories
-    this.register('focus', (layer) => new FocusFilter(layer as any));
-    // biome-ignore lint/suspicious/noExplicitAny: Casting Layer union to specific subtypes for factories
-    this.register('remove', (layer) => new RemoveFilter(layer as any));
+    // Register built-in transformers with type-safe wrappers
+    this.registerTyped<ResolveLayer>('resolve', (layer) => new ResolveFilter(layer));
+    this.registerTyped<FocusLayer>('focus', (layer) => new FocusFilter(layer));
+    this.registerTyped<RemoveLayer>('remove', (layer) => new RemoveFilter(layer));
   }
 
-  public register(action: string, factory: TransformerFactory) {
+  /**
+   * Type-safe registration for a specific layer type.
+   */
+  private registerTyped<T extends Layer>(
+    action: T['action'],
+    factory: TransformerFactory<T>,
+  ): void {
+    // Cast is safe here because we're using the action discriminant
+    this.factories.set(action, factory as TransformerFactory);
+  }
+
+  /**
+   * Register a custom transformer factory.
+   */
+  public register(action: string, factory: TransformerFactory): void {
     this.factories.set(action, factory);
   }
 
+  /**
+   * Get a transformer for the given layer.
+   * @returns Transformer instance or null if no factory is registered
+   */
   public get(layer: Layer): Transformer | null {
     const factory = this.factories.get(layer.action);
     if (!factory) return null;
     return factory(layer);
+  }
+
+  /**
+   * Check if a transformer is registered for the given action.
+   */
+  public has(action: string): boolean {
+    return this.factories.has(action);
   }
 }
 

@@ -88,4 +88,60 @@ describe('MermaidGeneratorVisitor', () => {
 
     expect(output).toContain('A->>B: hello');
   });
+
+  it('should generate par/and fragments', () => {
+    const root: PolagramRoot = {
+      kind: 'root',
+      meta: { version: '1.0.0', source: 'mermaid' },
+      participants: [],
+      groups: [],
+      events: [
+        {
+          kind: 'fragment',
+          id: 'frag_1',
+          operator: 'par',
+          branches: [
+            {
+              id: 'br_1',
+              condition: 'Task A',
+              events: [
+                {
+                  kind: 'message',
+                  id: 'msg_1',
+                  from: 'A',
+                  to: 'B',
+                  text: 'Do A',
+                  type: 'sync',
+                  style: { line: 'solid', head: 'arrow' },
+                },
+              ],
+            },
+            {
+              id: 'br_2',
+              condition: 'Task B',
+              events: [
+                {
+                  kind: 'message',
+                  id: 'msg_2',
+                  from: 'A',
+                  to: 'C',
+                  text: 'Do B',
+                  type: 'sync',
+                  style: { line: 'solid', head: 'arrow' },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+    const visitor = new MermaidGeneratorVisitor();
+    const output = visitor.generate(root);
+
+    expect(output).toContain('par Task A');
+    expect(output).toContain('A->>B: Do A');
+    expect(output).toContain('and Task B');
+    expect(output).toContain('A->>C: Do B');
+    expect(output).toContain('end');
+  });
 });

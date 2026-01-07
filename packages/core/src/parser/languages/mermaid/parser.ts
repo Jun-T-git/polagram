@@ -7,8 +7,8 @@ import type {
   ParticipantGroup,
   PolagramRoot,
 } from '../../../ast';
+import { ARROW_MAPPING } from '../../../common/mermaid/constants';
 import { BaseParser } from '../../base/parser';
-import { ARROW_MAPPING } from './constants';
 import type { Lexer } from './lexer';
 import type { Token, TokenType } from './tokens';
 
@@ -38,12 +38,12 @@ export class Parser extends BaseParser<Token> {
 
   private parseBlock(
     root: PolagramRoot,
-    stopTokens: TokenType[] = [],
+    stopTokens: string[] = [],
   ): EventNode[] {
     const events: EventNode[] = [];
 
-    while (this.currToken.type !== 'EOF') {
-      const type = this.currToken.type as TokenType;
+    while (!this.isCurrentToken('EOF')) {
+      const type = this.getCurrentTokenType();
 
       if (stopTokens.includes(type)) {
         return events;
@@ -77,7 +77,7 @@ export class Parser extends BaseParser<Token> {
         continue;
       }
 
-      if (type === 'LOOP' || type === 'ALT' || type === 'OPT') {
+      if (type === 'LOOP' || type === 'ALT' || type === 'OPT' || type === 'PAR' || type === 'BREAK' || type === 'CRITICAL' || type === 'RECT') {
         events.push(this.parseFragment(root));
         continue;
       }
@@ -162,7 +162,7 @@ export class Parser extends BaseParser<Token> {
     // Restore context
     this.currentGroup = previousGroup;
 
-    if (this.currToken.type === 'END') {
+    if (this.isCurrentToken('END')) {
       this.advance(); // eat 'end'
     }
 
@@ -170,17 +170,30 @@ export class Parser extends BaseParser<Token> {
   }
 
   private parseFragment(root: PolagramRoot): EventNode {
-    const type = this.currToken.type as TokenType;
+    const type = this.getCurrentTokenType();
     let operator: FragmentOperator = 'loop';
     if (type === 'ALT') operator = 'alt';
     if (type === 'OPT') operator = 'opt';
+    if (type === 'PAR') operator = 'par';
+    if (type === 'BREAK') operator = 'break';
+    if (type === 'CRITICAL') operator = 'critical';
+    if (type === 'RECT') operator = 'rect';
 
     this.advance(); // eat operator
 
     const condition = this.readRestOfLine();
 
     const branches = [];
-    const events = this.parseBlock(root, ['END', 'ELSE']);
+    // Determine stop tokens based on fragment type
+    let stopTokens: TokenType[];
+    if (operator === 'par') {
+      stopTokens = ['END', 'ELSE', 'AND'];
+    } else if (operator === 'critical') {
+      stopTokens = ['END', 'OPTION'];
+    } else {
+      stopTokens = ['END', 'ELSE'];
+    }
+    const events = this.parseBlock(root, stopTokens);
 
     branches.push({
       id: this.generateId('br'),
@@ -188,7 +201,32 @@ export class Parser extends BaseParser<Token> {
       events,
     });
 
-    while ((this.currToken.type as TokenType) === 'ELSE') {
+    // Handle 'and' branches for 'par' fragments
+    while (this.isCurrentToken('AND')) {
+      this.advance();
+      const andCond = this.readRestOfLine();
+      const andEvents = this.parseBlock(root, ['END', 'AND']);
+      branches.push({
+        id: this.generateId('br'),
+        condition: andCond,
+        events: andEvents,
+      });
+    }
+
+    // Handle 'option' branches for 'critical' fragments
+    while (this.isCurrentToken('OPTION')) {
+      this.advance();
+      const optionCond = this.readRestOfLine();
+      const optionEvents = this.parseBlock(root, ['END', 'OPTION']);
+      branches.push({
+        id: this.generateId('br'),
+        condition: optionCond,
+        events: optionEvents,
+      });
+    }
+
+    // Handle 'else' branches (for alt/opt)
+    while (this.isCurrentToken('ELSE')) {
       this.advance();
       const elseCond = this.readRestOfLine();
       const elseEvents = this.parseBlock(root, ['END', 'ELSE']);
@@ -199,7 +237,7 @@ export class Parser extends BaseParser<Token> {
       });
     }
 
-    if ((this.currToken.type as TokenType) === 'END') {
+    if (this.isCurrentToken('END')) {
       this.advance();
     }
 
@@ -341,11 +379,11 @@ export class Parser extends BaseParser<Token> {
     let activateTarget = false;
     let deactivateSource = false;
 
-    if ((this.currToken.type as TokenType) === 'PLUS') {
+    if (this.isCurrentToken('PLUS')) {
       activateTarget = true;
       this.advance();
     }
-    if ((this.currToken.type as TokenType) === 'MINUS') {
+    if (this.isCurrentToken('MINUS')) {
       deactivateSource = true;
       this.advance();
     }
@@ -356,7 +394,7 @@ export class Parser extends BaseParser<Token> {
     this.advance(); // eat to
 
     let text = '';
-    if ((this.currToken.type as TokenType) === 'COLON') {
+    if (this.isCurrentToken('COLON')) {
       this.advance();
       text = this.readRestOfLine();
     }
@@ -396,8 +434,8 @@ export class Parser extends BaseParser<Token> {
 
   private readRestOfLine(): string {
     if (
-      (this.currToken.type as TokenType) === 'NEWLINE' ||
-      (this.currToken.type as TokenType) === 'EOF'
+      this.isCurrentToken('NEWLINE') ||
+      this.isCurrentToken('EOF')
     ) {
       return '';
     }
@@ -406,8 +444,8 @@ export class Parser extends BaseParser<Token> {
     let end = this.currToken.end;
 
     while (
-      (this.currToken.type as TokenType) !== 'NEWLINE' &&
-      (this.currToken.type as TokenType) !== 'EOF'
+      !this.isCurrentToken('NEWLINE') &&
+      !this.isCurrentToken('EOF')
     ) {
       end = this.currToken.end;
       this.advance();

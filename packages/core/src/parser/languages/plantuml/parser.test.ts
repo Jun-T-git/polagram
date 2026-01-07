@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { asFragment, asNote } from '../../../../test/helpers';
 import type { PolagramRoot } from '../../../ast';
 import { Lexer } from './lexer';
 import { Parser } from './parser';
@@ -184,7 +185,7 @@ end
 `;
       const ast = parse(input);
       expect(ast.events).toHaveLength(1);
-      const fragment = ast.events[0] as any;
+      const fragment = asFragment(ast.events[0]);
       expect(fragment.kind).toBe('fragment');
       expect(fragment.operator).toBe('alt');
       expect(fragment.branches).toHaveLength(2);
@@ -208,9 +209,9 @@ end
       const ast = parse(input);
       expect(ast.events).toHaveLength(2);
       expect(ast.events[0].kind).toBe('fragment');
-      expect((ast.events[0] as any).operator).toBe('opt');
+      expect(asFragment(ast.events[0]).operator).toBe('opt');
       expect(ast.events[1].kind).toBe('fragment');
-      expect((ast.events[1] as any).operator).toBe('loop');
+      expect(asFragment(ast.events[1]).operator).toBe('loop');
     });
   });
 
@@ -266,14 +267,14 @@ end
 `;
       const ast = parse(input);
       expect(ast.events).toHaveLength(1);
-      const outer = ast.events[0] as any;
+      const outer = asFragment(ast.events[0]);
       expect(outer.operator).toBe('alt');
 
       const outerEvents = outer.branches[0].events;
       expect(outerEvents).toHaveLength(2);
       expect(outerEvents[0].kind).toBe('message');
 
-      const inner = outerEvents[1];
+      const inner = asFragment(outerEvents[1]);
       expect(inner.kind).toBe('fragment');
       expect(inner.operator).toBe('loop');
       expect(inner.branches[0].events).toHaveLength(1);
@@ -296,9 +297,123 @@ end note
         // text should contain lines. trim() might remove leading/trailing.
         // We probably want to preserve internal newlines.
       });
-      const text = (ast.events[0] as any).text;
+      const text = asNote(ast.events[0]).text;
       expect(text).toContain('Line 1');
       expect(text).toContain('Line 2');
+    });
+
+    it('should parse note containing PlantUML keywords', () => {
+      const input = `
+@startuml
+note over A: This is an alt and loop test end
+@enduml
+`;
+      const ast = parse(input);
+      expect(ast.events).toHaveLength(1);
+      const note = ast.events[0];
+      expect(note).toMatchObject({
+        kind: 'note',
+        text: 'This is an alt and loop test end',
+      });
+    });
+
+    it('should parse multi-line note with keywords', () => {
+      const input = `
+@startuml
+note over A
+  The loop will repeat
+  alt conditions here
+  end of description
+end note
+@enduml
+`;
+      const ast = parse(input);
+      expect(ast.events).toHaveLength(1);
+      const text = asNote(ast.events[0]).text;
+      expect(text).toContain('loop');
+      expect(text).toContain('alt');
+      expect(text).toContain('end of description');
+    });
+  });
+
+  describe('Dividers', () => {
+    it('should parse divider with text', () => {
+      const input = `
+@startuml
+A -> B : Message 1
+== Section Break ==
+A -> B : Message 2
+@enduml
+`;
+      const ast = parse(input);
+      expect(ast.events).toHaveLength(3);
+      expect(ast.events[1]).toMatchObject({
+        kind: 'divider',
+        text: 'Section Break',
+      });
+    });
+
+    it('should parse divider without text', () => {
+      const input = `
+@startuml
+A -> B : First
+====
+A -> B : Second
+@enduml
+`;
+      const ast = parse(input);
+      expect(ast.events).toHaveLength(3);
+      expect(ast.events[1]).toMatchObject({
+        kind: 'divider',
+      });
+    });
+  });
+
+  describe('Additional Participant Types', () => {
+    it('should parse boundary, control, entity participants', () => {
+      const input = `
+@startuml
+boundary UserInterface
+control BusinessLogic
+entity DataStore
+UserInterface -> BusinessLogic : Request
+BusinessLogic -> DataStore : Query
+@enduml
+`;
+      const ast = parse(input);
+      expect(ast.participants).toHaveLength(3);
+      expect(ast.participants[0]).toMatchObject({
+        id: 'UserInterface',
+        type: 'boundary',
+      });
+      expect(ast.participants[1]).toMatchObject({
+        id: 'BusinessLogic',
+        type: 'control',
+      });
+      expect(ast.participants[2]).toMatchObject({
+        id: 'DataStore',
+        type: 'entity',
+      });
+    });
+
+    it('should parse collections and queue participants', () => {
+      const input = `
+@startuml
+collections Workers
+queue MessageQueue
+Workers -> MessageQueue : Enqueue
+@enduml
+`;
+      const ast = parse(input);
+      expect(ast.participants).toHaveLength(2);
+      expect(ast.participants[0]).toMatchObject({
+        id: 'Workers',
+        type: 'collections',
+      });
+      expect(ast.participants[1]).toMatchObject({
+        id: 'MessageQueue',
+        type: 'queue',
+      });
     });
   });
 });
