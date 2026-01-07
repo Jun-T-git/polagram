@@ -167,7 +167,6 @@ describe('PlantUML Generator', () => {
       ],
     };
     const code = generator.generate(ast);
-    
     // Check block syntax
     expect(code).toContain('note right of A');
     expect(code).toContain('    My Note');

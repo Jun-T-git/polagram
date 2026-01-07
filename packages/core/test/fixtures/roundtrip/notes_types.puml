@@ -3,11 +3,17 @@ participant "Service A" as A
 actor User
 database DB
 
-note left of User: User initiates
+note left of User
+User initiates
+end note
 User -> A: Login
-note over A: Validate
+note over A
+Validate
+end note
 A -> DB: Check credentials
-note right of DB: Database lookup
+note right of DB
+Database lookup
+end note
 DB --> A: User found
 A --> User: Success
 @enduml
