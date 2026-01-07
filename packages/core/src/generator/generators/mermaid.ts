@@ -25,9 +25,11 @@ export class MermaidGeneratorVisitor implements PolagramVisitor {
   constructor() {
     this.traverser = new Traverser(this);
   }
-  visitParticipantGroup(node: ParticipantGroup): void {
-    throw new Error('Method not implemented.');
+
+  visitParticipantGroup(_node: ParticipantGroup): void {
+    // Handled in visitRoot via stack logic
   }
+
 
   public generate(ast: PolagramRoot): string {
     this.lines = [];
