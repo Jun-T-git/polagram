@@ -11,6 +11,10 @@ DB --> API: User data
 API --> Web: JWT token
 Web --> User: Welcome
 
-note right of User: User authenticated
-note over API, DB: Secure connection
+note right of User
+User authenticated
+end note
+note over API, DB
+Secure connection
+end note
 @enduml
