@@ -1,5 +1,11 @@
 # @polagram/core
 
+## 0.1.0
+
+### Minor Changes
+
+- dfa469b: Refactor: Cleaned up exports, removed deprecated APIs, and enhanced PlantUML/Mermaid parser support.
+
 ## 0.0.4
 
 ### Patch Changes
