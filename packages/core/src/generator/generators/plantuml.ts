@@ -128,11 +128,6 @@ export class PlantUMLGeneratorVisitor implements PolagramVisitor {
     const position = node.position || 'over';
     const participants = node.participantIds.join(', ');
 
-    // Determine header
-    // If we have participants, we usually need "of" (e.g. "note left of A").
-    // Exceptions:
-    // - "note over A" (no "of")
-    // - Floating notes (no participants) -> "note left" (no "of")
     let header = '';
     if (node.participantIds.length > 0) {
       if (position === 'over') {
