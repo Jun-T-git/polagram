@@ -25,6 +25,9 @@ export class MermaidGeneratorVisitor implements PolagramVisitor {
   constructor() {
     this.traverser = new Traverser(this);
   }
+  visitParticipantGroup(node: ParticipantGroup): void {
+    throw new Error('Method not implemented.');
+  }
 
   public generate(ast: PolagramRoot): string {
     this.lines = [];
@@ -41,14 +44,67 @@ export class MermaidGeneratorVisitor implements PolagramVisitor {
       this.add(`title ${node.meta.title}`);
     }
 
-    // Participants
-    // Note: We iterate participants in defined order.
-    // Currently, AST does not preserve the interleaving of Box definitions and Participants,
-    // so we cannot reliably reconstruct Box blocks wrapping specific ordered participants
-    // without potentially reordering them.
-    // For now, we revert to simple iteration (ignoring boxes) to preserve order and existing behavior.
+    // Map participant ID to List of Groups (Ordered by definition)
+    const participantGroupsMap = new Map<string, ParticipantGroup[]>();
     for (const p of node.participants) {
-      this.visitParticipant(p);
+        participantGroupsMap.set(p.id, []);
+    }
+    for (const group of node.groups) {
+      for (const pid of group.participantIds) {
+        const list = participantGroupsMap.get(pid);
+        if (list) {
+            list.push(group);
+        }
+      }
+    }
+
+    // Stack
+    const currentGroupStack: ParticipantGroup[] = [];
+
+    for (const participant of node.participants) {
+      const targetGroups = participantGroupsMap.get(participant.id) || [];
+
+      // Calculate Common Prefix Length
+      let commonPrefixLen = 0;
+      const minLen = Math.min(currentGroupStack.length, targetGroups.length);
+      for (let i = 0; i < minLen; i++) {
+          if (currentGroupStack[i] === targetGroups[i]) {
+              commonPrefixLen++;
+          } else {
+              break;
+          }
+      }
+
+      // 1. Close groups (Pop)
+      while (currentGroupStack.length > commonPrefixLen) {
+          this.indentLevel--;
+          this.add('end');
+          currentGroupStack.pop();
+      }
+
+      // 2. Open groups (Push)
+      for (let i = commonPrefixLen; i < targetGroups.length; i++) {
+          const groupToOpen = targetGroups[i];
+          let line = `box`;
+          if (groupToOpen.style?.backgroundColor) {
+            line += ` ${groupToOpen.style.backgroundColor}`;
+          }
+          if (groupToOpen.name) {
+            line += ` ${groupToOpen.name}`;
+          }
+          this.add(line);
+          this.indentLevel++;
+          currentGroupStack.push(groupToOpen);
+      }
+
+      this.visitParticipant(participant);
+    }
+
+    // Close remaining
+    while (currentGroupStack.length > 0) {
+      this.indentLevel--;
+      this.add('end');
+      currentGroupStack.pop();
     }
 
     // Events
@@ -66,16 +122,7 @@ export class MermaidGeneratorVisitor implements PolagramVisitor {
     }
   }
 
-  visitParticipantGroup(node: ParticipantGroup): void {
-    let line = `box`;
-    if (node.style?.backgroundColor) {
-      line += ` ${node.style.backgroundColor}`;
-    }
-    if (node.name) {
-      line += ` ${node.name}`;
-    }
-    this.add(line);
-  }
+
 
   visitMessage(node: MessageNode): void {
     const from = node.from ?? '[*]';

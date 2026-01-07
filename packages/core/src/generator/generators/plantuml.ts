@@ -38,22 +38,71 @@ export class PlantUMLGeneratorVisitor implements PolagramVisitor {
       this.add(`title ${node.meta.title}`);
     }
 
-    const participantsMap = new Map(node.participants.map((p) => [p.id, p]));
-    const groupedParticipantIds = new Set<string>();
-
-    // Groups
-    for (const group of node.groups) {
-      this.visitGroup(group, participantsMap);
-      group.participantIds.forEach((id) => {
-        groupedParticipantIds.add(id);
-      });
+    // Map participant ID to List of Groups (Ordered by definition in 'groups' array)
+    const participantGroupsMap = new Map<string, ParticipantGroup[]>();
+    
+    // Initialize map
+    for (const p of node.participants) {
+        participantGroupsMap.set(p.id, []);
     }
 
-    // Ungrouped Participants
-    for (const participant of node.participants) {
-      if (!groupedParticipantIds.has(participant.id)) {
-        this.visitParticipant(participant);
+    // Populate map. Since node.groups is ordered, we preserve that order in the lists.
+    // This allows implicit nesting: earlier defined groups are "outer" if they wrap the same participants.
+    for (const group of node.groups) {
+      for (const pid of group.participantIds) {
+        const list = participantGroupsMap.get(pid);
+        if (list) {
+            list.push(group);
+        }
       }
+    }
+
+    // Stack of currently open groups
+    const currentGroupStack: ParticipantGroup[] = [];
+
+    for (const participant of node.participants) {
+      // Get groups for this participant. 
+      // If a participant is in [G1, G2], and currently stack is [G1], we just open G2.
+      // If stack is [G1, G2] and next is in [G1], we close G2.
+      const targetGroups = participantGroupsMap.get(participant.id) || [];
+
+      // Calculate Common Prefix Length
+      let commonPrefixLen = 0;
+      const minLen = Math.min(currentGroupStack.length, targetGroups.length);
+      for (let i = 0; i < minLen; i++) {
+          if (currentGroupStack[i] === targetGroups[i]) {
+              commonPrefixLen++;
+          } else {
+              break;
+          }
+      }
+
+      // 1. Close groups that are no longer active (Pop from stack)
+      // We pop until stack length matches commonPrefixLen
+      while (currentGroupStack.length > commonPrefixLen) {
+          this.add('end box');
+          currentGroupStack.pop();
+      }
+
+      // 2. Open new groups (Push to stack)
+      // We push from targetGroups starting at commonPrefixLen
+      for (let i = commonPrefixLen; i < targetGroups.length; i++) {
+          const groupToOpen = targetGroups[i];
+          const color = groupToOpen.style?.backgroundColor
+            ? ` ${groupToOpen.style.backgroundColor}`
+            : '';
+          const title = groupToOpen.name ? ` "${groupToOpen.name}"` : '';
+          this.add(`box${title}${color}`);
+          currentGroupStack.push(groupToOpen);
+      }
+
+      this.visitParticipant(participant);
+    }
+
+    // Close remaining groups in stack
+    while (currentGroupStack.length > 0) {
+      this.add('end box');
+      currentGroupStack.pop();
     }
 
     // Events - use Traverser for consistent dispatching
@@ -77,24 +126,7 @@ export class PlantUMLGeneratorVisitor implements PolagramVisitor {
     // This is a no-op since we use visitGroup with context instead
   }
 
-  // Internal method with context for group handling
-  private visitGroup(node: ParticipantGroup, context: Map<string, Participant>): void {
-    const color = node.style?.backgroundColor
-      ? ` ${node.style.backgroundColor}`
-      : '';
-    const title = node.name ? ` "${node.name}"` : '';
 
-    this.add(`box${title}${color}`);
-
-    for (const pid of node.participantIds) {
-      const p = context.get(pid);
-      if (p) {
-        this.visitParticipant(p);
-      }
-    }
-
-    this.add('end box');
-  }
 
   visitMessage(node: MessageNode): void {
     const from = node.from || '[*]';
