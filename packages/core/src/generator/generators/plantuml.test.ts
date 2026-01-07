@@ -160,8 +160,12 @@ describe('PlantUML Generator', () => {
       ],
     };
     const code = generator.generate(ast);
-    expect(code).toContain('note right of A: My Note');
-    expect(code).toContain('note over A: Over Note');
+    expect(code).toContain('note right of A');
+    expect(code).toContain('    My Note');
+    expect(code).toContain('end note');
+    
+    expect(code).toContain('note over A');
+    expect(code).toContain('    Over Note');
   });
 
   it('should generate lifecycle events', () => {
