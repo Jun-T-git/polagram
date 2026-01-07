@@ -26,7 +26,13 @@ export type TokenType =
   | 'PLUS'
   | 'MINUS'
   | 'COMMA'
-  | 'BOX';
+  | 'BOX'
+  | 'PAR'
+  | 'AND'
+  | 'BREAK'
+  | 'CRITICAL'
+  | 'OPTION'
+  | 'RECT';
 
 export interface Token {
   type: TokenType;

@@ -1,4 +1,4 @@
-import type { MessageNode } from '../../../ast';
+import type { MessageNode } from '../../ast';
 
 export const ARROW_MAPPING: Record<
   string,

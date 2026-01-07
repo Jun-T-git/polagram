@@ -75,4 +75,50 @@ export abstract class BaseLexer<T extends BaseToken = BaseToken> {
   protected isDigit(ch: string): boolean {
     return '0' <= ch && ch <= '9';
   }
+
+  // --- Common Helper Methods ---
+
+  /**
+   * Read an identifier (letters and digits).
+   */
+  protected readIdentifier(): string {
+    const position = this.position;
+    while (this.isLetter(this.ch) || this.isDigit(this.ch)) {
+      this.readChar();
+    }
+    return this.input.slice(position, this.position);
+  }
+
+  /**
+   * Read a quoted string (consumes opening and closing quotes).
+   */
+  protected readQuotedString(): string {
+    const position = this.position + 1;
+    this.readChar(); // eat opening quote
+    while (this.ch !== '"' && this.ch !== '' && this.ch !== '\n') {
+      this.readChar();
+    }
+    const str = this.input.slice(position, this.position);
+    this.readChar(); // eat closing quote
+    return str;
+  }
+
+  /**
+   * Create a token with position information.
+   */
+  protected createToken(
+    type: string,
+    literal: string,
+    start: number,
+    startColumn: number,
+  ): T {
+    return {
+      type,
+      literal,
+      line: this.line,
+      column: startColumn,
+      start,
+      end: this.position > start ? this.position : start + literal.length,
+    } as T;
+  }
 }

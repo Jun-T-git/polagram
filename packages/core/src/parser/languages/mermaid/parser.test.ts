@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { asFragment } from '../../../../test/helpers';
 import type { PolagramRoot } from '../../../ast';
 import { Lexer } from './lexer';
 import { Parser } from './parser';
@@ -257,7 +258,7 @@ else Failure
 end
 `;
       const ast = parse(input);
-      const fragment = ast.events[0] as any;
+      const fragment = asFragment(ast.events[0]);
       expect(fragment.kind).toBe('fragment');
       expect(fragment.operator).toBe('alt');
       expect(fragment.branches).toHaveLength(2);
@@ -317,6 +318,234 @@ end
       expect(ast.events).toHaveLength(1);
       expect(ast.events[0].kind).toBe('message');
       expect(ast.groups[0].participantIds).toEqual(['A']);
+    });
+  });
+
+  describe('Comments', () => {
+    it('should ignore %% comments at the start of a line', () => {
+      const input = `
+sequenceDiagram
+%% This is a comment
+A->>B: Hello
+%% Another comment
+`;
+      const ast = parse(input);
+      expect(ast.events).toHaveLength(1);
+      expect(ast.events[0]).toMatchObject({
+        kind: 'message',
+        from: 'A',
+        to: 'B',
+        text: 'Hello',
+      });
+    });
+
+    it('should handle comments between statements', () => {
+      const input = `
+sequenceDiagram
+participant Alice
+%% Comment between participants
+participant Bob
+%% Comment before message
+Alice->>Bob: Hi
+`;
+      const ast = parse(input);
+      expect(ast.participants).toHaveLength(2);
+      expect(ast.events).toHaveLength(1);
+    });
+
+    it('should handle comment-only diagram', () => {
+      const input = `
+sequenceDiagram
+%% Only comments here
+%% No actual content
+`;
+      const ast = parse(input);
+      expect(ast.participants).toEqual([]);
+      expect(ast.events).toEqual([]);
+    });
+  });
+
+  describe('Parallel (par/and) Fragments', () => {
+    it('should parse par with single branch', () => {
+      const input = `
+sequenceDiagram
+par Alice to Bob
+  A->>B: Hello
+end
+`;
+      const ast = parse(input);
+      expect(ast.events).toHaveLength(1);
+      const fragment = ast.events[0];
+      if (fragment.kind !== 'fragment') throw new Error('Expected fragment');
+      expect(fragment.operator).toBe('par');
+      expect(fragment.branches).toHaveLength(1);
+      expect(fragment.branches[0].condition).toBe('Alice to Bob');
+      expect(fragment.branches[0].events).toHaveLength(1);
+    });
+
+    it('should parse par with multiple and branches', () => {
+      const input = `
+sequenceDiagram
+par Alice to Bob
+  A->>B: Message 1
+and Alice to John
+  A->>J: Message 2
+and Bob to John
+  B->>J: Message 3
+end
+`;
+      const ast = parse(input);
+      expect(ast.events).toHaveLength(1);
+      const fragment = ast.events[0];
+      if (fragment.kind !== 'fragment') throw new Error('Expected fragment');
+      expect(fragment.operator).toBe('par');
+      expect(fragment.branches).toHaveLength(3);
+      expect(fragment.branches[0].condition).toBe('Alice to Bob');
+      expect(fragment.branches[1].condition).toBe('Alice to John');
+      expect(fragment.branches[2].condition).toBe('Bob to John');
+    });
+
+    it('should parse nested par within loop', () => {
+      const input = `
+sequenceDiagram
+loop Every minute
+  par Task A
+    A->>B: Do A
+  and Task B
+    A->>C: Do B
+  end
+end
+`;
+      const ast = parse(input);
+      expect(ast.events).toHaveLength(1);
+      const loop = ast.events[0];
+      if (loop.kind !== 'fragment') throw new Error('Expected fragment');
+      expect(loop.operator).toBe('loop');
+      expect(loop.branches[0].events).toHaveLength(1);
+      const par = loop.branches[0].events[0];
+      if (par.kind !== 'fragment') throw new Error('Expected fragment');
+      expect(par.operator).toBe('par');
+      expect(par.branches).toHaveLength(2);
+    });
+  });
+
+  describe('Break Fragments', () => {
+    it('should parse break fragment', () => {
+      const input = `
+sequenceDiagram
+A->>B: Request
+break when condition fails
+  B->>A: Error
+end
+A->>C: Continue
+`;
+      const ast = parse(input);
+      expect(ast.events).toHaveLength(3);
+      const fragment = ast.events[1];
+      if (fragment.kind !== 'fragment') throw new Error('Expected fragment');
+      expect(fragment.operator).toBe('break');
+      expect(fragment.branches).toHaveLength(1);
+      expect(fragment.branches[0].condition).toBe('when condition fails');
+    });
+  });
+
+  describe('Critical Fragments', () => {
+    it('should parse critical with option branches', () => {
+      const input = `
+sequenceDiagram
+critical Establish connection
+  A->>B: Connect
+option Network error
+  A->>B: Retry
+option Timeout
+  A->>B: Abort
+end
+`;
+      const ast = parse(input);
+      expect(ast.events).toHaveLength(1);
+      const fragment = ast.events[0];
+      if (fragment.kind !== 'fragment') throw new Error('Expected fragment');
+      expect(fragment.operator).toBe('critical');
+      expect(fragment.branches).toHaveLength(3);
+      expect(fragment.branches[0].condition).toBe('Establish connection');
+      expect(fragment.branches[1].condition).toBe('Network error');
+      expect(fragment.branches[2].condition).toBe('Timeout');
+    });
+
+    it('should parse critical without options', () => {
+      const input = `
+sequenceDiagram
+critical Transaction
+  A->>B: Begin
+  B->>A: Commit
+end
+`;
+      const ast = parse(input);
+      expect(ast.events).toHaveLength(1);
+      const fragment = ast.events[0];
+      if (fragment.kind !== 'fragment') throw new Error('Expected fragment');
+      expect(fragment.operator).toBe('critical');
+      expect(fragment.branches).toHaveLength(1);
+    });
+  });
+
+  describe('Rect (Background Highlighting)', () => {
+    it('should parse rect with rgb color', () => {
+      const input = `
+sequenceDiagram
+rect rgb(200, 150, 255)
+  A->>B: In highlight
+end
+`;
+      const ast = parse(input);
+      expect(ast.events).toHaveLength(1);
+      const fragment = ast.events[0];
+      if (fragment.kind !== 'fragment') throw new Error('Expected fragment');
+      expect(fragment.operator).toBe('rect');
+      expect(fragment.branches).toHaveLength(1);
+      expect(fragment.branches[0].events).toHaveLength(1);
+    });
+
+    it('should parse rect with rgba color', () => {
+      const input = `
+sequenceDiagram
+rect rgba(0, 0, 255, 0.1)
+  A->>B: Transparent blue
+  B->>A: Reply
+end
+`;
+      const ast = parse(input);
+      expect(ast.events).toHaveLength(1);
+      const fragment = ast.events[0];
+      if (fragment.kind !== 'fragment') throw new Error('Expected fragment');
+      expect(fragment.branches[0].events).toHaveLength(2);
+    });
+  });
+
+  describe('Participant Types', () => {
+    it('should parse database participant', () => {
+      const input = `
+sequenceDiagram
+participant DB as Database
+A->>DB: Query
+`;
+      const ast = parse(input);
+      expect(ast.participants).toHaveLength(2);
+      // Note: Currently parsed as 'participant', future enhancement to detect type from context
+    });
+
+    it('should parse multiple participant types', () => {
+      const input = `
+sequenceDiagram
+participant User
+participant API as API Server
+participant DB as Database
+User->>API: Request
+API->>DB: Query
+`;
+      const ast = parse(input);
+      expect(ast.participants).toHaveLength(3);
+      expect(ast.events).toHaveLength(2);
     });
   });
 });

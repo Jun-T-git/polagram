@@ -342,14 +342,14 @@ System->>System: Self update`;
 
       // TODO: Parser/Generator bug causes Note to be malformed as 'note over:' (missing content).
       // Verify that at least the node exists (even if text is lost - known issue)
-      // expect(normalized).toContain('Note left of User: Keep this note');
-      expect(normalized).toContain('note over:');
+      expect(normalized).toContain('note left of User: Keep this note');
+      // expect(normalized).toContain('note over:');
 
       expect(normalized).toContain('User->>User: Local action');
 
-      const _indexParticipant = normalized.indexOf('participant User');
-      // const indexNote = normalized.indexOf('Note left of User');
-      // expect(indexParticipant).toBeLessThan(indexNote);
+      const indexParticipant = normalized.indexOf('participant User');
+      const indexNote = normalized.indexOf('note left of User');
+      expect(indexParticipant).toBeLessThan(indexNote);
     });
   });
 });

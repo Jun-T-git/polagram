@@ -43,6 +43,15 @@ export class Lexer extends BaseLexer<Token> {
         }
         break;
       }
+      case '=': {
+        // Handle == divider ==
+        if (this.peekExact('=')) {
+          const dividerText = this.readDivider();
+          return this.newToken('DIVIDER', dividerText, start, startColumn);
+        }
+        tok = this.newToken('UNKNOWN', this.ch, start, startColumn);
+        break;
+      }
       case '':
         tok = this.newToken('EOF', '', start, startColumn);
         break;
@@ -71,14 +80,7 @@ export class Lexer extends BaseLexer<Token> {
     return { type, literal, line: this.line, column: startColumn, start, end };
   }
 
-  private readIdentifier(): string {
-    const position = this.position;
-    while (this.isLetter(this.ch) || this.isDigit(this.ch)) {
-      this.readChar();
-    }
-    return this.input.slice(position, this.position);
-  }
-
+  // Override readString to handle PlantUML specific behavior
   private readString(): string {
     const position = this.position + 1;
     this.readChar();
@@ -110,6 +112,11 @@ export class Lexer extends BaseLexer<Token> {
       else: 'ELSE',
       end: 'END',
       box: 'BOX',
+      boundary: 'BOUNDARY',
+      control: 'CONTROL',
+      entity: 'ENTITY',
+      collections: 'COLLECTIONS',
+      queue: 'QUEUE',
       '@startuml': 'START_UML',
       '@enduml': 'END_UML',
     };
@@ -156,5 +163,17 @@ export class Lexer extends BaseLexer<Token> {
 
   private readMulti(count: number) {
     for (let i = 0; i < count; i++) this.readChar();
+  }
+
+  private readDivider(): string {
+    // Read == and content until end of line or closing ==
+    const line = this.readRestOfLine();
+    // Extract text between == and ==
+    const match = line.match(/^==\s*(.*?)\s*==$/);
+    if (match) {
+      return match[1];
+    }
+    // Just == or ==== without text
+    return '';
   }
 }

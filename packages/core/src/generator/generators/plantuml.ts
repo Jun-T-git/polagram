@@ -10,17 +10,32 @@ import type {
     ReferenceNode,
     SpacerNode,
 } from '../../ast';
+import { Traverser } from '../base/walker';
 import type { PolagramVisitor } from '../interface';
 
+/**
+ * Visitor implementation that generates PlantUML code.
+ * Uses the same Traverser pattern as MermaidGeneratorVisitor for consistency.
+ */
 export class PlantUMLGeneratorVisitor implements PolagramVisitor {
-  generate(root: PolagramRoot): string {
-    return this.visitRoot(root);
+  private lines: string[] = [];
+  private traverser: Traverser;
+
+  constructor() {
+    this.traverser = new Traverser(this);
   }
 
-  visitRoot(node: PolagramRoot): string {
-    const lines: string[] = ['@startuml'];
+  generate(root: PolagramRoot): string {
+    this.lines = [];
+    this.traverser.traverse(root);
+    return this.lines.join('\n');
+  }
+
+  visitRoot(node: PolagramRoot): void {
+    this.add('@startuml');
+
     if (node.meta.title) {
-      lines.push(`title ${node.meta.title}`);
+      this.add(`title ${node.meta.title}`);
     }
 
     const participantsMap = new Map(node.participants.map((p) => [p.id, p]));
@@ -28,7 +43,7 @@ export class PlantUMLGeneratorVisitor implements PolagramVisitor {
 
     // Groups
     for (const group of node.groups) {
-      lines.push(this.visitGroup(group, participantsMap));
+      this.visitGroup(group, participantsMap);
       group.participantIds.forEach((id) => {
         groupedParticipantIds.add(id);
       });
@@ -37,144 +52,112 @@ export class PlantUMLGeneratorVisitor implements PolagramVisitor {
     // Ungrouped Participants
     for (const participant of node.participants) {
       if (!groupedParticipantIds.has(participant.id)) {
-        lines.push(this.visitParticipant(participant));
+        this.visitParticipant(participant);
       }
     }
 
-    // Events
-    for (const event of node.events) {
-      lines.push(this.visitEvent(event));
-    }
+    // Events - use Traverser for consistent dispatching
+    this.traverser.dispatchEvents(node.events);
 
-    lines.push('@enduml');
-    return lines.join('\n');
+    this.add('@enduml');
   }
 
-  visitParticipant(node: Participant): string {
+  visitParticipant(node: Participant): void {
     // If Name == ID, use concise format: "type ID"
     // Otherwise use explicit format: "type "Name" as ID"
     if (node.name === node.id) {
-      return `${node.type} ${node.id}`;
+      this.add(`${node.type} ${node.id}`);
+    } else {
+      this.add(`${node.type} "${node.name}" as ${node.id}`);
     }
-    return `${node.type} "${node.name}" as ${node.id}`;
   }
 
-  // Adjusted signature to pass context
-  visitGroup(
-    node: ParticipantGroup,
-    context?: Map<string, Participant>,
-  ): string {
-    const parts: string[] = [];
+  visitParticipantGroup(_node: ParticipantGroup): void {
+    // Called by traverser, but we handle groups manually in visitRoot with context
+    // This is a no-op since we use visitGroup with context instead
+  }
+
+  // Internal method with context for group handling
+  private visitGroup(node: ParticipantGroup, context: Map<string, Participant>): void {
     const color = node.style?.backgroundColor
       ? ` ${node.style.backgroundColor}`
       : '';
     const title = node.name ? ` "${node.name}"` : '';
 
-    parts.push(`box${title}${color}`);
+    this.add(`box${title}${color}`);
 
-    if (context) {
-      for (const pid of node.participantIds) {
-        const p = context.get(pid);
-        if (p) {
-          parts.push(this.visitParticipant(p));
-        }
+    for (const pid of node.participantIds) {
+      const p = context.get(pid);
+      if (p) {
+        this.visitParticipant(p);
       }
     }
 
-    parts.push('end box');
-    return parts.join('\n');
+    this.add('end box');
   }
 
-  visitMessage(node: MessageNode): string {
-    const from = node.from || '[*]'; // Handle lost/found if needed
+  visitMessage(node: MessageNode): void {
+    const from = node.from || '[*]';
     const to = node.to || '[*]';
 
     let arrow = '->';
     if (node.type === 'reply') arrow = '-->';
-    else if (node.type === 'async') arrow = '->>'; // PlantUML doesn't strictly distinguish async arrow head generally, but ->> is fine
+    else if (node.type === 'async') arrow = '->>';
 
-    // style override
-    if (node.style.line === 'dotted') {
-      // If reply, already --> (dotted). If sync but dotted: A -[dotted]-> B ?
-      // PlantUML: A ..> B
-      // But --> is usually standard reply.
-    }
-
-    return `${from} ${arrow} ${to}: ${node.text}`;
+    this.add(`${from} ${arrow} ${to}: ${node.text}`);
   }
 
-  visitFragment(node: FragmentNode): string {
-    const lines: string[] = [];
+  visitFragment(node: FragmentNode): void {
     const op = node.operator;
 
     node.branches.forEach((branch, index) => {
       if (index === 0) {
-        lines.push(`${op} ${branch.condition || ''}`.trim());
+        this.add(`${op} ${branch.condition || ''}`.trim());
       } else {
-        lines.push(`else ${branch.condition || ''}`.trim());
+        this.add(`else ${branch.condition || ''}`.trim());
       }
 
-      for (const event of branch.events) {
-        // We need to recursively visit events (messages, nested fragments, etc.)
-        // But we can't easily call visitX because we don't know the type statically here or need a centralized dispatcher that returns string.
-        // But wait, visitRoot has a dispatcher. We should extract it to `visitEvent`.
-        // For now, let's duplicate the relevant dispatch logic or creating a helper.
-        lines.push(this.visitEvent(event));
-      }
+      // Use Traverser for nested events
+      this.traverser.dispatchEvents(branch.events);
     });
 
-    lines.push('end');
-    return lines.join('\n');
+    this.add('end');
   }
 
-  // biome-ignore lint/suspicious/noExplicitAny: event type is complex union
-  private visitEvent(event: any): string {
-    switch (event.kind) {
-      case 'message':
-        return this.visitMessage(event);
-      case 'fragment':
-        return this.visitFragment(event);
-      case 'note':
-        return this.visitNote(event);
-      case 'activation':
-        return this.visitActivation(event);
-      case 'divider':
-        return this.visitDivider(event);
-      case 'spacer':
-        return this.visitSpacer(event);
-      case 'ref':
-        return this.visitReference(event);
-      default:
-        return '';
-    }
-  }
-  visitNote(node: NoteNode): string {
+  visitNote(node: NoteNode): void {
     const position = node.position || 'over';
     const participants = node.participantIds.join(', ');
 
-    // note left of A: Text
-    // note over A, B: Text
-    // For 'over', we don't say 'of' in standard examples? "note over Alice", "note over Alice, Bob"
-    // But 'left of', 'right of' use 'of'.
     const positionStr =
       position === 'left' || position === 'right' ? `${position} of` : position;
-    return `note ${positionStr} ${participants}: ${node.text}`;
+    this.add(`note ${positionStr} ${participants}: ${node.text}`);
   }
-  visitActivation(node: ActivationNode): string {
-    // activate A
-    // deactivate A
-    return `${node.action} ${node.participantId}`;
+
+  visitActivation(node: ActivationNode): void {
+    this.add(`${node.action} ${node.participantId}`);
   }
-  visitParticipantGroup(_node: ParticipantGroup): string {
-    return '';
+
+  visitDivider(node: DividerNode): void {
+    if (node.text) {
+      this.add(`== ${node.text} ==`);
+    } else {
+      this.add('====');
+    }
   }
-  visitDivider(_node: DividerNode): string {
-    return '';
+
+  visitSpacer(_node: SpacerNode): void {
+    // PlantUML spacer: ||| or ||45||
+    this.add('|||');
   }
-  visitSpacer(_node: SpacerNode): string {
-    return '';
+
+  visitReference(node: ReferenceNode): void {
+    const participants = node.participantIds.join(', ');
+    this.add(`ref over ${participants}: ${node.text}`);
   }
-  visitReference(_node: ReferenceNode): string {
-    return '';
+
+  // --- Helpers ---
+
+  private add(line: string): void {
+    this.lines.push(line);
   }
 }

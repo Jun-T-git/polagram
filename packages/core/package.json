@@ -35,7 +35,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "biome lint .",
-    "gen:docs": "node ../cli/dist/index.js run -c docs/sequence/polagram.yml"
+    "gen:docs": "node ../cli/dist/index.js generate -c docs/sequence/polagram.yml"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",

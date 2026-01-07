@@ -1,5 +1,6 @@
 import type {
     ActivationNode,
+    DividerNode,
     EventNode,
     FragmentNode,
     MessageNode,
@@ -45,8 +46,20 @@ export class Parser extends BaseParser<Token> {
         continue;
       }
 
-      if (['PARTICIPANT', 'ACTOR', 'DATABASE'].includes(this.currToken.type)) {
+      if (['PARTICIPANT', 'ACTOR', 'DATABASE', 'BOUNDARY', 'CONTROL', 'ENTITY', 'COLLECTIONS', 'QUEUE'].includes(this.currToken.type)) {
         this.parseParticipant(root);
+        continue;
+      }
+
+      // Handle dividers
+      if (this.currToken.type === 'DIVIDER') {
+        const divider: DividerNode = {
+          kind: 'divider',
+          id: `div_${root.events.length + 1}`,
+          text: this.currToken.literal || undefined,
+        };
+        root.events.push(divider);
+        this.advance();
         continue;
       }
 
@@ -146,7 +159,7 @@ export class Parser extends BaseParser<Token> {
       }
 
       // We expect participant declarations inside box usually.
-      if (['PARTICIPANT', 'ACTOR', 'DATABASE'].includes(this.currToken.type)) {
+      if (['PARTICIPANT', 'ACTOR', 'DATABASE', 'BOUNDARY', 'CONTROL', 'ENTITY', 'COLLECTIONS', 'QUEUE'].includes(this.currToken.type)) {
         // We need to capture the ID of the participant created.
         // parseParticipant pushes to root.participants.
         // We can check root.participants.length before and after? Or return ID from parseParticipant.
@@ -260,7 +273,7 @@ export class Parser extends BaseParser<Token> {
 
   // Refactor parse() to use parseStatement
   private parseStatement(root: PolagramRoot): EventNode | null {
-    if (['PARTICIPANT', 'ACTOR', 'DATABASE'].includes(this.currToken.type)) {
+    if (['PARTICIPANT', 'ACTOR', 'DATABASE', 'BOUNDARY', 'CONTROL', 'ENTITY', 'COLLECTIONS', 'QUEUE'].includes(this.currToken.type)) {
       this.parseParticipant(root);
       return null; // Not an event
     }
@@ -449,10 +462,15 @@ export class Parser extends BaseParser<Token> {
   }
 
   private parseParticipant(root: PolagramRoot) {
-    const typeStr = this.currToken.type; // ACTOR, DATABASE, PARTICIPANT
+    const typeStr = this.currToken.type; // ACTOR, DATABASE, PARTICIPANT, BOUNDARY, etc.
     let type: Participant['type'] = 'participant'; // Default
     if (typeStr === 'ACTOR') type = 'actor';
     if (typeStr === 'DATABASE') type = 'database';
+    if (typeStr === 'BOUNDARY') type = 'boundary';
+    if (typeStr === 'CONTROL') type = 'control';
+    if (typeStr === 'ENTITY') type = 'entity';
+    if (typeStr === 'COLLECTIONS') type = 'collections';
+    if (typeStr === 'QUEUE') type = 'queue';
 
     this.advance(); // eat keyword
 

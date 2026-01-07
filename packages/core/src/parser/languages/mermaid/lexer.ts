@@ -5,6 +5,12 @@ export class Lexer extends BaseLexer<Token> {
   public nextToken(): Token {
     this.skipWhitespace();
 
+    // Handle %% comments - skip to end of line
+    if (this.ch === '%' && this.peekChar() === '%') {
+      this.skipComment();
+      return this.nextToken(); // Recursively get the next real token
+    }
+
     const start = this.position;
     const startColumn = this.column;
     let tok: Token;
@@ -75,14 +81,6 @@ export class Lexer extends BaseLexer<Token> {
     };
   }
 
-  private readIdentifier(): string {
-    const position = this.position;
-    while (this.isLetter(this.ch) || this.isDigit(this.ch)) {
-      this.readChar();
-    }
-    return this.input.slice(position, this.position);
-  }
-
   private readNumber(): string {
     const position = this.position;
     while (this.isDigit(this.ch)) {
@@ -145,9 +143,17 @@ export class Lexer extends BaseLexer<Token> {
     for (let i = 0; i < count; i++) this.readChar();
   }
 
+  private skipComment(): void {
+    // Skip %% and everything until end of line
+    while (this.ch !== '\n' && this.ch !== '') {
+      this.readChar();
+    }
+    // Don't consume the newline - let the main loop handle it
+  }
+
   private lookupIdent(ident: string): TokenType {
     const keywords: Record<string, TokenType> = {
-      sequenceDiagram: 'SEQUENCE_DIAGRAM',
+      sequencediagram: 'SEQUENCE_DIAGRAM',
       participant: 'PARTICIPANT',
       actor: 'ACTOR',
       loop: 'LOOP',
@@ -165,7 +171,13 @@ export class Lexer extends BaseLexer<Token> {
       activate: 'ACTIVATE',
       deactivate: 'DEACTIVATE',
       box: 'BOX',
+      par: 'PAR',
+      and: 'AND',
+      break: 'BREAK',
+      critical: 'CRITICAL',
+      option: 'OPTION',
+      rect: 'RECT',
     };
-    return keywords[ident] || 'IDENTIFIER';
+    return keywords[ident.toLowerCase()] || 'IDENTIFIER';
   }
 }

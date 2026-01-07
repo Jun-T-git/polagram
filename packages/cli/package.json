@@ -25,7 +25,7 @@
     "polagram": "dist/index.js"
   },
   "scripts": {
-    "build": "tsc -b",
+    "build": "rm -rf dist && tsc",
     "dev": "tsc -w",
     "test": "vitest run",
     "start": "node dist/index.js"

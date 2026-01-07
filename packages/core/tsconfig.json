@@ -1,11 +1,11 @@
 {
   "extends": "../../tsconfig.base.json",
-  "include": ["src"],
+  "include": ["src", "test"],
   "compilerOptions": {
     "composite": true,
     "baseUrl": ".",
     "declaration": true,
-    "noEmit": false,
+    "noEmit": true,
     "allowImportingTsExtensions": false,
     "outDir": "dist",
     "paths": {

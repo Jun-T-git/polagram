@@ -10,7 +10,7 @@ import type {
   ReferenceNode,
   SpacerNode,
 } from '../../ast';
-import { getArrowString } from '../../parser/languages/mermaid/constants';
+import { getArrowString } from '../../common/mermaid/constants';
 import { Traverser } from '../base/walker';
 import type { PolagramVisitor } from '../interface';
 
@@ -105,10 +105,18 @@ export class MermaidGeneratorVisitor implements PolagramVisitor {
       this.traverser.dispatchEvents(first.events);
     });
 
+    // Use 'and' for par, 'option' for critical, 'else' for others
+    let branchKeyword = 'else';
+    if (node.operator === 'par') {
+      branchKeyword = 'and';
+    } else if (node.operator === 'critical') {
+      branchKeyword = 'option';
+    }
+    
     for (let i = 1; i < node.branches.length; i++) {
       const b = node.branches[i];
       const cond = b.condition ? ` ${b.condition}` : '';
-      this.add(`else${cond}`);
+      this.add(`${branchKeyword}${cond}`);
       this.indent(() => {
         this.traverser.dispatchEvents(b.events);
       });

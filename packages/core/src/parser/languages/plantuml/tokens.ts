@@ -26,7 +26,13 @@ export type TokenType =
   | 'AS'
   | 'ARROW'
   | 'COLON'
-  | 'COMMA';
+  | 'COMMA'
+  | 'DIVIDER'
+  | 'BOUNDARY'
+  | 'CONTROL'
+  | 'ENTITY'
+  | 'COLLECTIONS'
+  | 'QUEUE';
 
 export interface Token {
   type: TokenType;

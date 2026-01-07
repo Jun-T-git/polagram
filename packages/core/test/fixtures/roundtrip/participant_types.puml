@@ -1,0 +1,9 @@
+@startuml
+boundary WebUI
+control AuthService
+entity UserDB
+WebUI -> AuthService: login(user, pass)
+AuthService -> UserDB: validate
+UserDB --> AuthService: result
+AuthService --> WebUI: token
+@enduml
