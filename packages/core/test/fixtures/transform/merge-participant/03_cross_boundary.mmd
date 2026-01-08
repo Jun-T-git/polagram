@@ -1,0 +1,13 @@
+sequenceDiagram
+    box "Box 1"
+        participant A
+    end
+    box "Box 2"
+        participant B
+    end
+    participant C
+
+    C->>A: Req (Ext -> Box1)
+    A->>B: Fwd (Box1 -> Box2)
+    B-->>A: Ack (Box2 -> Box1)
+    A-->>C: Res (Box1 -> Ext)

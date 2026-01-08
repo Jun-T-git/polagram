@@ -1,0 +1,44 @@
+sequenceDiagram
+    participant User
+    box "Legacy System" #LightBlue
+        participant Auth
+        participant Order
+        participant Billing
+    end
+    box "External"
+        participant Bank
+    end
+
+    User->>Auth: Login
+    activate Auth
+    Auth->>Auth: Validate Token
+    Auth-->>User: Token
+    deactivate Auth
+
+    User->>Order: Place Order
+    activate Order
+    
+    note over Order, Billing: Internal Sync
+    Order->>Billing: Create Invoice
+    
+    opt Payment Processing
+        Billing->>Bank: Charge Credit Card
+        activate Bank
+        note right of Bank: External Interaction
+        Bank-->>Billing: Success
+        deactivate Bank
+    end
+
+    loop Retry Logic
+        Billing->>Billing: Update Status
+    end
+
+    alt Stock Check
+        Order->>Order: Check DB
+    else Out of Stock
+        Order-->>User: Error
+    end
+
+    Billing-->>Order: Invoice Created
+    deactivate Order
+    Order-->>User: Order Confirmed

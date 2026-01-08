@@ -1,0 +1,16 @@
+sequenceDiagram
+    participant User
+    participant A
+    participant B
+    participant DB
+
+    User->>A: Request
+    A->>B: Process
+    alt Success
+        B->>DB: Save
+        DB-->>B: Saved
+        B-->>A: Done
+    else Error
+        B-->>A: Fail
+    end
+    A-->>User: Response

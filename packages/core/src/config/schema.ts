@@ -39,21 +39,41 @@ const GroupSelectorSchema = z.object({
   name: TextMatcherSchema.optional(),
 });
 
-const SelectorSchema = z.discriminatedUnion('kind', [
-  FragmentSelectorSchema,
-  ParticipantSelectorSchema,
-  MessageSelectorSchema,
-  GroupSelectorSchema,
-]);
+
 
 // -- Layers --
 
-const ActionSchema = z.enum(['focus', 'remove', 'resolve']);
-
-const LayerSchema = z.object({
-  action: ActionSchema,
-  selector: SelectorSchema,
+const ResolveLayerSchema = z.object({
+  action: z.literal('resolve'),
+  selector: FragmentSelectorSchema,
 });
+
+const FocusLayerSchema = z.object({
+  action: z.literal('focus'),
+  selector: ParticipantSelectorSchema,
+});
+
+const RemoveLayerSchema = z.object({
+  action: z.literal('remove'),
+  selector: z.union([
+    ParticipantSelectorSchema,
+    MessageSelectorSchema,
+    GroupSelectorSchema,
+  ]),
+});
+
+const MergeLayerSchema = z.object({
+  action: z.literal('merge'),
+  newName: z.string(),
+  selector: ParticipantSelectorSchema,
+});
+
+const LayerSchema = z.discriminatedUnion('action', [
+  ResolveLayerSchema,
+  FocusLayerSchema,
+  RemoveLayerSchema,
+  MergeLayerSchema,
+]);
 
 // -- Lens --
 

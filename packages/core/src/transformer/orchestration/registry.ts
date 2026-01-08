@@ -1,9 +1,11 @@
 import { FocusFilter } from '../filters/focus';
+import { MergeFilter } from '../filters/merge';
 import { RemoveFilter } from '../filters/remove';
 import { ResolveFilter } from '../filters/resolve';
 import type {
     FocusLayer,
     Layer,
+    MergeLayer,
     RemoveLayer,
     ResolveLayer,
     Transformer,
@@ -26,6 +28,7 @@ class TransformerRegistry {
     this.registerTyped<ResolveLayer>('resolve', (layer) => new ResolveFilter(layer));
     this.registerTyped<FocusLayer>('focus', (layer) => new FocusFilter(layer));
     this.registerTyped<RemoveLayer>('remove', (layer) => new RemoveFilter(layer));
+    this.registerTyped<MergeLayer>('merge', (layer) => new MergeFilter(layer));
   }
 
   /**
