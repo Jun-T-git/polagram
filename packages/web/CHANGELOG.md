@@ -1,5 +1,12 @@
 # @polagram/web
 
+## 0.0.8
+
+### Patch Changes
+
+- Updated dependencies [f605f22]
+  - @polagram/core@0.3.0
+
 ## 0.0.7
 
 ### Patch Changes

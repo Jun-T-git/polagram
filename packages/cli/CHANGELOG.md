@@ -1,5 +1,17 @@
 # @polagram/cli
 
+## 0.1.1
+
+### Patch Changes
+
+- f605f22: Refactor merge configuration:
+  - Introduce `into` object for merge targets.
+  - Support `id` and `name` in `into`.
+  - Implement auto-naming if `id`/`name` are omitted.
+  - Fix participant ordering (insert at first merged participant's position).
+- Updated dependencies [f605f22]
+  - @polagram/core@0.3.0
+
 ## 0.1.0
 
 ### Minor Changes
