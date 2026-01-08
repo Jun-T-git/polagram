@@ -1,7 +1,6 @@
 # Polagram
 
 > **Unraveling Logic.**
-> 複雑に絡み合ったロジックを、解きほぐす。
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Language](https://img.shields.io/badge/language-TypeScript-3178C6.svg)
@@ -9,46 +8,46 @@
 
 **Official Website:** [https://polagram.org/](https://polagram.org/)
 
-Polagram は、Mermaid や PlantUML などのシーケンス図コードを解析し、静的な画像ではなく **「インタラクティブな構造（DOM）」** としてレンダリングするための次世代エンジンです。
+Polagram is a next-generation engine that parses sequence diagram code (like Mermaid or PlantUML) and renders it as an **"Interactive Structure (DOM)"** instead of a static image.
 
-## 📖 Philosophy (哲学)
+## 📖 Philosophy
 
-**「網羅性」からの解放と、「文脈」へのフォーカス。**
+**Liberation from "Completeness", Focus on "Context".**
 
-従来のシーケンス図ツールは「全ての分岐を一枚の画像に収める」ことに特化していました。しかし、実際の開発現場における複雑な仕様書は、巨大すぎて誰も全体像を把握できません。
+Traditional sequence diagram tools focus on "fitting every branch into a single image." However, complex specifications in real-world development are often too massive for anyone to grasp the entire picture at once.
 
-Polagram は、**「読む人の思考に合わせて情報を段階的に開示する（Progressive Disclosure）」** という思想で作られています。
+Polagram is built on the philosophy of **"Progressive Disclosure"**—revealing information gradually to match the reader's thought process.
 
-## ✨ Features (特徴)
+## ✨ Features
 
-* **Foldable Sequence (折りたためるシーケンス図):**
-    * `alt`（条件分岐）や `loop`（繰り返し）ブロックを、コードエディタのように折りたたんだり展開したりできます。
-* **Focus & Filter (関心の分離):**
-    * **Focus**: 特定の Actor/Participant に関連する処理だけをハイライト。
-    * **Remove**: 不要なログ出力やノイズとなる Participant を除外。
-    * **Merge**: 複数の内部マイクロサービスを 1 つの「システム」としてマージし、詳細を隠蔽して俯瞰的な図を生成。
+* **Foldable Sequence:**
+    * Collapse and expand `alt` (conditional) or `loop` blocks just like in a code editor.
+* **Focus & Filter:**
+    * **Focus**: Highlight only the processing routes relevant to a specific Actor or Participant.
+    * **Remove**: Exclude unnecessary logs or noisy Participants.
+    * **Merge**: Merge multiple internal microservices into a single "System" entity, hiding implementation details to generate a high-level overview.
 * **DOM-based Rendering:**
-    * SVG/PNG画像への変換ではなく、操作可能な HTML/DOM として出力するため、テキスト選択や検索、リンク共有が容易です。
+    * Outputs manipulatable HTML/DOM instead of converting to SVG/PNG images, making text selection, search, and link sharing easy.
 
 ## 📦 Packages
 
-Polagram はモノレポ（Monorepo）構成を採用しており、以下のパッケージで構成されています。
+Polagram adopts a Monorepo structure consisting of the following packages:
 
-### 核心モジュール
+### Core Modules
 * **[@polagram/core](./packages/core):**
-    * Mermaid / PlantUML を **Polagram AST** に変換するコアライブラリ。
-    * 変換エンジン（Transformation Engine）を含み、`focus`, `remove`, `merge` などの高度なフィルター処理を提供します。
+    * The core library that converts Mermaid / PlantUML into **Polagram AST**.
+    * Includes the **Transformation Engine**, providing advanced filtering capabilities like `focus`, `remove`, and `merge`.
 
-### ツール & UI
+### Tools & UI
 * **[@polagram/cli](./packages/cli):**
-    * Polagram AST を活用した CLI ツール。
-    * `polagram.yml` で定義された変換ルールに基づき、大量の図を自動生成・変換します。CI/CD パイプラインに最適です。
+    * A CLI tool leveraging the Polagram AST.
+    * Automatically generates and transforms large numbers of diagrams based on rules defined in `polagram.yml`. Ideal for CI/CD pipelines.
 * **@polagram/web (Beta):**
-    * インタラクティブなダイアグラムビューア。
+    * An interactive diagram viewer.
 
 ## 🚀 Getting Started with CLI
 
-最も簡単に Polagram の機能を試す方法は CLI です。
+The easiest way to try Polagram's features is via the CLI.
 
 ### Installation
 
@@ -58,7 +57,7 @@ pnpm add -D @polagram/cli
 
 ### Usage
 
-1. **`polagram.yml` を作成**
+1. **Create `polagram.yml`**
 
 ```yaml
 version: 1
@@ -77,7 +76,7 @@ targets:
             selector: { kind: participant, name: { pattern: "(Auth|Order|Payment)" } }
 ```
 
-2. **実行**
+2. **Run**
 
 ```bash
 pnpm polagram generate
@@ -85,7 +84,7 @@ pnpm polagram generate
 
 ## 🧩 Polagram AST Schema
 
-Polagram は、シーケンス図を独自の木構造（Tree）として扱います。これにより、単なる描画だけでなく、プログラムによる「図のりファクタリング」が可能になります。
+Polagram treats sequence diagrams as a unique Tree structure. This enables not just rendering, but programmatic "Refactoring of Diagrams."
 
 ```typescript
 // Example: Fragment Node (alt/loop) structure
@@ -107,7 +106,7 @@ Polagram は、シーケンス図を独自の木構造（Tree）として扱い�
 
 ## 🤝 Contribution
 
-アイデアやプルリクエストは歓迎します。現在は Beta 段階のため、まずは Issue でディスカッションすることをお勧めします。
+Ideas and Pull Requests are welcome. As we are currently in the Beta phase, we recommend starting a discussion in Issues first.
 
 ## 📄 License
 
