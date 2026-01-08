@@ -1,11 +1,11 @@
 import type {
-    ActivationNode,
-    EventNode,
-    FragmentNode,
-    MessageNode,
-    NoteNode,
-    Participant,
-    PolagramRoot,
+  ActivationNode,
+  EventNode,
+  FragmentNode,
+  MessageNode,
+  NoteNode,
+  Participant,
+  PolagramRoot,
 } from '../../ast';
 import { Matcher } from '../selector/matcher';
 import { Walker } from '../traverse/walker';
@@ -14,48 +14,110 @@ import type { MergeLayer } from '../types';
 export class MergeFilter extends Walker {
   private matcher = new Matcher();
   private mergedParticipantIds = new Set<string>();
-  private newParticipantId: string;
+  private targetParticipantId: string = '';
 
   constructor(private layer: MergeLayer) {
     super();
-    // Simple id generation for now, just use the name
-    this.newParticipantId = layer.newName;
   }
 
   public transform(root: PolagramRoot): PolagramRoot {
     const selector = this.layer.selector;
+    const participantsToMerge: Participant[] = [];
 
     // 1. Identify participants to merge
     root.participants.forEach((p) => {
       if (this.matcher.matchParticipant(p, selector)) {
-        this.mergedParticipantIds.add(p.id);
+        participantsToMerge.push(p);
       }
     });
 
-    if (this.mergedParticipantIds.size === 0) {
+    if (participantsToMerge.length === 0) {
       return root;
     }
 
-    // 2. Add the new merged participant if not exists
-    const alreadyExists = root.participants.some(
-      (p) => p.id === this.newParticipantId,
-    );
-    if (!alreadyExists) {
-      const newParticipant: Participant = {
-        id: this.newParticipantId,
-        name: this.layer.newName,
-        type: 'participant',
-      };
-      // Add to the beginning or end? standard is usually appending,
-      // but if we want to preserve some order it's tricky.
-      // For now, let's append it.
-      root.participants.push(newParticipant);
+    this.mergedParticipantIds = new Set(participantsToMerge.map((p) => p.id));
+
+    // 2. Determine Target ID and Name
+    const into = this.layer.into || {};
+    let targetId = into.id;
+    let targetName = into.name;
+
+    if (!targetId) {
+      if (targetName) {
+        // Sanitize name to create ID
+        targetId = targetName.replace(/[^a-zA-Z0-9-_]/g, '_');
+      } else {
+        // Auto-generate from merged IDs
+        targetId = participantsToMerge.map((p) => p.id).join('_');
+      }
     }
 
-    // 3. Remove original participants
-    root.participants = root.participants.filter(
-      (p) => !this.mergedParticipantIds.has(p.id),
+    // Fallback for name if not provided
+    if (!targetName) {
+      // Use targetId as name if name is missing
+      targetName = targetId; 
+    }
+
+    this.targetParticipantId = targetId;
+
+    // 3. Update participants list
+    // Three scenarios for Target:
+    // A. Target IS one of the merged participants (e.g. merge [A, B] into A).
+    //    We keep A (but possibly updated name?), B is removed.
+    // B. Target exists but NOT in merged participants (e.g. merge [A, B] into C).
+    //    A and B are removed. C stays where it is.
+    // C. Target is NEW (e.g. merge [A, B] into New).
+    //    A and B are removed. New inserted at A's position.
+
+    const newParticipantsList: Participant[] = [];
+    
+    // Check if target already exists in the "remaining" set (excluding merged ones)
+    const existsOutsideMerge = root.participants.some(
+      (p) => p.id === targetId && !this.mergedParticipantIds.has(p.id)
     );
+
+    // Should we add a new participant entry?
+    // We add it IF it doesn't exist outside (Case B), AND we haven't added it yet.
+    // If it exists outside (Case B), we just rely on the existing entry.
+    
+    const shouldAddNew = !existsOutsideMerge;
+    let added = false; // Track if we've added the target (or if we encountered the target in merged set)
+
+    for (const p of root.participants) {
+      if (this.mergedParticipantIds.has(p.id)) {
+        // This participant is being merged.
+        
+        // If it happens to be the target ID itself (Case A: merge [A,B] into A),
+        // we essentially "keep" it (add it as the target).
+        // Or if it's not the target ID, but we need to insert the *new* target here (Case C).
+        
+        if (shouldAddNew && !added) {
+           const newParticipant: Participant = {
+            id: targetId || '',
+            name: targetName || '',
+            type: 'participant',
+             // Todo: map stereotype?
+          };
+          newParticipantsList.push(newParticipant);
+          added = true;
+        }
+        // Skip p itself (it's either replaced by newParticipant, or removed)
+        continue;
+      }
+
+      // Not being merged.
+      // Special check: could this be the target (Case B)?
+      if (p.id === targetId) {
+          // This is the target, existing separately. Keep it.
+          // Note: added doesn't matter here since we are keeping the existing node.
+          newParticipantsList.push(p);
+      } else {
+          // Unrelated participant
+          newParticipantsList.push(p);
+      }
+    }
+
+    root.participants = newParticipantsList;
 
     // 4. Transform events
     return super.transform(root);
@@ -71,20 +133,11 @@ export class MergeFilter extends Walker {
     if (node.kind === 'activation') {
       return this.transformActivation(node as ActivationNode);
     }
-    // Fragments are handled by default recursion in visitFragment -> visitEvent
-    // But we need to cleanup empty fragments after recursion.
-    // Walker's visitEvent calls visitFragment for fragments.
-    // We can override visitFragment if needed, or rely on the return value of super.visitEvent
-    // which calls child visits.
-    // However, Walker.visitEvent for fragment just returns [node] after visiting children.
-    // We need to check if children are empty.
 
     if (node.kind === 'fragment') {
       const result = super.visitEvent(node);
-      // result is EventNode[] (usually [node] with modified children)
       if (result.length > 0 && result[0].kind === 'fragment') {
         const fragment = result[0] as FragmentNode;
-        // Check if all branches are empty
         const isEmpty = fragment.branches.every(
           (b) => b.events.length === 0,
         );
@@ -104,14 +157,14 @@ export class MergeFilter extends Walker {
 
     // Map participants
     if (from && this.mergedParticipantIds.has(from)) {
-      from = this.newParticipantId;
+      from = this.targetParticipantId;
     }
     if (to && this.mergedParticipantIds.has(to)) {
-      to = this.newParticipantId;
+      to = this.targetParticipantId;
     }
 
     // Check for self-message on the new participant
-    if (from === this.newParticipantId && to === this.newParticipantId) {
+    if (from === this.targetParticipantId && to === this.targetParticipantId) {
       return [];
     }
 
@@ -130,7 +183,7 @@ export class MergeFilter extends Walker {
 
     for (const pid of node.participantIds) {
       if (this.mergedParticipantIds.has(pid)) {
-        newParticipantIds.add(this.newParticipantId);
+        newParticipantIds.add(this.targetParticipantId);
         changed = true;
       } else {
         newParticipantIds.add(pid);
@@ -142,15 +195,6 @@ export class MergeFilter extends Walker {
     }
 
     const uniqueIds = Array.from(newParticipantIds);
-
-    // If the note is ONLY about the new participant (meaning all original participants were merged),
-    // and it was originally internal to the group, we remove it.
-    // Wait, the rule is: "If A and B are BOTH in APIs, Note over A,B -> Delete".
-    // If "Note over A", A in APIs -> "Note over APIs".
-    //
-    // The user said: "C. 指定したParticipant群に関するnoteは全て削除しましょう。つまり、あなたの例ではA と B が共に APIs にマージされる場合は削除です。"
-    // This implies if ALL participants of the note are in the merge set.
-    // If "Note over A, C" (C external) -> "Note over APIs, C" (Keep).
 
     const allOriginallyMerged = node.participantIds.every((pid) =>
       this.mergedParticipantIds.has(pid),

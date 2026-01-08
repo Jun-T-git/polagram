@@ -80,7 +80,7 @@ describe('Config Schema Validation', () => {
               layers: [
                 {
                   action: 'merge',
-                  newName: 'Managed',
+                  into: { name: 'Managed' },
                   selector: { kind: 'participant', name: 'A' },
                 },
               ],

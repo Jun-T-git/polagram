@@ -78,7 +78,7 @@ describe('MergeParticipant', () => {
     runTest('merge-participant', '01_complex', [
       {
         action: 'merge',
-        newName: 'System',
+        into: { name: 'System' },
         selector: { kind: 'participant', name: { pattern: '(A|B|DB)' } },
       },
     ]);
@@ -88,7 +88,7 @@ describe('MergeParticipant', () => {
     runTest('merge-participant', '02_ultra_complex', [
       {
         action: 'merge',
-        newName: 'CoreSystem',
+        into: { name: 'CoreSystem' },
         selector: { kind: 'participant', name: { pattern: '(Auth|Order|Billing)' } },
       },
     ]);
@@ -98,7 +98,7 @@ describe('MergeParticipant', () => {
     runTest('merge-participant', '03_cross_boundary', [
       {
         action: 'merge',
-        newName: 'NewService',
+        into: { name: 'NewService' },
         selector: { kind: 'participant', name: { pattern: '(A|C)' } },
       },
     ]);

@@ -49,7 +49,11 @@ export interface RemoveLayer {
 
 export interface MergeLayer {
   action: 'merge';
-  newName: string;
+  into?: {
+    name?: string;
+    id?: string;
+    stereotype?: string;
+  };
   selector: ParticipantSelector;
 }
 

@@ -64,7 +64,13 @@ const RemoveLayerSchema = z.object({
 
 const MergeLayerSchema = z.object({
   action: z.literal('merge'),
-  newName: z.string(),
+  into: z
+    .object({
+      name: z.string().optional(),
+      id: z.string().optional(),
+      stereotype: z.string().optional(),
+    })
+    .optional(),
   selector: ParticipantSelectorSchema,
 });
 

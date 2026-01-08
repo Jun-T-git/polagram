@@ -1,8 +1,7 @@
 sequenceDiagram
-    box "Box 2"
-        participant B
-    end
-    participant NewService
-
-    NewService->>B: Fwd (Box1 -> Box2)
-    B-->>NewService: Ack (Box2 -> Box1)
+participant NewService
+box "Box 2"
+participant B
+end
+NewService->>B: Fwd (Box1 -> Box2)
+B-->>NewService: Ack (Box2 -> Box1)

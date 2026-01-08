@@ -18,7 +18,7 @@ describe('MergeFilter Complex Scenarios', () => {
 
   const mergeABconfig = {
     action: 'merge' as const,
-    newName: 'System',
+    into: { name: 'System' },
     selector: { kind: 'participant' as const, name: { pattern: 'Service [AB]' } },
   };
 

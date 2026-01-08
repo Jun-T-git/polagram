@@ -144,7 +144,7 @@ targets:
       - name: merged
         layers:
           - action: merge
-            newName: "System"
+            into: { name: "System" }
             selector: { kind: "participant", name: "A" }
 `;
         await fs.writeFile(path.join(FIXTURE_DIR, 'merge.yml'), config);
