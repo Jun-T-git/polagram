@@ -1,5 +1,16 @@
 # @polagram/cli
 
+## 0.1.0
+
+### Minor Changes
+
+- 6f0474a: Introduced `MergeFilter` and `MergeLayer` to allow merging multiple participants into a single entity, abstracting internal interactions. Updated CLI to support `action: merge` in `polagram.yml`.
+
+### Patch Changes
+
+- Updated dependencies [6f0474a]
+  - @polagram/core@0.2.0
+
 ## 0.0.11
 
 ### Patch Changes
