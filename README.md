@@ -69,11 +69,18 @@ targets:
         layers:
           # Detailed logs removal
           - action: remove
-            selector: { kind: participant, name: { pattern: ".*Log.*" } }
+            selector:
+              kind: participant
+              name:
+                pattern: ".*Log.*"
           # Merge internal services into one 'Backend'
           - action: merge
-            newName: "Backend"
-            selector: { kind: participant, name: { pattern: "(Auth|Order|Payment)" } }
+            into:
+              name: "Backend"
+            selector:
+              kind: participant
+              name:
+                pattern: "(Auth|Order|Payment)"
 ```
 
 2. **Run**
