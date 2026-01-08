@@ -73,12 +73,33 @@ describe('RemoveParticipant', () => {
   });
 });
 
-describe('ResolveFragment', () => {
-  it('should unwrap option blocks', () => {
-    runTest('focus-fragment', '01_opt', [
+describe('MergeParticipant', () => {
+  it('should merge A, B, DB into System and hide internal details', () => {
+    runTest('merge-participant', '01_complex', [
       {
-        action: 'resolve',
-        selector: { kind: 'fragment', condition: 'Option' },
+        action: 'merge',
+        newName: 'System',
+        selector: { kind: 'participant', name: { pattern: '(A|B|DB)' } },
+      },
+    ]);
+  });
+
+  it('should handle ultra complex scenario (groups, notes, activations)', () => {
+    runTest('merge-participant', '02_ultra_complex', [
+      {
+        action: 'merge',
+        newName: 'CoreSystem',
+        selector: { kind: 'participant', name: { pattern: '(Auth|Order|Billing)' } },
+      },
+    ]);
+  });
+
+  it('should handle cross-boundary merge (Box 1 + External)', () => {
+    runTest('merge-participant', '03_cross_boundary', [
+      {
+        action: 'merge',
+        newName: 'NewService',
+        selector: { kind: 'participant', name: { pattern: '(A|C)' } },
       },
     ]);
   });

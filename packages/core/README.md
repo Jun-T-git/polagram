@@ -73,40 +73,37 @@ Polagram's core strength is its ability to transform diagrams. You can define **
 
 ### Concepts
 
-- **Action**: A primitive operation on the AST (e.g., `remove`, `focus`, `resolve`).
-- **Selector**: A criteria to select nodes (e.g., `participant: { name: "Logger" }`).
-- **Layer**: A combination of an Action and a Selector.
+- **Action**: A primitive operation on the AST.
+    - `remove`: Removes matching participants (and their messages).
+    - `focus`: Keeps only matching participants (removes everyone else).
+    - `merge`: Combines multiple participants into a single one (hides internal details).
+- **Selector**: A criteria to select nodes.
+- **Layer**: A configuration object defining an action and a selector.
 - **Lens**: A collection of Layers applied sequentially.
 
-### Example: Creating a "Client View"
+### Example: Creating a "Client View" (Remove & Resolve)
 
 ```typescript
-import { Transformer, Lens, Layer } from '@polagram/core';
+import { TransformationEngine, Layer } from '@polagram/core';
 
 // 1. Define Layers
-const removeLogger = new Layer('remove', {
-    kind: 'participant',
-    name: 'Logger' // Text or Regex
-});
+const layers: Layer[] = [
+  {
+    action: 'remove',
+    selector: { kind: 'participant', name: 'Logger' }
+  },
+  {
+    action: 'resolve',
+    selector: { kind: 'fragment', condition: 'Success' }
+  }
+];
 
-const resolveSuccess = new Layer('resolve', {
-    kind: 'fragment',
-    condition: 'Success' // Keeps only the 'Success' branch of alt/opt
-});
-
-// 2. Create a Lens
-const clientViewLens = new Lens('client-view', [
-    removeLogger,
-    resolveSuccess
-]);
-
-// 3. Transform
-const transformer = new Transformer(ast);
-const newAst = transformer.apply(clientViewLens);
-
-// 4. Generate Code
-const newCode = GeneratorFactory.getGenerator('mermaid').generate(newAst);
+// 2. Transform
+const engine = new TransformationEngine();
+const newAst = engine.transform(ast, layers);
 ```
+
+
 
 ## Development
 

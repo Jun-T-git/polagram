@@ -55,8 +55,33 @@ describe('Config Schema Validation', () => {
               name: 'Test',
               layers: [
                 {
-                  action: 'focus',
+                  action: 'resolve',
                   selector: { kind: 'fragment', condition: 'Success' },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+    expect(() => validateConfig(input)).not.toThrow();
+  });
+
+  it('should validate merge layer correctly', () => {
+    const input = {
+      version: 1,
+      targets: [
+        {
+          input: ['src/*.mmd'],
+          outputDir: 'dist',
+          lenses: [
+            {
+              name: 'Test',
+              layers: [
+                {
+                  action: 'merge',
+                  newName: 'Managed',
+                  selector: { kind: 'participant', name: 'A' },
                 },
               ],
             },

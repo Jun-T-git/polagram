@@ -133,4 +133,36 @@ targets:
         // Ensure source file was NOT executed/deleted/renamed
         expect(await fs.stat(srcFile).then(() => true).catch(() => false)).toBe(true);
     });
+
+    it('should support merge action', async () => {
+        const config = `
+version: 1
+targets:
+  - input: ["src/*.mmd"]
+    outputDir: "dist"
+    lenses:
+      - name: merged
+        layers:
+          - action: merge
+            newName: "System"
+            selector: { kind: "participant", name: "A" }
+`;
+        await fs.writeFile(path.join(FIXTURE_DIR, 'merge.yml'), config);
+        
+        const srcDir = path.join(FIXTURE_DIR, 'src');
+        await fs.mkdir(srcDir, { recursive: true });
+        await fs.writeFile(path.join(srcDir, 'merge.mmd'), 'sequenceDiagram\nA->>B: Hi');
+
+        // Execute
+        await execAsync(`node ${CLI_PATH} generate -c merge.yml`, { cwd: FIXTURE_DIR });
+
+        // Verify Output Exists
+        const output = path.join(FIXTURE_DIR, 'dist/src/merge.merged.mmd');
+        expect(await fs.stat(output).then(() => true).catch(() => false)).toBe(true);
+        
+        // Verify Content (B should remain, A should become System)
+        const content = await fs.readFile(output, 'utf-8');
+        expect(content).toContain('System');
+        expect(content).toContain('B');
+    });
 });

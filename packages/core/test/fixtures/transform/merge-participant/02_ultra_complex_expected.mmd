@@ -1,0 +1,25 @@
+sequenceDiagram
+    participant User
+    box "External"
+        participant Bank
+    end
+    participant CoreSystem
+
+    User->>CoreSystem: Login
+    CoreSystem-->>User: Token
+
+    User->>CoreSystem: Place Order
+    
+    opt Payment Processing
+        CoreSystem->>Bank: Charge Credit Card
+        activate Bank
+        note right of Bank: External Interaction
+        Bank-->>CoreSystem: Success
+        deactivate Bank
+    end
+
+    alt Out of Stock
+        CoreSystem-->>User: Error
+    end
+
+    CoreSystem-->>User: Order Confirmed

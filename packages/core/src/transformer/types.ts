@@ -32,8 +32,6 @@ export interface GroupSelector {
 
 // -- Layers --
 
-export type Layer = ResolveLayer | FocusLayer | RemoveLayer;
-
 export interface ResolveLayer {
   action: 'resolve';
   selector: FragmentSelector;
@@ -48,6 +46,14 @@ export interface RemoveLayer {
   action: 'remove';
   selector: ParticipantSelector | MessageSelector | GroupSelector;
 }
+
+export interface MergeLayer {
+  action: 'merge';
+  newName: string;
+  selector: ParticipantSelector;
+}
+
+export type Layer = ResolveLayer | FocusLayer | RemoveLayer | MergeLayer;
 
 // -- Lens --
 

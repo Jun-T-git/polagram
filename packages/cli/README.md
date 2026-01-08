@@ -64,7 +64,7 @@ pnpm polagram generate --config my-config.yml
 - **Format Conversion**: Convert between Mermaid and PlantUML formats
 - **Glob Support**: Use standard glob patterns to find input files
 - **Directory Mirroring**: Output files preserve their directory structure relative to the project root
-- **Strict Validation**: Validates `polagram.yml` against the Core schema to prevent errors
+- **Strict Validation**: Validates `polagram.yml` against the Core schema to prevent errors (supports `merge`, `remove`, `focus`, `resolve` actions)
 
 ## Supported Formats
 
