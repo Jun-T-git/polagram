@@ -35,12 +35,14 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "biome lint .",
-    "gen:docs": "node ../cli/dist/index.js generate -c docs/sequence/polagram.yml"
+    "gen:docs": "node ../cli/dist/index.js generate -c docs/sequence/polagram.yml",
+    "gen:config-ref": "tsx scripts/gen-config-docs.ts"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.9",
     "@vitest/coverage-v8": "^4.0.16",
     "js-yaml": "^4.1.1",
+    "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vite": "^7.3.0",
     "vitest": "^4.0.16"

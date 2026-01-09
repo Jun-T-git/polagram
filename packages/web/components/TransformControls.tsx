@@ -6,11 +6,11 @@ import { Sheet, SheetClose, SheetContent, SheetTrigger } from './ui/sheet';
 
 interface TransformControlsProps {
   pipeline: TransformOperation[];
-  onAddTransform: (operation: 'focusParticipant' | 'removeParticipant' | 'resolveFragment' | 'removeMessage' | 'removeGroup', target: string, isRegex?: boolean) => void;
+  onAddTransform: (operation: 'focusParticipant' | 'removeParticipant' | 'resolveFragment' | 'mergeParticipant', target: string, isRegex?: boolean, renameTo?: string) => void;
   onRemoveTransform: (index: number) => void;
   onToggleTransform: (index: number) => void;
   onToggleAll: () => void;
-  getSuggestions: (operationType: 'participant' | 'fragment' | 'group' | 'message') => string[];
+  getSuggestions: (operationType: 'participant' | 'fragment') => string[];
   view?: 'mobile' | 'desktop';
   className?: string;
 }
@@ -25,25 +25,23 @@ export default function TransformControls({
   view,
   className
 }: TransformControlsProps) {
-  const [selectedOperation, setSelectedOperation] = useState<'focusParticipant' | 'removeParticipant' | 'resolveFragment' | 'removeMessage' | 'removeGroup'>('focusParticipant');
+  const [selectedOperation, setSelectedOperation] = useState<'focusParticipant' | 'removeParticipant' | 'resolveFragment' | 'mergeParticipant'>('focusParticipant');
   const [target, setTarget] = useState('');
+  const [targetName, setTargetName] = useState(''); // For merge rename
   const [isRegex, setIsRegex] = useState(false);
 
   // Get suggestions ...
   const suggestions = getSuggestions(
-    selectedOperation === 'focusParticipant' || selectedOperation === 'removeParticipant' 
-      ? 'participant' 
-      : selectedOperation === 'removeGroup'
-        ? 'group'
-        : selectedOperation === 'removeMessage'
-          ? 'message'
-          : 'fragment'
+    selectedOperation === 'resolveFragment'
+      ? 'fragment'
+      : 'participant'
   );
 
   const handleApply = () => {
     if (target.trim()) {
-      onAddTransform(selectedOperation, target.trim(), isRegex);
+      onAddTransform(selectedOperation, target.trim(), isRegex, targetName.trim() || undefined);
       setTarget('');
+      setTargetName('');
     }
   };
 
@@ -60,12 +58,11 @@ export default function TransformControls({
         <select 
           className="h-9 px-3 rounded-md bg-background border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 w-full md:w-auto"
           value={selectedOperation}
-          onChange={(e) => setSelectedOperation(e.target.value as 'focusParticipant' | 'removeParticipant' | 'resolveFragment' | 'removeMessage' | 'removeGroup')}
+          onChange={(e) => setSelectedOperation(e.target.value as 'focusParticipant' | 'removeParticipant' | 'resolveFragment' | 'mergeParticipant')}
         >
           <option value="focusParticipant">Focus Participant</option>
           <option value="removeParticipant">Remove Participant</option>
-          <option value="removeMessage">Remove Message</option>
-          <option value="removeGroup">Remove Group</option>
+          <option value="mergeParticipant">Merge Participant</option>
           <option value="resolveFragment">Resolve Fragment</option>
         </select>
         
@@ -80,8 +77,6 @@ export default function TransformControls({
                   onKeyPress={handleKeyPress}
                   placeholder={
                     selectedOperation === 'resolveFragment' ? "Fragment..." : 
-                    selectedOperation === 'removeMessage' ? "Message text..." : 
-                    selectedOperation === 'removeGroup' ? "Group name..." :
                     "Participant..."
                   }
                   list="suggestions"
@@ -103,6 +98,19 @@ export default function TransformControls({
                 .*
             </button>
           </div>
+
+          {selectedOperation === 'mergeParticipant' && (
+             <div className="relative w-full md:w-40">
+                <input
+                  type="text"
+                  className="w-full h-9 px-3 rounded-md bg-background border border-border text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-muted-foreground/50"
+                  value={targetName}
+                  onChange={(e) => setTargetName(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  placeholder="Into Name..."
+                />
+             </div>
+          )}
           
           <button 
             className="h-9 px-4 bg-primary hover:bg-primary/90 text-primary-foreground text-sm font-medium rounded-md transition-colors shadow-sm whitespace-nowrap flex-none flex items-center gap-2"
@@ -126,7 +134,8 @@ export default function TransformControls({
           pipeline.map((op: TransformOperation, index: number) => {
             const Icon = op.operation === 'focusParticipant' ? Eye :
                          op.operation === 'resolveFragment' ? Check :
-                         op.operation === 'removeParticipant' ? Ban : Minus;
+                         op.operation === 'removeParticipant' ? Ban : 
+                         op.operation === 'mergeParticipant' ? Settings2 : Minus;
             
             return (
               <div 
@@ -137,6 +146,7 @@ export default function TransformControls({
                     ? "bg-muted/30 border-border/60 text-muted-foreground opacity-60" 
                     : op.operation === 'focusParticipant' ? "bg-blue-500/5 border-blue-500/20 text-blue-700 dark:text-blue-300"
                     : op.operation === 'resolveFragment' ? "bg-green-500/5 border-green-500/20 text-green-700 dark:text-green-300"
+                    : op.operation === 'mergeParticipant' ? "bg-purple-500/5 border-purple-500/20 text-purple-700 dark:text-purple-300"
                     : "bg-red-500/5 border-red-500/20 text-red-700 dark:text-red-300"
                 )}
               >
@@ -148,6 +158,7 @@ export default function TransformControls({
                   <Icon size={14} strokeWidth={2} className="shrink-0" />
                   <span className={cn("font-medium max-w-[120px] truncate", op.isRegex && "font-mono text-[11px]")}>
                     {op.isRegex ? `/${op.target}/` : op.target}
+                    {op.renameTo && <span className="text-muted-foreground font-normal ml-1">→ {op.renameTo}</span>}
                   </span>
                 </button>
                 

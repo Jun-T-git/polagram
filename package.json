@@ -9,7 +9,8 @@
     "check": "turbo run check",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "turbo run build && changeset publish"
+    "release": "turbo run build && changeset publish",
+    "gen:docs": "pnpm run --filter @polagram/core gen:config-ref"
   },
   "homepage": "https://polagram.org/",
   "devDependencies": {
@@ -20,7 +21,8 @@
     "typescript": "^5.9.3",
     "vite": "^7.3.0",
     "vite-plugin-dts": "^4.5.4",
-    "vitest": "^4.0.16"
+    "vitest": "^4.0.16",
+    "zod-to-json-schema": "^3.25.1"
   },
   "packageManager": "pnpm@8.15.1"
 }

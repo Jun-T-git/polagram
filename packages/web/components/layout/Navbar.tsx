@@ -1,6 +1,6 @@
 'use client';
 
-import { Menu, X } from 'lucide-react';
+import { Github, Menu, Package, X } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -11,6 +11,11 @@ import { Sheet, SheetContent, SheetTrigger } from '../ui/sheet';
 const navItems = [
   { label: 'Docs', href: '/docs' },
   { label: 'Playground', href: '/playground' },
+];
+
+const socialItems = [
+    { label: 'GitHub', href: 'https://github.com/Jun-T-git/polagram', icon: Github },
+    { label: 'npm', href: 'https://www.npmjs.com/package/@polagram/cli', icon: Package },
 ];
 
 export function Navbar() {
@@ -60,6 +65,23 @@ export function Navbar() {
                 </Link>
               );
             })}
+          </div>
+          
+          <div className="w-px h-4 bg-border/60 mx-2" />
+
+          <div className="flex items-center gap-2">
+            {socialItems.map((item) => (
+                <Link
+                    key={item.label}
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 text-muted-foreground hover:text-foreground hover:bg-secondary/50 rounded-full transition-all duration-200"
+                    title={item.label}
+                >
+                    <item.icon size={20} />
+                </Link>
+            ))}
           </div>
         </div>
 
@@ -121,6 +143,20 @@ export function Navbar() {
 
                 {/* Mobile Menu Footer */}
                 <div className="mt-auto p-6 border-t border-border/40 bg-secondary/10">
+                    <div className="flex items-center justify-center gap-4 mb-6">
+                        {socialItems.map((item) => (
+                            <Link
+                                key={item.label}
+                                href={item.href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-3 bg-background border border-border text-muted-foreground hover:text-foreground hover:border-primary/50 rounded-full transition-all duration-200"
+                                title={item.label}
+                            >
+                                <item.icon size={20} />
+                            </Link>
+                        ))}
+                    </div>
                   <div className="flex flex-col gap-4">
                     <p className="text-xs text-muted-foreground text-center">
                       &copy; {new Date().getFullYear()} Polagram

@@ -25,7 +25,7 @@ const items = [
     title: 'Reference',
     items: [
       { title: 'Specification', href: '/docs#reference' },
-      { title: 'Roadmap', href: '/docs#roadmap' },
+      { title: 'Supported Formats', href: '/docs#formats' },
     ],
   },
 ];
@@ -49,7 +49,7 @@ export function DocsSidebar({ className }: DocsSidebarProps) {
       { rootMargin: '-10% 0px -80% 0px' }
     );
 
-    const ids = ['introduction', 'problem', 'philosophy', 'demo', 'installation', 'cicd', 'reference', 'roadmap'];
+    const ids = ['introduction', 'problem', 'philosophy', 'demo', 'installation', 'cicd', 'reference', 'formats'];
     ids.forEach((id) => {
       const element = document.getElementById(id);
       if (element) observer.observe(element);

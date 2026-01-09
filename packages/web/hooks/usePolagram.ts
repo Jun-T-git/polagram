@@ -4,8 +4,9 @@ import { useMemo, useState } from 'react';
 
 // UI Operations (Legacy keys kept for UI compatibility if needed, but mapped to new API)
 export interface TransformOperation {
-  operation: 'focusParticipant' | 'removeParticipant' | 'resolveFragment' | 'removeMessage' | 'removeGroup';
+  operation: 'focusParticipant' | 'removeParticipant' | 'resolveFragment' | 'mergeParticipant';
   target: string;
+  renameTo?: string;
   isRegex?: boolean;
   enabled: boolean;
 }
@@ -17,11 +18,11 @@ interface UsePolagramReturn {
   pipeline: TransformOperation[];
   lensYaml: string;
   updateLensYaml: (yamlStr: string) => void;
-  addTransform: (operation: TransformOperation['operation'], target: string, isRegex?: boolean) => void;
+  addTransform: (operation: TransformOperation['operation'], target: string, isRegex?: boolean, renameTo?: string) => void;
   removeTransform: (index: number) => void;
   toggleTransform: (index: number) => void;
   toggleAll: () => void;
-  getSuggestions: (operationType: 'participant' | 'fragment' | 'group' | 'message') => string[];
+  getSuggestions: (operationType: 'participant' | 'fragment') => string[];
 }
 
 
@@ -120,16 +121,12 @@ export function usePolagram(code: string): UsePolagramReturn {
           action: 'resolve',
           selector: { kind: 'fragment', condition: matcher }
         };
-      } else if (op.operation === 'removeMessage') {
-        return {
-          action: 'remove',
-          selector: { kind: 'message', text: matcher }
-        };
       } else {
-        // removeGroup
+        // mergeParticipant
         return {
-          action: 'remove',
-          selector: { kind: 'group', name: matcher }
+          action: 'merge',
+          selector: { kind: 'participant', name: matcher },
+          ...(op.renameTo ? { into: { name: op.renameTo } } : {})
         };
       }
     });
@@ -201,16 +198,19 @@ export function usePolagram(code: string): UsePolagramReturn {
              operation = 'removeParticipant';
         } else if (layer.action === 'resolve' && layer.selector?.kind === 'fragment') {
              operation = 'resolveFragment';
-        } else if (layer.action === 'remove' && layer.selector?.kind === 'message') {
-             operation = 'removeMessage';
-        } else if (layer.action === 'remove' && layer.selector?.kind === 'group') {
-             operation = 'removeGroup';
+        } else if (layer.action === 'merge' && layer.selector?.kind === 'participant') {
+             operation = 'mergeParticipant';
         }
 
         // Extract target from selector
         const selector = layer.selector;
         let target = '';
         let isRegex = false;
+        let renameTo: string | undefined;
+
+        if (operation === 'mergeParticipant' && 'into' in layer && layer.into && 'name' in layer.into) {
+             renameTo = layer.into.name;
+        }
 
         if (selector) {
             let info = { target: '', isRegex: false };
@@ -225,6 +225,7 @@ export function usePolagram(code: string): UsePolagramReturn {
           operation,
           target,
           isRegex,
+          renameTo,
           enabled: true // YAML rules are always enabled
         };
       });
@@ -237,8 +238,8 @@ export function usePolagram(code: string): UsePolagramReturn {
   };
 
   // Add a new transformation to the pipeline
-  const addTransform = (operation: TransformOperation['operation'], target: string, isRegex?: boolean) => {
-    const newPipeline = [...pipeline, { operation, target, isRegex, enabled: true }];
+  const addTransform = (operation: TransformOperation['operation'], target: string, isRegex?: boolean, renameTo?: string) => {
+    const newPipeline = [...pipeline, { operation, target, isRegex, renameTo, enabled: true }];
     setPipeline(newPipeline);
     setLensYaml(generateLensYaml(newPipeline));
   };
@@ -269,7 +270,7 @@ export function usePolagram(code: string): UsePolagramReturn {
   };
 
   // Get autocomplete suggestions based on operation type
-  const getSuggestions = (operationType: 'participant' | 'fragment' | 'group' | 'message'): string[] => {
+  const getSuggestions = (operationType: 'participant' | 'fragment'): string[] => {
     if (!ast) return [];
     
     if (operationType === 'participant') {
@@ -279,27 +280,6 @@ export function usePolagram(code: string): UsePolagramReturn {
         else if (p.alias) suggestions.push(p.alias);
       });
       return [...new Set(suggestions)];
-    } else if (operationType === 'group') {
-      const groups: string[] = [];
-      ast.groups?.forEach(g => {
-        if (g.name) groups.push(g.name);
-      });
-      return [...new Set(groups)];
-    } else if (operationType === 'message') {
-      const messages: string[] = [];
-      const extractMessages = (events: EventNode[]) => {
-        events?.forEach((event: EventNode) => {
-          if (event.kind === 'message') {
-            if (event.text) messages.push(event.text);
-          } else if (event.kind === 'fragment') {
-            event.branches?.forEach((branch) => {
-              extractMessages(branch.events);
-            });
-          }
-        });
-      };
-      if (ast.events) extractMessages(ast.events);
-      return [...new Set(messages)];
     } else {
       const fragments: string[] = [];
       const extractFragments = (events: EventNode[]) => {
