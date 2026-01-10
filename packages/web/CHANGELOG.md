@@ -1,5 +1,16 @@
 # @polagram/web
 
+## 0.1.0
+
+### Minor Changes
+
+- d5ed757: fix: standardize filter consistency for Note, Reference, and Group in Remove, Focus, and Merge filters
+
+### Patch Changes
+
+- Updated dependencies [d5ed757]
+  - @polagram/core@0.4.0
+
 ## 0.0.8
 
 ### Patch Changes
