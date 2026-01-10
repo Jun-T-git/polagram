@@ -67,14 +67,12 @@ export class FocusFilter extends Walker {
       this.targetParticipantIds.has(pid),
     );
 
-    if (visibleIds.length === 0) return [];
+    // Strict Mode: All participants must be visible to keep the note.
+    if (visibleIds.length !== node.participantIds.length) {
+      return [];
+    }
 
-    return [
-      {
-        ...node,
-        participantIds: visibleIds,
-      },
-    ];
+    return [node];
   }
 
 

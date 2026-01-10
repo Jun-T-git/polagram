@@ -76,7 +76,7 @@
                   "description": "Ordered list of transformation layers. Applied sequentially.",
                   "items": {
                     "name": "item",
-                    "type": "any",
+                    "type": "union",
                     "required": true,
                     "description": "A transformation step to apply to the diagram.",
                     "children": [
@@ -108,7 +108,7 @@
                               },
                               {
                                 "name": "condition",
-                                "type": "any",
+                                "type": "union",
                                 "required": false,
                                 "description": "Filter by branch condition text (e.g. \"Success\").",
                                 "example": "\"Success\"",
@@ -145,7 +145,7 @@
                               },
                               {
                                 "name": "operator",
-                                "type": "any",
+                                "type": "union",
                                 "required": false,
                                 "description": "Filter by loop/alt type.",
                                 "example": "\"loop\"\n@values \"loop\", \"alt\", \"opt\", \"break\", \"par\", \"critical\"",
@@ -196,7 +196,7 @@
                               },
                               {
                                 "name": "name",
-                                "type": "any",
+                                "type": "union",
                                 "required": false,
                                 "description": "Filter by participant name (the text displayed).",
                                 "example": "\"UserService\"",
@@ -233,7 +233,7 @@
                               },
                               {
                                 "name": "id",
-                                "type": "any",
+                                "type": "union",
                                 "required": false,
                                 "description": "Filter by participant ID (alias).",
                                 "example": "\"S1\"",
@@ -270,7 +270,7 @@
                               },
                               {
                                 "name": "stereotype",
-                                "type": "any",
+                                "type": "union",
                                 "required": false,
                                 "description": "Filter by stereotype (e.g. <<Service>>).",
                                 "example": "\"<<Service>>\"",
@@ -324,7 +324,7 @@
                           },
                           {
                             "name": "selector",
-                            "type": "any",
+                            "type": "union",
                             "required": true,
                             "description": "Criteria for selecting elements to remove.",
                             "children": [
@@ -343,7 +343,7 @@
                                   },
                                   {
                                     "name": "name",
-                                    "type": "any",
+                                    "type": "union",
                                     "required": false,
                                     "description": "Filter by participant name (the text displayed).",
                                     "example": "\"UserService\"",
@@ -380,7 +380,7 @@
                                   },
                                   {
                                     "name": "id",
-                                    "type": "any",
+                                    "type": "union",
                                     "required": false,
                                     "description": "Filter by participant ID (alias).",
                                     "example": "\"S1\"",
@@ -417,7 +417,7 @@
                                   },
                                   {
                                     "name": "stereotype",
-                                    "type": "any",
+                                    "type": "union",
                                     "required": false,
                                     "description": "Filter by stereotype (e.g. <<Service>>).",
                                     "example": "\"<<Service>>\"",
@@ -469,7 +469,7 @@
                                   },
                                   {
                                     "name": "text",
-                                    "type": "any",
+                                    "type": "union",
                                     "required": false,
                                     "description": "Filter by message content.",
                                     "example": "\"Login Request\"",
@@ -506,7 +506,7 @@
                                   },
                                   {
                                     "name": "from",
-                                    "type": "any",
+                                    "type": "union",
                                     "required": false,
                                     "description": "Filter by Sender participant ID.",
                                     "example": "\"User\"",
@@ -543,7 +543,7 @@
                                   },
                                   {
                                     "name": "to",
-                                    "type": "any",
+                                    "type": "union",
                                     "required": false,
                                     "description": "Filter by Receiver participant ID.",
                                     "example": "\"Database\"",
@@ -595,7 +595,7 @@
                                   },
                                   {
                                     "name": "name",
-                                    "type": "any",
+                                    "type": "union",
                                     "required": false,
                                     "description": "Filter by group name.",
                                     "example": "\"Services\"",
@@ -693,7 +693,7 @@
                               },
                               {
                                 "name": "name",
-                                "type": "any",
+                                "type": "union",
                                 "required": false,
                                 "description": "Filter by participant name (the text displayed).",
                                 "example": "\"UserService\"",
@@ -730,7 +730,7 @@
                               },
                               {
                                 "name": "id",
-                                "type": "any",
+                                "type": "union",
                                 "required": false,
                                 "description": "Filter by participant ID (alias).",
                                 "example": "\"S1\"",
@@ -767,7 +767,7 @@
                               },
                               {
                                 "name": "stereotype",
-                                "type": "any",
+                                "type": "union",
                                 "required": false,
                                 "description": "Filter by stereotype (e.g. <<Service>>).",
                                 "example": "\"<<Service>>\"",

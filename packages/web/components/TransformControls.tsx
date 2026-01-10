@@ -117,7 +117,7 @@ export default function TransformControls({
             onClick={handleApply}
           >
             <Plus size={16} />
-            <span className="hidden md:inline">Add Lens</span>
+            <span className="hidden md:inline">Add</span>
             <span className="md:hidden">Add</span>
           </button>
         </div>
