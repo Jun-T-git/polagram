@@ -1,5 +1,12 @@
 # @polagram/core
 
+## 0.4.1
+
+### Patch Changes
+
+- c53bf0c: fix: Enforce strict removal of Notes/Refs in Focus and Remove filters when participants are missing.
+  fix: Correct generated config schema types (replace 'any' with 'union') in documentation.
+
 ## 0.4.0
 
 ### Minor Changes
