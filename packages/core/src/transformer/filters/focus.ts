@@ -1,9 +1,10 @@
 import type {
-  ActivationNode,
-  EventNode,
-  MessageNode,
-  NoteNode,
-  PolagramRoot,
+    ActivationNode,
+    EventNode,
+    MessageNode,
+    NoteNode,
+    PolagramRoot,
+    ReferenceNode,
 } from '../../ast';
 import { Matcher } from '../selector/matcher';
 import { Walker } from '../traverse/walker';
@@ -45,12 +46,8 @@ export class FocusFilter extends Walker {
       }
     }
 
-    if (node.kind === 'note') {
-      const note = node as NoteNode;
-      const isRelated = note.participantIds.some((pid) =>
-        this.targetParticipantIds.has(pid),
-      );
-      if (!isRelated) return [];
+    if (node.kind === 'note' || node.kind === 'ref') {
+      return this.filterMultiParticipantNode(node as NoteNode | ReferenceNode);
     }
 
     if (node.kind === 'activation') {
@@ -63,9 +60,27 @@ export class FocusFilter extends Walker {
     return super.visitEvent(node);
   }
 
+  private filterMultiParticipantNode(
+    node: NoteNode | ReferenceNode,
+  ): EventNode[] {
+    const visibleIds = node.participantIds.filter((pid) =>
+      this.targetParticipantIds.has(pid),
+    );
+
+    if (visibleIds.length === 0) return [];
+
+    return [
+      {
+        ...node,
+        participantIds: visibleIds,
+      },
+    ];
+  }
+
+
+
   // Helper to check if message involves the participant from selector
   private isRelatedToParticipant(msg: MessageNode): boolean {
-    // Check if from or to matches any targeted participant ID
     if (msg.from && this.targetParticipantIds.has(msg.from)) return true;
     if (msg.to && this.targetParticipantIds.has(msg.to)) return true;
     return false;

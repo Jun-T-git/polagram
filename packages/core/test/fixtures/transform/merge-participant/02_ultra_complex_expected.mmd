@@ -1,12 +1,15 @@
 sequenceDiagram
 participant User
+box "Legacy System" #LightBlue
 participant CoreSystem
+end
 box "External"
 participant Bank
 end
 User->>CoreSystem: Login
 CoreSystem-->>User: Token
 User->>CoreSystem: Place Order
+note over CoreSystem: Internal Sync
 opt Payment Processing
 CoreSystem->>Bank: Charge Credit Card
 activate Bank
