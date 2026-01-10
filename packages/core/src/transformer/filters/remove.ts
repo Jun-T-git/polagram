@@ -83,16 +83,12 @@ export class RemoveFilter extends Walker {
       (pid) => !this.removedParticipantIds.has(pid),
     );
 
-    if (remainingIds.length === 0) {
+    // Strict Mode: If any participant is removed, drop the note.
+    if (remainingIds.length !== node.participantIds.length) {
       return [];
     }
 
-    return [
-      {
-        ...node,
-        participantIds: remainingIds,
-      },
-    ];
+    return [node];
   }
 
   private isRelatedToRemovedParticipant(msg: MessageNode): boolean {

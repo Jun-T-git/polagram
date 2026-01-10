@@ -29,7 +29,8 @@ describe('Filter Consistency (Note Survival)', () => {
 
   // Scenario 1: Remove
   // Note over A, B. Remove A. -> Note over B.
-  it('Remove: keeps note if at least one participant remains (A removed)', () => {
+  // Note over A, B. Remove A. -> Note removed (Strict).
+  it('Remove: deletes note if at least one participant is removed', () => {
     const root = createAst(['A', 'B']);
     const layer: RemoveLayer = {
       action: 'remove',
@@ -37,9 +38,7 @@ describe('Filter Consistency (Note Survival)', () => {
     };
     const result = new RemoveFilter(layer).transform(root);
 
-    expect(result.events).toHaveLength(1);
-    const note = result.events[0] as NoteNode;
-    expect(note.participantIds).toEqual(['B']);
+    expect(result.events).toHaveLength(0);
   });
 
   it('Remove: deletes note if ALL participants are removed', () => {
@@ -54,8 +53,8 @@ describe('Filter Consistency (Note Survival)', () => {
   });
 
   // Scenario 2: Focus
-  // Note over A, B. Focus B. -> Note over B.
-  it('Focus: keeps note and trims IDs if at least one participant is focused', () => {
+  // Note over A, B. Focus B. -> Note removed (Strict: A is hidden).
+  it('Focus: deletes note if not all participants are focused', () => {
     const root = createAst(['A', 'B']);
     const layer: FocusLayer = {
       action: 'focus',
@@ -63,9 +62,7 @@ describe('Filter Consistency (Note Survival)', () => {
     };
     const result = new FocusFilter(layer).transform(root);
 
-    expect(result.events).toHaveLength(1);
-    const note = result.events[0] as NoteNode;
-    expect(note.participantIds).toEqual(['B']);
+    expect(result.events).toHaveLength(0);
   });
 
   // Scenario 3 & 4: Merge
@@ -104,7 +101,7 @@ describe('Filter Consistency (Note Survival)', () => {
   });
   // --- ReferenceNode Scenarios (Should match Note behavior) ---
 
-  it('Remove: keeps ref if at least one participant remains', () => {
+  it('Remove: deletes ref if at least one participant is removed', () => {
     const root = createAst(['A', 'B']);
     // Add a ref node
     root.events.push({
@@ -120,18 +117,11 @@ describe('Filter Consistency (Note Survival)', () => {
     };
     const result = new RemoveFilter(layer).transform(root);
 
-    // Should have 1 note (from createAst) + 1 ref
-    expect(result.events).toHaveLength(2);
-    
-    const note = result.events[0] as NoteNode;
-    expect(note.participantIds).toEqual(['B']);
-
-    const ref = result.events[1] as any; // Cast for now
-    expect(ref.kind).toBe('ref');
-    expect(ref.participantIds).toEqual(['B']);
+    // Should be 0 (both note and ref removed)
+    expect(result.events).toHaveLength(0);
   });
 
-  it('Focus: keeps ref and trims IDs', () => {
+  it('Focus: deletes ref if not all participants are focused', () => {
     const root = createAst(['A', 'B']);
      root.events.push({
       kind: 'ref',
@@ -146,9 +136,7 @@ describe('Filter Consistency (Note Survival)', () => {
     };
     const result = new FocusFilter(layer).transform(root);
 
-    expect(result.events).toHaveLength(2);
-    const ref = result.events[1] as any;
-    expect(ref.participantIds).toEqual(['B']);
+    expect(result.events).toHaveLength(0);
   });
 
   it('Merge: keeps internal ref and maps to target', () => {

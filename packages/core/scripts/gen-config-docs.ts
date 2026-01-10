@@ -1,8 +1,8 @@
 
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { z } from 'zod';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import type { z } from 'zod';
 import { PolagramConfigSchema } from '../src/config/schema.js';
 
 // Helper to handle ESM __dirname
@@ -25,7 +25,7 @@ type DocField = {
 
 // Simplified schema walker
 function generateDoc(schema: z.ZodTypeAny, name: string = '', isOptional: boolean = false): DocField | null {
-  const def = schema._def || (schema as any).def;
+  const def = schema._def || (schema as { def?: unknown }).def;
   if (!def) {
     if (schema && typeof schema === 'object') {
        console.warn(`Invalid schema for field: ${name} (keys: ${Object.keys(schema)})`);
@@ -47,7 +47,6 @@ function generateDoc(schema: z.ZodTypeAny, name: string = '', isOptional: boolea
     if (innerDoc && schema.description) {
         // Wrapper has a description, use it (and parse its @example)
         let desc = schema.description;
-        let note = ''; 
         
         // Handle @example
         if (desc.includes('@example')) {
@@ -64,7 +63,7 @@ function generateDoc(schema: z.ZodTypeAny, name: string = '', isOptional: boolea
             try {
                 const manual = rawValues.split(',').map(s => s.trim().replace(/^['"]|['"]$/g, ''));
                 innerDoc.options = manual;
-            } catch (e) {}
+            } catch (_e) {}
         }
         
         innerDoc.description = desc;
@@ -81,7 +80,7 @@ function generateDoc(schema: z.ZodTypeAny, name: string = '', isOptional: boolea
   }
 
   let example: string | undefined;
-  if (description && description.includes('@example')) {
+  if (description?.includes('@example')) {
       const parts = description.split('@example');
       description = parts[0].trim();
       example = parts[1].trim();
@@ -89,7 +88,7 @@ function generateDoc(schema: z.ZodTypeAny, name: string = '', isOptional: boolea
 
   // Parse @values tag for manual enum specification
   let manualOptions: string[] | undefined;
-  if (description && description.includes('@values')) {
+  if (description?.includes('@values')) {
       const parts = description.split('@values');
       description = parts[0].trim();
       // Expecting CSV format: "val1", "val2"
@@ -126,7 +125,7 @@ function generateDoc(schema: z.ZodTypeAny, name: string = '', isOptional: boolea
       break;
     case 'ZodLiteral':
     case 'literal': {
-      const val = def.value !== undefined ? def.value : (def.values && def.values[0]);
+      const val = def.value !== undefined ? def.value : (def.values?.[0]);
       type = `"${val}"`;
       break;
     }
@@ -181,8 +180,9 @@ function generateDoc(schema: z.ZodTypeAny, name: string = '', isOptional: boolea
           type = types.join(' | ');
       } else {
           // If complex (objects), we might want to show them as children or just "union"
+          type = 'union';
           if (types.length > 0) {
-              children.push(...unionOptions.map((opt: z.ZodTypeAny) => generateDoc(opt)).filter((d: any) => d));
+              children.push(...unionOptions.map((opt: z.ZodTypeAny) => generateDoc(opt)).filter((d) => d));
           }
       }
       break;
