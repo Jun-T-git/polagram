@@ -1,11 +1,13 @@
+
 import type {
-  ActivationNode,
-  EventNode,
-  FragmentNode,
-  MessageNode,
-  NoteNode,
-  Participant,
-  PolagramRoot,
+    ActivationNode,
+    EventNode,
+    FragmentNode,
+    MessageNode,
+    NoteNode,
+    Participant,
+    PolagramRoot,
+    ReferenceNode,
 } from '../../ast';
 import { Matcher } from '../selector/matcher';
 import { Walker } from '../traverse/walker';
@@ -119,7 +121,23 @@ export class MergeFilter extends Walker {
 
     root.participants = newParticipantsList;
 
-    // 4. Transform events
+    // 4. Update Groups
+    root.groups = root.groups.map((g) => {
+        const newIds = new Set<string>();
+        g.participantIds.forEach((pid) => {
+             if (this.mergedParticipantIds.has(pid)) {
+                 newIds.add(this.targetParticipantId);
+             } else {
+                 newIds.add(pid);
+             }
+        });
+        return {
+            ...g,
+            participantIds: Array.from(newIds),
+        };
+    });
+
+    // 5. Transform events
     return super.transform(root);
   }
 
@@ -127,8 +145,8 @@ export class MergeFilter extends Walker {
     if (node.kind === 'message') {
       return this.transformMessage(node as MessageNode);
     }
-    if (node.kind === 'note') {
-      return this.transformNote(node as NoteNode);
+    if (node.kind === 'note' || node.kind === 'ref') {
+      return this.transformMultiParticipantNode(node as NoteNode | ReferenceNode);
     }
     if (node.kind === 'activation') {
       return this.transformActivation(node as ActivationNode);
@@ -177,7 +195,9 @@ export class MergeFilter extends Walker {
     ];
   }
 
-  private transformNote(node: NoteNode): EventNode[] {
+  private transformMultiParticipantNode(
+    node: NoteNode | ReferenceNode,
+  ): EventNode[] {
     const newParticipantIds = new Set<string>();
     let changed = false;
 
@@ -195,14 +215,6 @@ export class MergeFilter extends Walker {
     }
 
     const uniqueIds = Array.from(newParticipantIds);
-
-    const allOriginallyMerged = node.participantIds.every((pid) =>
-      this.mergedParticipantIds.has(pid),
-    );
-
-    if (allOriginallyMerged) {
-      return [];
-    }
 
     return [
       {

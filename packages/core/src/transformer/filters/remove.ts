@@ -1,9 +1,11 @@
+
 import type {
-  ActivationNode,
-  EventNode,
-  MessageNode,
-  NoteNode,
-  PolagramRoot,
+    ActivationNode,
+    EventNode,
+    MessageNode,
+    NoteNode,
+    PolagramRoot,
+    ReferenceNode,
 } from '../../ast';
 import { Matcher } from '../selector/matcher';
 import { Walker } from '../traverse/walker';
@@ -62,12 +64,8 @@ export class RemoveFilter extends Walker {
         const msg = node as MessageNode;
         if (this.isRelatedToRemovedParticipant(msg)) return [];
       }
-      if (node.kind === 'note') {
-        const note = node as NoteNode;
-        const isRelated = note.participantIds.some((pid) =>
-          this.removedParticipantIds.has(pid),
-        );
-        if (isRelated) return [];
+      if (node.kind === 'note' || node.kind === 'ref') {
+        return this.filterMultiParticipantNode(node as NoteNode | ReferenceNode);
       }
       if (node.kind === 'activation') {
         const activation = node as ActivationNode;
@@ -76,6 +74,25 @@ export class RemoveFilter extends Walker {
     }
 
     return super.visitEvent(node);
+  }
+
+  private filterMultiParticipantNode(
+    node: NoteNode | ReferenceNode,
+  ): EventNode[] {
+    const remainingIds = node.participantIds.filter(
+      (pid) => !this.removedParticipantIds.has(pid),
+    );
+
+    if (remainingIds.length === 0) {
+      return [];
+    }
+
+    return [
+      {
+        ...node,
+        participantIds: remainingIds,
+      },
+    ];
   }
 
   private isRelatedToRemovedParticipant(msg: MessageNode): boolean {

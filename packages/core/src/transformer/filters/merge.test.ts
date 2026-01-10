@@ -175,7 +175,7 @@ describe('MergeFilter', () => {
         expect(events[0].participantId).toBe('C');
     });
 
-    it('should remove internal notes', () => {
+    it('should keep internal notes and map to target', () => {
          const root = createBaseAst();
         root.events = [
             { kind: 'note', id: 'n1', text: 'Internal Note', position: 'over', participantIds: ['A', 'B'] },
@@ -188,7 +188,9 @@ describe('MergeFilter', () => {
         });
 
         const result = filter.transform(root);
-        expect(result.events).toHaveLength(0);
+        expect(result.events).toHaveLength(1);
+        const note = result.events[0] as any;
+        expect(note.participantIds).toEqual(['AB']);
     });
 
      it('should keep shared notes but rename participants', () => {
