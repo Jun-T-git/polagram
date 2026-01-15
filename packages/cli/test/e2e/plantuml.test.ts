@@ -1,8 +1,7 @@
-
-import { exec } from 'child_process';
-import { promises as fs } from 'fs';
-import path from 'path';
-import { promisify } from 'util';
+import { exec } from 'node:child_process';
+import { promises as fs } from 'node:fs';
+import path from 'node:path';
+import { promisify } from 'node:util';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 const execAsync = promisify(exec);
@@ -32,7 +31,7 @@ API -> Logger: Log
 Logger --> API: OK
 API --> Client: Response
 @enduml`;
-    
+
     await fs.writeFile(path.join(FIXTURE_DIR, 'test.puml'), plantumlContent);
 
     // Create polagram.yml
@@ -50,7 +49,7 @@ targets:
 
     // Run CLI
     await execAsync(`node ${CLI_PATH} generate --config polagram.yml`, {
-      cwd: FIXTURE_DIR
+      cwd: FIXTURE_DIR,
     });
 
     // Verify output
@@ -72,7 +71,7 @@ participant B
 A -> B: Hello
 B --> A: World
 @enduml`;
-    
+
     await fs.writeFile(path.join(FIXTURE_DIR, 'test.puml'), plantumlContent);
 
     // Create polagram.yml with outputFormat
@@ -89,11 +88,15 @@ targets:
 
     // Run CLI
     await execAsync(`node ${CLI_PATH} generate --config polagram.yml`, {
-      cwd: FIXTURE_DIR
+      cwd: FIXTURE_DIR,
     });
 
     // Verify output is Mermaid format
-    const outputFile = path.join(FIXTURE_DIR, 'generated', 'test.converted.mmd');
+    const outputFile = path.join(
+      FIXTURE_DIR,
+      'generated',
+      'test.converted.mmd',
+    );
     const output = await fs.readFile(outputFile, 'utf-8');
 
     expect(output).toContain('sequenceDiagram');
