@@ -1,5 +1,11 @@
 # @polagram/preview
 
+## 0.1.2
+
+### Patch Changes
+
+- ac47762: fix: resolve file paths relative to config file directory in preview command
+
 ## 0.1.1
 
 ### Patch Changes
