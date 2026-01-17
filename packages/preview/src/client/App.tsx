@@ -7,6 +7,7 @@ function App() {
     <HashRouter>
       <Routes>
         <Route path="/" element={<Layout />}>
+          <Route index element={<PreviewPage />} />
           <Route path="*" element={<PreviewPage />} />
         </Route>
       </Routes>

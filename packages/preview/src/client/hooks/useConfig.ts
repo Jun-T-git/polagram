@@ -5,20 +5,7 @@ import { useEffect, useState } from 'react';
 // Importing from core in the client might be tricky if it has node deps.
 // We'll define a simple interface here.
 
-interface PolagramConfig {
-  targets: Target[];
-}
-
-interface Target {
-  input: string;
-  lenses?: Lens[];
-  [key: string]: any;
-}
-
-interface Lens {
-  name: string;
-  [key: string]: any;
-}
+import type { PolagramConfig } from '@polagram/core';
 
 export function useConfig() {
   const [config, setConfig] = useState<PolagramConfig | null>(null);

@@ -1,9 +1,9 @@
 #!/usr/bin/env node
-import { promises as fs } from 'node:fs';
-import path from 'node:path';
-import { type DiagramFormat, FormatDetector, Polagram } from '@polagram/core';
+import { type DiagramFormat, FormatDetector, type Lens, Polagram } from '@polagram/core';
 import { Command } from 'commander';
 import { glob } from 'glob';
+import { promises as fs } from 'node:fs';
+import path from 'node:path';
 import { loadConfig } from './config.js';
 import { previewCommand } from './preview.js';
 
@@ -84,8 +84,7 @@ program
               const lensPipeline = Polagram.init(content, inputFormat);
               // core expects strict discriminated union, Zod inferred type is loose.
               // Validation guarantees structure.
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              lensPipeline.applyLens(lens as any);
+              lensPipeline.applyLens(lens as unknown as Lens);
 
               // 3. Generate based on output format
               const result =

@@ -1,3 +1,6 @@
+
+import type { TargetConfig } from '@polagram/core';
+import { validateConfig } from '@polagram/core';
 import { glob } from 'glob';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
@@ -43,11 +46,11 @@ export async function buildStatic(options: BuildOptions) {
   const content = await fs.readFile(configPath, 'utf-8');
   // Dynamic import js-yaml (should be in deps)
   const yaml = await import('js-yaml');
-  const parsed: any = yaml.load(content);
+  const parsed = validateConfig(yaml.load(content));
 
   // Resolve files
   const enrichedTargets = await Promise.all(
-    (parsed.targets || []).map(async (t: any) => {
+    (parsed.targets || []).map(async (t: TargetConfig) => {
       if (!t.input) return t;
       const inputs = Array.isArray(t.input) ? t.input : [t.input];
       const files = await glob(inputs, {
@@ -75,7 +78,7 @@ export async function buildStatic(options: BuildOptions) {
   // So we need to put files in `outDir/api/file/...`
   // We need to collect ALL distinct files from all targets.
   const allFiles = new Set<string>();
-  enrichedTargets.forEach((t: any) => {
+  enrichedTargets.forEach((t: TargetConfig & { _files?: string[] }) => {
     if (Array.isArray(t._files)) {
       t._files.forEach((f: string) => {
         allFiles.add(f);

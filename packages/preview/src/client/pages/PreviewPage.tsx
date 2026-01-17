@@ -1,15 +1,17 @@
-import { FormatDetector, Polagram, type PolagramBuilder } from '@polagram/core';
+import type { Layer, Lens, PolagramBuilder, TargetConfig } from '@polagram/core';
+import { FormatDetector, Polagram } from '@polagram/core';
 import {
     AlertTriangle,
     Code,
     Eye,
     Layers,
+
     Maximize,
     Minimize,
     PanelRight,
     RotateCcw,
     ZoomIn,
-    ZoomOut,
+    ZoomOut
 } from 'lucide-react';
 import mermaid from 'mermaid';
 import { useEffect, useMemo, useRef, useState } from 'react';
@@ -17,7 +19,7 @@ import {
     type ImperativePanelHandle,
     Panel,
     PanelGroup,
-    PanelResizeHandle,
+    PanelResizeHandle
 } from 'react-resizable-panels';
 import { useLocation, useSearchParams } from 'react-router-dom';
 import { TransformComponent, TransformWrapper } from 'react-zoom-pan-pinch';
@@ -40,12 +42,16 @@ export default function PreviewPage() {
   // Fullscreen State
   const [isFullscreen, setIsFullscreen] = useState(false);
 
+
+
   // State for layer toggling (Lens)
   const [disabledLayers, setDisabledLayers] = useState<Set<number>>(new Set());
 
   const [content, setContent] = useState<string>('');
+  const [svgContent, setSvgContent] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
 
   const viewName = searchParams.get('view');
 
@@ -71,10 +77,12 @@ export default function PreviewPage() {
   // Calculate target and lens
   const { targetLens } = useMemo(() => {
     if (!config?.targets || !filePath) return { targetLens: null };
-    const t = config.targets.find((t: any) => t._files?.includes(filePath));
+    const t = (config.targets as (TargetConfig & { _files?: string[] })[]).find((t) =>
+      t._files?.includes(filePath),
+    );
     const l =
       t && viewName
-        ? t.lenses?.find((lens: any) => lens.name === viewName)
+        ? t.lenses?.find((lens: Lens) => lens.name === viewName)
         : null;
     return { targetLens: l };
   }, [config, filePath, viewName]);
@@ -101,7 +109,7 @@ export default function PreviewPage() {
     if (!targetLens?.layers) return;
     if (disabledLayers.size === 0) {
       const all = new Set<number>();
-      targetLens.layers.forEach((_: any, i: number) => {
+      targetLens.layers.forEach((_: unknown, i: number) => {
         all.add(i);
       });
       setDisabledLayers(all);
@@ -155,10 +163,10 @@ export default function PreviewPage() {
     if (targetLens) {
       try {
         const activeLayers = (targetLens.layers || []).filter(
-          (_: any, index: number) => !disabledLayers.has(index),
+          (_: unknown, index: number) => !disabledLayers.has(index),
         );
-        const effectiveLens = { ...targetLens, layers: activeLayers };
-        pipeline.applyLens(effectiveLens as any);
+        const effectiveLens: Lens = { ...targetLens, layers: activeLayers };
+        pipeline.applyLens(effectiveLens);
       } catch (e) {
         return {
           previewCode: content,
@@ -187,25 +195,49 @@ export default function PreviewPage() {
 
   // Render Mermaid
   useEffect(() => {
+    mermaid.initialize({ startOnLoad: false, theme: 'dark' });
+  }, []);
+
+  useEffect(() => {
     if (previewCode) {
-      requestAnimationFrame(async () => {
-        const element = document.querySelector('.mermaid-preview');
-        if (element) {
-          mermaid.initialize({ startOnLoad: false, theme: 'dark' });
-          element.removeAttribute('data-processed');
-          element.innerHTML = previewCode;
-          try {
-            await mermaid.run({ nodes: [element as HTMLElement] });
-          } catch (e) {
-            console.error('Mermaid rendering failed:', e);
-          }
+      (async () => {
+        try {
+          const id = `mermaid-${Date.now()}`;
+          // clear previous?
+          // mermaid.render returns strict SVG string
+          // We need to make sure the element doesn't exist or is handled by mermaid internal mock
+          const { svg } = await mermaid.render(id, previewCode);
+          setSvgContent(svg);
+        } catch (e) {
+          console.error('Mermaid rendering failed:', e);
+          setSvgContent(null);
         }
-      });
+      })();
+    } else {
+      setSvgContent(null);
     }
   }, [previewCode]);
 
   if (!filePath || filePath === '/') {
-    return <div className="p-10 text-slate-400">Select a file to preview</div>;
+    return (
+      <div className="flex flex-col items-center justify-center h-full bg-background select-none">
+        <div className="mb-6">
+          <img 
+            src="/polagram-logo.png" 
+            alt="Polagram" 
+            className="w-24 h-24 opacity-90" 
+          />
+        </div>
+
+        <h1 className="text-2xl font-bold mb-2 tracking-tight text-foreground">
+          Polagram Preview
+        </h1>
+        
+        <p className="text-sm text-muted-foreground max-w-xs text-center leading-relaxed">
+          Select a diagram file from the sidebar<br/>to start visualizing your architecture.
+        </p>
+      </div>
+    );
   }
 
   return (
@@ -270,8 +302,12 @@ export default function PreviewPage() {
                 {transformError}
               </div>
             )}
+            
+            {/* Debug info removed */}
 
-            {previewCode && (
+
+
+            {svgContent && (
               <TransformWrapper
                 initialScale={1}
                 minScale={0.1}
@@ -327,19 +363,23 @@ export default function PreviewPage() {
                     </div>
 
                     <TransformComponent
-                      wrapperClass="w-full h-full flex items-center justify-center"
-                      contentClass="w-full h-full flex items-center justify-center"
+                      wrapperClass="w-full h-full !flex items-center justify-center"
+                      wrapperStyle={{ width: '100%', height: '100%' }}
+                      contentClass="w-full h-full !flex items-center justify-center"
+                      contentStyle={{ width: '100%', height: '100%' }}
                     >
-                      <div className="mermaid-preview w-full h-full max-w-[90%] max-h-[90%] [&>svg]:max-w-full [&>svg]:max-h-full [&>svg]:h-auto [&>svg]:w-auto flex items-center justify-center bg-transparent">
-                        {previewCode}
-                      </div>
+                      <div 
+                        className="mermaid-preview w-full h-full max-w-[90%] max-h-[90%] [&>svg]:max-w-full [&>svg]:max-h-full [&>svg]:h-auto [&>svg]:w-auto flex items-center justify-center bg-transparent"
+                        // biome-ignore lint/security/noDangerouslySetInnerHtml: Mermaid SVG is trusted
+                        dangerouslySetInnerHTML={{ __html: svgContent || '' }}
+                      />
                     </TransformComponent>
                   </div>
                 )}
               </TransformWrapper>
             )}
+            
           </Panel>
-
           <PanelResizeHandle className="w-[1px] bg-border hover:bg-primary/50 transition-colors" />
 
           {/* Inspector Panel */}
@@ -398,7 +438,7 @@ export default function PreviewPage() {
                       </div>
 
                       <ul className="space-y-2">
-                        {targetLens.layers?.map((layer: any, i: number) => {
+                        {targetLens.layers?.map((layer: Layer, i: number) => {
                           const isDisabled = disabledLayers.has(i);
                           const isActive = !isDisabled;
                           return (

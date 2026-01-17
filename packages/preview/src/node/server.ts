@@ -1,10 +1,12 @@
+import type { TargetConfig } from '@polagram/core';
+import { validateConfig } from '@polagram/core';
+import connect from 'connect';
+import { glob } from 'glob';
 import { promises as fs } from 'node:fs';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import connect from 'connect';
-import { glob } from 'glob';
 import picocolors from 'picocolors';
 import sirv from 'sirv';
 
@@ -38,10 +40,10 @@ export function createPreviewMiddleware(options: PreviewServerOptions) {
         const content = await fs.readFile(configPath, 'utf-8');
 
         const yaml = await import('js-yaml');
-        const parsed: any = yaml.load(content);
+        const parsed = validateConfig(yaml.load(content));
 
         const enrichedTargets = await Promise.all(
-          (parsed.targets || []).map(async (t: any) => {
+          (parsed.targets || []).map(async (t: TargetConfig) => {
             if (!t.input) return t;
             const inputs = Array.isArray(t.input) ? t.input : [t.input];
             const files = await glob(inputs, {
