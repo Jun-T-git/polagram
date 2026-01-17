@@ -42,7 +42,7 @@ importers:
         specifier: ^0.4.2
         version: link:../core
       '@polagram/preview':
-        specifier: ^0.1.0
+        specifier: ^0.1.1
         version: link:../preview
       commander:
         specifier: ^13.0.0
