@@ -39,10 +39,10 @@ importers:
   packages/cli:
     dependencies:
       '@polagram/core':
-        specifier: workspace:*
+        specifier: ^0.4.2
         version: link:../core
       '@polagram/preview':
-        specifier: workspace:^
+        specifier: ^0.1.0
         version: link:../preview
       commander:
         specifier: ^13.0.0
@@ -101,7 +101,7 @@ importers:
   packages/preview:
     dependencies:
       '@polagram/core':
-        specifier: workspace:^
+        specifier: ^0.4.2
         version: link:../core
       connect:
         specifier: ^3.7.0

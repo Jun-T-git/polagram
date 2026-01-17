@@ -32,8 +32,8 @@
     "lint": "biome lint ."
   },
   "dependencies": {
-    "@polagram/core": "workspace:*",
-    "@polagram/preview": "workspace:^",
+    "@polagram/core": "^0.4.2",
+    "@polagram/preview": "^0.1.0",
     "commander": "^13.0.0",
     "glob": "^11.0.0",
     "js-yaml": "^4.1.0"
