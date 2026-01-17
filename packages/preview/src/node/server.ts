@@ -21,6 +21,7 @@ export interface PreviewServerOptions {
 export function createPreviewMiddleware(options: PreviewServerOptions) {
   const app = connect();
   const configPath = path.resolve(process.cwd(), options.config);
+  const configDir = path.dirname(configPath);
   const projectRoot = options.root
     ? path.resolve(process.cwd(), options.root)
     : process.cwd();
@@ -47,7 +48,7 @@ export function createPreviewMiddleware(options: PreviewServerOptions) {
             if (!t.input) return t;
             const inputs = Array.isArray(t.input) ? t.input : [t.input];
             const files = await glob(inputs, {
-              cwd: projectRoot,
+              cwd: configDir,
               ignore: ['**/node_modules/**'],
             });
             return { ...t, _files: files };
@@ -77,7 +78,8 @@ export function createPreviewMiddleware(options: PreviewServerOptions) {
     }
 
     // Security check: Ensure file is within project root
-    const absPath = path.resolve(projectRoot, filePath);
+    // filePath is relative to configDir (from glob), so we resolve it from there
+    const absPath = path.resolve(configDir, filePath);
     if (!absPath.startsWith(projectRoot)) {
       res.statusCode = 403;
       res.end(
