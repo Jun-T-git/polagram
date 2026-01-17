@@ -1,5 +1,11 @@
 # @polagram/core
 
+## 0.4.2
+
+### Patch Changes
+
+- 4bd1eee: Enhance preview UI, add E2E tests, and refine configuration schema.
+
 ## 0.4.1
 
 ### Patch Changes
