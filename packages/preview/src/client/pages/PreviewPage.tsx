@@ -30,7 +30,7 @@ export default function PreviewPage() {
   const [searchParams] = useSearchParams();
   const { config } = useConfig();
   // path is location.pathname without leading slash
-  const filePath = location.pathname.slice(1);
+  const filePath = decodeURIComponent(location.pathname.slice(1));
 
   // Inspector State
   const [inspectorTab, setInspectorTab] = useState<

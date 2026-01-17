@@ -38,7 +38,7 @@ export function Sidebar({ config }: { config: any }) {
                   return (
                     <div key={file}>
                       <NavLink
-                        to={`/${file}`}
+                        to={`/${encodeURIComponent(file)}`}
                         className={({ isActive }) =>
                           `flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-200 group ${
                             isActive
@@ -61,7 +61,7 @@ export function Sidebar({ config }: { config: any }) {
                           <div className="ml-4 mt-1 pl-4 border-l border-border/50 flex flex-col gap-1 py-1">
                             {/* Original View */}
                             <NavLink
-                              to={`/${file}`}
+                              to={`/${encodeURIComponent(file)}`}
                               end
                               className={() =>
                                 `text-xs px-3 py-1.5 rounded-md transition-all block ${
@@ -75,11 +75,11 @@ export function Sidebar({ config }: { config: any }) {
                             </NavLink>
 
                             {/* Lenses */}
-                            {/* biome-ignore lint/suspicious/noExplicitAny: Lens type is complex */}
+                              {/* biome-ignore lint/suspicious/noExplicitAny: Lens type is complex */}
                             {target.lenses.map((lens: any) => (
                               <NavLink
                                 key={lens.name}
-                                to={`/${file}?view=${lens.name}`}
+                                to={`/${encodeURIComponent(file)}?view=${lens.name}`}
                                 className={() =>
                                   `text-xs px-3 py-1.5 rounded-md transition-all block ${
                                     currentView === lens.name
