@@ -20,7 +20,7 @@
     "lint": "biome lint src/client/App.tsx src/client/main.tsx src/client/components src/client/hooks src/client/pages src/node vite.config.ts"
   },
   "dependencies": {
-    "@polagram/core": "workspace:^",
+    "@polagram/core": "^0.4.2",
     "connect": "^3.7.0",
     "glob": "^11.0.0",
     "js-yaml": "^4.1.1",
