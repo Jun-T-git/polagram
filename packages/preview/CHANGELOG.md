@@ -1,5 +1,11 @@
 # @polagram/preview
 
+## 0.1.3
+
+### Patch Changes
+
+- ac47762: fix: resolve file paths relative to config file directory and fix client-side handling of relative paths
+
 ## 0.1.2
 
 ### Patch Changes
