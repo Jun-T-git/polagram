@@ -1,5 +1,11 @@
 # @polagram/preview
 
+## 0.1.1
+
+### Patch Changes
+
+- f93d0cc: Fix broken dependencies
+
 ## 0.1.0
 
 ### Minor Changes
