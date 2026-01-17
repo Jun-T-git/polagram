@@ -1,8 +1,7 @@
-
-import { exec } from 'child_process';
-import { promises as fs } from 'fs';
-import path from 'path';
-import { promisify } from 'util';
+import { exec } from 'node:child_process';
+import { promises as fs } from 'node:fs';
+import path from 'node:path';
+import { promisify } from 'node:util';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
 const execAsync = promisify(exec);
@@ -11,23 +10,23 @@ const CLI_PATH = path.resolve(__dirname, '../../dist/index.js');
 const FIXTURE_DIR = path.resolve(__dirname, 'config-fixture');
 
 describe('CLI: Configuration & Structure', () => {
-    beforeAll(async () => {
-        await fs.rm(FIXTURE_DIR, { recursive: true, force: true });
-        await fs.mkdir(FIXTURE_DIR, { recursive: true });
-    });
+  beforeAll(async () => {
+    await fs.rm(FIXTURE_DIR, { recursive: true, force: true });
+    await fs.mkdir(FIXTURE_DIR, { recursive: true });
+  });
 
-    afterAll(async () => {
-        await fs.rm(FIXTURE_DIR, { recursive: true, force: true });
-    });
+  afterAll(async () => {
+    await fs.rm(FIXTURE_DIR, { recursive: true, force: true });
+  });
 
-    it('should support custom config path via -c flag', async () => {
-        // Create custom config in a subfolder
-        const configDir = path.join(FIXTURE_DIR, 'configs');
-        await fs.mkdir(configDir, { recursive: true });
-        
-        // Target: "local" src directory relative to config
-        // Output: "local" dist directory relative to config
-        const config = `
+  it('should support custom config path via -c flag', async () => {
+    // Create custom config in a subfolder
+    const configDir = path.join(FIXTURE_DIR, 'configs');
+    await fs.mkdir(configDir, { recursive: true });
+
+    // Target: "local" src directory relative to config
+    // Output: "local" dist directory relative to config
+    const config = `
 version: 1
 targets:
   - input: ["src/*.mmd"]
@@ -36,25 +35,33 @@ targets:
       - name: custom
         layers: []
 `;
-        await fs.writeFile(path.join(configDir, 'custom.yml'), config);
+    await fs.writeFile(path.join(configDir, 'custom.yml'), config);
 
-        // Create src file INSIDE the config dir to ensure simple relative mirroring
-        const srcDir = path.join(configDir, 'src');
-        await fs.mkdir(srcDir, { recursive: true });
-        await fs.writeFile(path.join(srcDir, 'test.mmd'), 'sequenceDiagram\nA->>B: Hi');
+    // Create src file INSIDE the config dir to ensure simple relative mirroring
+    const srcDir = path.join(configDir, 'src');
+    await fs.mkdir(srcDir, { recursive: true });
+    await fs.writeFile(
+      path.join(srcDir, 'test.mmd'),
+      'sequenceDiagram\nA->>B: Hi',
+    );
 
-        // Execute with -c (Path relative to CWD=FIXTURE_DIR)
-        await execAsync(`node ${CLI_PATH} generate -c configs/custom.yml`, { cwd: FIXTURE_DIR });
-
-        // Verify Output
-        // Expected: configs/dist/src/test.custom.mmd
-        const expectedOutput = path.join(configDir, 'dist/src/test.custom.mmd');
-        const exists = await fs.stat(expectedOutput).then(() => true).catch(() => false);
-        expect(exists).toBe(true);
+    // Execute with -c (Path relative to CWD=FIXTURE_DIR)
+    await execAsync(`node ${CLI_PATH} generate -c configs/custom.yml`, {
+      cwd: FIXTURE_DIR,
     });
 
-    it('should mirror deep directory structures and respect ignores', async () => {
-        const config = `
+    // Verify Output
+    // Expected: configs/dist/src/test.custom.mmd
+    const expectedOutput = path.join(configDir, 'dist/src/test.custom.mmd');
+    const exists = await fs
+      .stat(expectedOutput)
+      .then(() => true)
+      .catch(() => false);
+    expect(exists).toBe(true);
+  });
+
+  it('should mirror deep directory structures and respect ignores', async () => {
+    const config = `
 version: 1
 targets:
   - input: ["src/**/*.mmd"]
@@ -64,40 +71,62 @@ targets:
       - name: deep
         layers: []
 `;
-        await fs.writeFile(path.join(FIXTURE_DIR, 'polagram.yml'), config);
+    await fs.writeFile(path.join(FIXTURE_DIR, 'polagram.yml'), config);
 
-        // Structure:
-        // src/
-        //   app/
-        //     feature/
-        //       flow.mmd
-        //   ignored/
-        //     secret.mmd
-        
-        const featureDir = path.join(FIXTURE_DIR, 'src/app/feature');
-        const ignoredDir = path.join(FIXTURE_DIR, 'src/ignored');
-        
-        await fs.mkdir(featureDir, { recursive: true });
-        await fs.mkdir(ignoredDir, { recursive: true });
-        
-        await fs.writeFile(path.join(featureDir, 'flow.mmd'), 'sequenceDiagram\nA->>B: Flow');
-        await fs.writeFile(path.join(ignoredDir, 'secret.mmd'), 'sequenceDiagram\nA->>B: Secret');
+    // Structure:
+    // src/
+    //   app/
+    //     feature/
+    //       flow.mmd
+    //   ignored/
+    //     secret.mmd
 
-        // Execute default config
-        await execAsync(`node ${CLI_PATH} generate`, { cwd: FIXTURE_DIR });
+    const featureDir = path.join(FIXTURE_DIR, 'src/app/feature');
+    const ignoredDir = path.join(FIXTURE_DIR, 'src/ignored');
 
-        // Verify deep structured output
-        const deepOutput = path.join(FIXTURE_DIR, 'gen/src/app/feature/flow.deep.mmd');
-        expect(await fs.stat(deepOutput).then(() => true).catch(() => false)).toBe(true);
+    await fs.mkdir(featureDir, { recursive: true });
+    await fs.mkdir(ignoredDir, { recursive: true });
 
-        // Verify ignore
-        const ignoredOutput = path.join(FIXTURE_DIR, 'gen/src/ignored/secret.deep.mmd');
-        expect(await fs.stat(ignoredOutput).then(() => true).catch(() => false)).toBe(false);
-    });
+    await fs.writeFile(
+      path.join(featureDir, 'flow.mmd'),
+      'sequenceDiagram\nA->>B: Flow',
+    );
+    await fs.writeFile(
+      path.join(ignoredDir, 'secret.mmd'),
+      'sequenceDiagram\nA->>B: Secret',
+    );
 
-    it('should not modify source files (no side effects)', async () => {
-        // Setup config
-        const config = `
+    // Execute default config
+    await execAsync(`node ${CLI_PATH} generate`, { cwd: FIXTURE_DIR });
+
+    // Verify deep structured output
+    const deepOutput = path.join(
+      FIXTURE_DIR,
+      'gen/src/app/feature/flow.deep.mmd',
+    );
+    expect(
+      await fs
+        .stat(deepOutput)
+        .then(() => true)
+        .catch(() => false),
+    ).toBe(true);
+
+    // Verify ignore
+    const ignoredOutput = path.join(
+      FIXTURE_DIR,
+      'gen/src/ignored/secret.deep.mmd',
+    );
+    expect(
+      await fs
+        .stat(ignoredOutput)
+        .then(() => true)
+        .catch(() => false),
+    ).toBe(false);
+  });
+
+  it('should not modify source files (no side effects)', async () => {
+    // Setup config
+    const config = `
 version: 1
 targets:
   - input: ["src/*.mmd"]
@@ -106,36 +135,46 @@ targets:
       - name: check
         layers: []
 `;
-        await fs.writeFile(path.join(FIXTURE_DIR, 'polagram.yml'), config);
+    await fs.writeFile(path.join(FIXTURE_DIR, 'polagram.yml'), config);
 
-        // Setup Source File
-        const srcDir = path.join(FIXTURE_DIR, 'src');
-        await fs.mkdir(srcDir, { recursive: true });
-        const srcFile = path.join(srcDir, 'immutable.mmd');
-        const originalContent = 'sequenceDiagram\nA->>B: Immutable?';
-        await fs.writeFile(srcFile, originalContent);
+    // Setup Source File
+    const srcDir = path.join(FIXTURE_DIR, 'src');
+    await fs.mkdir(srcDir, { recursive: true });
+    const srcFile = path.join(srcDir, 'immutable.mmd');
+    const originalContent = 'sequenceDiagram\nA->>B: Immutable?';
+    await fs.writeFile(srcFile, originalContent);
 
-        // Capture mtime (resolution might be second-based on some FS, so we might need wait? 
-        // Content check is more robust for "modification" than mtime if we suspect content rewriting)
-        // Let's rely on content identity.
-        
-        // Execute
-        await execAsync(`node ${CLI_PATH} generate`, { cwd: FIXTURE_DIR });
+    // Capture mtime (resolution might be second-based on some FS, so we might need wait?
+    // Content check is more robust for "modification" than mtime if we suspect content rewriting)
+    // Let's rely on content identity.
 
-        // Verify Output Exists
-        const output = path.join(FIXTURE_DIR, 'gen/src/immutable.check.mmd');
-        expect(await fs.stat(output).then(() => true).catch(() => false)).toBe(true);
+    // Execute
+    await execAsync(`node ${CLI_PATH} generate`, { cwd: FIXTURE_DIR });
 
-        // Verify Source Integrity (Side Effect Check)
-        const currentContent = await fs.readFile(srcFile, 'utf-8');
-        expect(currentContent).toBe(originalContent);
-        
-        // Ensure source file was NOT executed/deleted/renamed
-        expect(await fs.stat(srcFile).then(() => true).catch(() => false)).toBe(true);
-    });
+    // Verify Output Exists
+    const output = path.join(FIXTURE_DIR, 'gen/src/immutable.check.mmd');
+    expect(
+      await fs
+        .stat(output)
+        .then(() => true)
+        .catch(() => false),
+    ).toBe(true);
 
-    it('should support merge action', async () => {
-        const config = `
+    // Verify Source Integrity (Side Effect Check)
+    const currentContent = await fs.readFile(srcFile, 'utf-8');
+    expect(currentContent).toBe(originalContent);
+
+    // Ensure source file was NOT executed/deleted/renamed
+    expect(
+      await fs
+        .stat(srcFile)
+        .then(() => true)
+        .catch(() => false),
+    ).toBe(true);
+  });
+
+  it('should support merge action', async () => {
+    const config = `
 version: 1
 targets:
   - input: ["src/*.mmd"]
@@ -147,22 +186,32 @@ targets:
             into: { name: "System" }
             selector: { kind: "participant", name: "A" }
 `;
-        await fs.writeFile(path.join(FIXTURE_DIR, 'merge.yml'), config);
-        
-        const srcDir = path.join(FIXTURE_DIR, 'src');
-        await fs.mkdir(srcDir, { recursive: true });
-        await fs.writeFile(path.join(srcDir, 'merge.mmd'), 'sequenceDiagram\nA->>B: Hi');
+    await fs.writeFile(path.join(FIXTURE_DIR, 'merge.yml'), config);
 
-        // Execute
-        await execAsync(`node ${CLI_PATH} generate -c merge.yml`, { cwd: FIXTURE_DIR });
+    const srcDir = path.join(FIXTURE_DIR, 'src');
+    await fs.mkdir(srcDir, { recursive: true });
+    await fs.writeFile(
+      path.join(srcDir, 'merge.mmd'),
+      'sequenceDiagram\nA->>B: Hi',
+    );
 
-        // Verify Output Exists
-        const output = path.join(FIXTURE_DIR, 'dist/src/merge.merged.mmd');
-        expect(await fs.stat(output).then(() => true).catch(() => false)).toBe(true);
-        
-        // Verify Content (B should remain, A should become System)
-        const content = await fs.readFile(output, 'utf-8');
-        expect(content).toContain('System');
-        expect(content).toContain('B');
+    // Execute
+    await execAsync(`node ${CLI_PATH} generate -c merge.yml`, {
+      cwd: FIXTURE_DIR,
     });
+
+    // Verify Output Exists
+    const output = path.join(FIXTURE_DIR, 'dist/src/merge.merged.mmd');
+    expect(
+      await fs
+        .stat(output)
+        .then(() => true)
+        .catch(() => false),
+    ).toBe(true);
+
+    // Verify Content (B should remain, A should become System)
+    const content = await fs.readFile(output, 'utf-8');
+    expect(content).toContain('System');
+    expect(content).toContain('B');
+  });
 });

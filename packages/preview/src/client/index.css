@@ -1,0 +1,82 @@
+/* biome-ignore lint/suspicious/noUnknownAtRules: Tailwind directives */
+@tailwind base;
+/* biome-ignore lint/suspicious/noUnknownAtRules: Tailwind directives */
+@tailwind components;
+/* biome-ignore lint/suspicious/noUnknownAtRules: Tailwind directives */
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Polagram Dark Theme Palette */
+    --background: 240 10% 4%;
+    --foreground: 0 0% 98%;
+
+    --card: 240 10% 6%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 240 10% 6%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 250 80% 65%;
+    --primary-foreground: 240 10% 4%;
+
+    --secondary: 240 5% 15%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 240 5% 15%;
+    --muted-foreground: 240 5% 65%;
+
+    --accent: 250 80% 65%;
+    --accent-foreground: 240 10% 4%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 5% 18%;
+    --input: 240 5% 18%;
+    --ring: 250 80% 65%;
+
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground antialiased selection:bg-primary/20 selection:text-primary;
+  }
+}
+
+@layer components {
+  /* Glassmorphism Utilities */
+  .glass {
+    @apply bg-background/70 backdrop-blur-xl border border-white/10;
+  }
+
+  .glass-card {
+    @apply bg-card/50 backdrop-blur-md border border-white/5;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-white/10 rounded-full hover:bg-white/20 transition-colors;
+}
+
+/* Mermaid adjustments for dark mode */
+.mermaid-preview {
+  /* Using bright filter to make generic mermaid diagrams visible on dark background if they are black text */
+  /* Or better: configure mermaid to use dark theme in PreviewPage */
+}
+

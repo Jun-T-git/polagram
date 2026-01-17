@@ -15,7 +15,10 @@ const TextMatcherSchema = z.union([
 const FragmentSelectorSchema = z.object({
   kind: z.literal('fragment').describe('The type of element to select.\n@example "fragment"'),
   condition: TextMatcherSchema.optional().describe('Filter by branch condition text (e.g. "Success").\n@example "Success"'),
-  operator: z.union([z.string(), z.array(z.string())]).optional().describe('Filter by loop/alt type.\n@example "loop"\n@values "loop", "alt", "opt", "break", "par", "critical"'),
+  operator: z.union([
+    z.enum(['alt', 'opt', 'loop', 'par', 'break', 'critical', 'rect', 'group']),
+    z.array(z.enum(['alt', 'opt', 'loop', 'par', 'break', 'critical', 'rect', 'group']))
+  ]).optional().describe('Filter by loop/alt type.\n@example "loop"\n@values "loop", "alt", "opt", "break", "par", "critical"'),
 }).describe('Selects fragment (alt/loop/opt) blocks.');
 
 const ParticipantSelectorSchema = z.object({
