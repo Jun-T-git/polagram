@@ -2,6 +2,9 @@
   "name": "@polagram/preview",
   "version": "0.0.1",
   "type": "module",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "dist/node/index.js",
   "types": "dist/node/index.d.ts",
   "exports": {
