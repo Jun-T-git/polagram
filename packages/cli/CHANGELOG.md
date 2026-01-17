@@ -1,5 +1,11 @@
 # @polagram/cli
 
+## 0.2.2
+
+### Patch Changes
+
+- 1b5a5cf: chore: update @polagram/preview dependency to ^0.1.3 to include path resolution fix
+
 ## 0.2.1
 
 ### Patch Changes
