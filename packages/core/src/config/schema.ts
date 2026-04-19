@@ -40,6 +40,74 @@ const GroupSelectorSchema = z.object({
   name: TextMatcherSchema.optional().describe('Filter by group name.\n@example "Services"'),
 }).describe('Selects groups (boxes/rectangles) of participants.');
 
+// Section: PlantUML "== Title ==" dividers folded into named ranges.
+// Specify EXACTLY ONE of `name` (single), `names` (any-of),
+// or `between` (contiguous range bounded by from/to section names).
+//
+// Modeled as a `z.union` of three strict sub-schemas (each requires its mode
+// field) so the Zod-inferred type IS the discriminated union — matches the
+// TypeScript `SectionSelector` shape exactly. Mixing modes is rejected at
+// parse time because no sub-schema accepts unknown extra mode keys.
+//
+// PlantUML-only: Mermaid has no native section construct, so this selector
+// matches nothing on Mermaid input.
+
+const SectionByNameSchema = z
+  .object({
+    kind: z
+      .literal('section')
+      .describe('The type of element to select.\n@example "section"'),
+    name: TextMatcherSchema.describe(
+      'Match a single section by exact name or pattern. Use this when the lens targets one named phase. Mutually exclusive with `names` and `between`.\n@example "Onboarding"',
+    ),
+  })
+  .strict();
+
+const SectionByNamesSchema = z
+  .object({
+    kind: z
+      .literal('section')
+      .describe('The type of element to select.\n@example "section"'),
+    names: z
+      .array(TextMatcherSchema)
+      .describe(
+        'Match any section whose name matches at least one entry (any-of). Use this for non-contiguous selections. Mutually exclusive with `name` and `between`.\n@example ["Onboarding", "Diagnostic"]',
+      ),
+  })
+  .strict();
+
+const SectionByBetweenSchema = z
+  .object({
+    kind: z
+      .literal('section')
+      .describe('The type of element to select.\n@example "section"'),
+    between: z
+      .object({
+        from: TextMatcherSchema.describe(
+          'Name (or pattern) of one endpoint of the range. Order vs `to` does not matter — the contiguous span between them is selected in source order.\n@example "Onboarding"',
+        ),
+        to: TextMatcherSchema.describe(
+          'Name (or pattern) of the other endpoint of the range. If `from` and `to` resolve to the same section, the range is just that section (or empty when `inclusive: false`).\n@example "Diagnostic"',
+        ),
+        inclusive: z
+          .boolean()
+          .optional()
+          .describe(
+            'When false, drops the from/to boundary sections from the range. Defaults to true.\n@example false',
+          ),
+      })
+      .describe(
+        'Match a contiguous range of sections in source order. Mutually exclusive with `name` and `names`.\n@example { from: "Onboarding", to: "Diagnostic", inclusive: false }',
+      ),
+  })
+  .strict();
+
+const SectionSelectorSchema = z
+  .union([SectionByNameSchema, SectionByNamesSchema, SectionByBetweenSchema])
+  .describe(
+    'Selects sections (PlantUML "== Title ==" ranges) by name, list, or contiguous range. Specify exactly one of `name`, `names`, or `between` — mixing or omitting all three is rejected. PlantUML-only — Mermaid has no native section construct, so this selector matches nothing on Mermaid input.',
+  );
+
 
 
 // -- Layers --
@@ -51,8 +119,12 @@ const ResolveLayerSchema = z.object({
 
 const FocusLayerSchema = z.object({
   action: z.literal('focus').describe('The operation to perform.\n@example "focus"'),
-  selector: ParticipantSelectorSchema.describe('Criteria for selecting participants to focus on.'),
-}).describe('Keeps only interactions involving the selected participants, hiding everything else.');
+  selector: z
+    .union([ParticipantSelectorSchema, SectionSelectorSchema])
+    .describe(
+      'Criteria for selecting participants OR sections to focus on. The action is polymorphic on `selector.kind`.',
+    ),
+}).describe('Keeps only interactions involving the selected participants, or only the selected sections, hiding everything else.');
 
 const RemoveLayerSchema = z.object({
   action: z.literal('remove').describe('The operation to perform.\n@example "remove"'),
@@ -60,8 +132,9 @@ const RemoveLayerSchema = z.object({
     ParticipantSelectorSchema,
     MessageSelectorSchema,
     GroupSelectorSchema,
+    SectionSelectorSchema,
   ]).describe('Criteria for selecting elements to remove.'),
-}).describe('Removes the selected elements (participants, messages, or groups) from the diagram.');
+}).describe('Removes the selected elements (participants, messages, groups, or sections) from the diagram.');
 
 const MergeLayerSchema = z.object({
   action: z.literal('merge').describe('The operation to perform.\n@example "merge"'),

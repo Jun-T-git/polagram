@@ -336,8 +336,8 @@ end note
     });
   });
 
-  describe('Dividers', () => {
-    it('should parse divider with text', () => {
+  describe('Sections (folded from "== Title ==" dividers)', () => {
+    it('should fold events after a divider into a SectionNode at the top level', () => {
       const input = `
 @startuml
 A -> B : Message 1
@@ -346,14 +346,90 @@ A -> B : Message 2
 @enduml
 `;
       const ast = parse(input);
-      expect(ast.events).toHaveLength(3);
-      expect(ast.events[1]).toMatchObject({
-        kind: 'divider',
-        text: 'Section Break',
-      });
+      // [preamble message, SectionNode { events: [message] }]
+      expect(ast.events).toHaveLength(2);
+
+      expect(ast.events[0]).toMatchObject({ kind: 'message', text: 'Message 1' });
+
+      expect(ast.events[1].kind).toBe('section');
+      const section = ast.events[1] as Extract<typeof ast.events[number], { kind: 'section' }>;
+      expect(section.name).toBe('Section Break');
+      expect(section.events).toHaveLength(1);
+      expect(section.events[0]).toMatchObject({ kind: 'message', text: 'Message 2' });
     });
 
-    it('should parse divider without text', () => {
+    it('should produce one SectionNode per "==" with events grouped under each', () => {
+      const input = `
+@startuml
+A -> B : intro
+== One ==
+A -> B : in one
+== Two ==
+A -> B : in two
+B --> A : also two
+== Three ==
+A -> B : in three
+@enduml
+`;
+      const ast = parse(input);
+      expect(ast.events).toHaveLength(4); // [preamble, sec1, sec2, sec3]
+
+      expect(ast.events[0]).toMatchObject({ kind: 'message', text: 'intro' });
+
+      const s1 = ast.events[1];
+      expect(s1.kind).toBe('section');
+      if (s1.kind !== 'section') throw new Error('not section');
+      expect(s1.name).toBe('One');
+      expect(s1.events).toHaveLength(1);
+
+      const s2 = ast.events[2];
+      if (s2.kind !== 'section') throw new Error('not section');
+      expect(s2.name).toBe('Two');
+      expect(s2.events).toHaveLength(2);
+
+      const s3 = ast.events[3];
+      if (s3.kind !== 'section') throw new Error('not section');
+      expect(s3.name).toBe('Three');
+      expect(s3.events).toHaveLength(1);
+    });
+
+    it('should produce a SectionNode with empty events for back-to-back dividers', () => {
+      const input = `
+@startuml
+== Empty ==
+== Next ==
+A -> B : msg
+@enduml
+`;
+      const ast = parse(input);
+      expect(ast.events).toHaveLength(2);
+      const empty = ast.events[0];
+      if (empty.kind !== 'section') throw new Error('not section');
+      expect(empty.name).toBe('Empty');
+      expect(empty.events).toHaveLength(0);
+
+      const next = ast.events[1];
+      if (next.kind !== 'section') throw new Error('not section');
+      expect(next.name).toBe('Next');
+      expect(next.events).toHaveLength(1);
+    });
+
+    it('should produce a trailing SectionNode with empty events when nothing follows the last divider', () => {
+      const input = `
+@startuml
+A -> B : msg
+== Tail ==
+@enduml
+`;
+      const ast = parse(input);
+      expect(ast.events).toHaveLength(2);
+      const tail = ast.events[1];
+      if (tail.kind !== 'section') throw new Error('not section');
+      expect(tail.name).toBe('Tail');
+      expect(tail.events).toHaveLength(0);
+    });
+
+    it('should accept dividers without text (==== ) as anonymous sections', () => {
       const input = `
 @startuml
 A -> B : First
@@ -362,10 +438,30 @@ A -> B : Second
 @enduml
 `;
       const ast = parse(input);
-      expect(ast.events).toHaveLength(3);
-      expect(ast.events[1]).toMatchObject({
-        kind: 'divider',
-      });
+      expect(ast.events).toHaveLength(2);
+      const sec = ast.events[1];
+      if (sec.kind !== 'section') throw new Error('not section');
+      expect(sec.name).toBeUndefined();
+      expect(sec.events).toHaveLength(1);
+    });
+
+    it('should NOT promote a divider inside a fragment to a SectionNode (top-level only)', () => {
+      const input = `
+@startuml
+alt outer
+  A -> B : before
+  == Inner Divider ==
+  A -> B : after
+end
+@enduml
+`;
+      const ast = parse(input);
+      expect(ast.events).toHaveLength(1);
+      const frag = asFragment(ast.events[0]);
+      const innerEvents = frag.branches[0].events;
+      // Fragment internals keep DividerNode unchanged
+      expect(innerEvents.some((e) => e.kind === 'section')).toBe(false);
+      expect(innerEvents.some((e) => e.kind === 'divider')).toBe(true);
     });
   });
 

@@ -3,6 +3,7 @@ import type {
   FragmentBranch,
   FragmentNode,
   PolagramRoot,
+  SectionNode,
 } from '../../ast';
 
 /**
@@ -36,6 +37,10 @@ export abstract class Walker {
 
     if (node.kind === 'fragment') {
       return this.visitFragment(node);
+    }
+
+    if (node.kind === 'section') {
+      return this.visitSection(node);
     }
 
     // Groups are tricky because they are defined in root.groups AND sometimes used as containers in other ASTs.
@@ -82,5 +87,15 @@ export abstract class Walker {
       ...branch,
       events: this.mapEvents(branch.events),
     };
+  }
+
+  protected visitSection(node: SectionNode): EventNode[] {
+    // Default: descend into section events, rebuild section (Copy-on-Write).
+    return [
+      {
+        ...node,
+        events: this.mapEvents(node.events),
+      },
+    ];
   }
 }

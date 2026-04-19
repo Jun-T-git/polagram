@@ -38,6 +38,9 @@ export class Traverser {
       case 'ref':
         this.visitor.visitReference(node);
         break;
+      case 'section':
+        this.visitor.visitSection(node);
+        break;
       default:
         // Unknown node type
         break;

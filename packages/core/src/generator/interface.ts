@@ -8,6 +8,7 @@ import type {
   ParticipantGroup,
   PolagramRoot,
   ReferenceNode,
+  SectionNode,
   SpacerNode,
 } from '../ast';
 
@@ -28,4 +29,5 @@ export interface PolagramVisitor {
   visitDivider(node: DividerNode): void;
   visitSpacer(node: SpacerNode): void;
   visitReference(node: ReferenceNode): void;
+  visitSection(node: SectionNode): void;
 }

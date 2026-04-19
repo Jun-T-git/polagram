@@ -139,5 +139,45 @@ describe('Walker (Base Traversal)', () => {
       expect(resFrag.branches[0].events).toHaveLength(1);
       expect((resFrag.branches[0].events[0] as MessageNode).text).toBe('hello');
     });
+
+    it('descends into SectionNode events transparently', () => {
+      const dropMsg = { ...msg, id: 'm2', text: 'DROP inside section' };
+      const root = createAst([
+        {
+          kind: 'section',
+          id: 's1',
+          name: 'Phase 1',
+          events: [msg, dropMsg],
+        },
+      ]);
+
+      const result = new FilteringWalker().transform(root);
+
+      expect(result.events).toHaveLength(1);
+      const sec = result.events[0];
+      if (sec.kind !== 'section') throw new Error('not section');
+      expect(sec.name).toBe('Phase 1');
+      expect(sec.events).toHaveLength(1);
+      expect((sec.events[0] as MessageNode).text).toBe('hello');
+    });
+
+    it('preserves SectionNode identity (Copy-on-Write) when descending', () => {
+      const root = createAst([
+        {
+          kind: 'section',
+          id: 's1',
+          name: 'X',
+          events: [msg],
+        },
+      ]);
+
+      const result = new IdentityWalker().transform(root);
+
+      expect(result.events[0]).not.toBe(root.events[0]); // new object
+      const sec = result.events[0];
+      if (sec.kind !== 'section') throw new Error('not section');
+      expect(sec.events).not.toBe((root.events[0] as { events: unknown }).events); // new array
+      expect(sec.name).toBe('X');
+    });
   });
 });

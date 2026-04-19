@@ -58,6 +58,16 @@ describe('FocusFilter', () => {
     expect((result.events[0] as MessageNode).id).toBe('m1');
   });
 
+  it('throws if constructed with a non-participant selector (mis-routed)', () => {
+    const bad: FocusLayer = {
+      action: 'focus',
+      selector: { kind: 'section', name: 'X' },
+    };
+    expect(() => new FocusFilter(bad)).toThrow(
+      /expects a participant selector/,
+    );
+  });
+
   it('removes messages even inside fragments, but keeps structure', () => {
     const fragment: FragmentNode = {
       kind: 'fragment',

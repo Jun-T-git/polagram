@@ -8,14 +8,26 @@ import type {
 } from '../../ast';
 import { Matcher } from '../selector/matcher';
 import { Walker } from '../traverse/walker';
-import type { FocusLayer } from '../types';
+import type { FocusLayer, ParticipantSelector } from '../types';
 
 export class FocusFilter extends Walker {
   private matcher = new Matcher();
   private targetParticipantIds = new Set<string>();
+  private selector: ParticipantSelector;
 
-  constructor(private layer: FocusLayer) {
+  constructor(layer: FocusLayer) {
     super();
+    // FocusFilter handles ParticipantSelector only; SectionSelector is routed
+    // to FocusSectionFilter by the registry. A mis-route is a programmer
+    // error — fail loudly rather than silently drop every event (which is
+    // what an empty `targetParticipantIds` set would do downstream). This is
+    // symmetric with FocusSectionFilter / RemoveSectionFilter.
+    if (layer.selector.kind !== 'participant') {
+      throw new Error(
+        `FocusFilter expects a participant selector, got '${layer.selector.kind}'.`,
+      );
+    }
+    this.selector = layer.selector;
   }
 
   public transform(root: PolagramRoot): PolagramRoot {
@@ -25,10 +37,8 @@ export class FocusFilter extends Walker {
 
   private resolveTargetParticipants(root: PolagramRoot) {
     this.targetParticipantIds.clear();
-    const selector = this.layer.selector;
-
     root.participants.forEach((p) => {
-      if (this.matcher.matchParticipant(p, selector)) {
+      if (this.matcher.matchParticipant(p, this.selector)) {
         this.targetParticipantIds.add(p.id);
       }
     });

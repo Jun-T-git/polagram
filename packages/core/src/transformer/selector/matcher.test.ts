@@ -167,4 +167,53 @@ describe('Matcher', () => {
       ).toBe(false);
     });
   });
+
+  describe('Section Matching', () => {
+    const named = { kind: 'section' as const, id: 's1', name: 'Onboarding', events: [] };
+    const unnamed = { kind: 'section' as const, id: 's2', events: [] };
+
+    it('matches by name (exact string)', () => {
+      expect(
+        matcher.matchSection(named, { kind: 'section', name: 'Onboarding' }),
+      ).toBe(true);
+      expect(
+        matcher.matchSection(named, { kind: 'section', name: 'Other' }),
+      ).toBe(false);
+    });
+
+    it('matches by name (regex pattern)', () => {
+      expect(
+        matcher.matchSection(named, { kind: 'section', name: { pattern: 'board' } }),
+      ).toBe(true);
+      expect(
+        matcher.matchSection(named, { kind: 'section', name: /^On/ }),
+      ).toBe(true);
+    });
+
+    it('matches by names list (any-of)', () => {
+      expect(
+        matcher.matchSection(named, {
+          kind: 'section',
+          names: ['Other', 'Onboarding'],
+        }),
+      ).toBe(true);
+      expect(
+        matcher.matchSection(named, {
+          kind: 'section',
+          names: ['Other', 'Stuff'],
+        }),
+      ).toBe(false);
+    });
+
+    it('returns false for unnamed sections when a name matcher is given', () => {
+      expect(
+        matcher.matchSection(unnamed, { kind: 'section', name: 'X' }),
+      ).toBe(false);
+    });
+
+    // Note: the empty selector `{ kind: 'section' }` is rejected at compile
+    // time (discriminated union requires exactly one of name/names/between)
+    // and at runtime by the Zod schema's refine. There is no "matches every
+    // section" fallback — that ambiguity was removed deliberately.
+  });
 });

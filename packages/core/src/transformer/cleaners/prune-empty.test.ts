@@ -66,6 +66,59 @@ describe('StructureCleaner', () => {
     expect(result.events).toHaveLength(0);
   });
 
+  it('removes a SectionNode whose events become empty after recursion', () => {
+    const root = createAst([
+      {
+        kind: 'section',
+        id: 's1',
+        name: 'Empty Phase',
+        events: [],
+      },
+      msg,
+    ]);
+    const result = new StructureCleaner().transform(root);
+    expect(result.events).toHaveLength(1);
+    expect((result.events[0] as MessageNode).id).toBe('m1');
+  });
+
+  it('removes a SectionNode whose only child is an empty fragment (cascading prune)', () => {
+    // Mirrors the real bug: merge collapses internal self-loops to nothing,
+    // leaving an empty fragment, which prune-empty drops, leaving an empty
+    // section, which now also gets pruned.
+    const emptyFragment: FragmentNode = {
+      kind: 'fragment',
+      id: 'f1',
+      operator: 'alt',
+      branches: [{ id: 'b1', condition: 'x', events: [] }],
+    };
+    const root = createAst([
+      {
+        kind: 'section',
+        id: 's1',
+        name: 'Phase',
+        events: [emptyFragment],
+      },
+    ]);
+    const result = new StructureCleaner().transform(root);
+    expect(result.events).toHaveLength(0);
+  });
+
+  it('keeps a non-empty SectionNode and recursively cleans its events', () => {
+    const root = createAst([
+      {
+        kind: 'section',
+        id: 's1',
+        name: 'Phase',
+        events: [msg],
+      },
+    ]);
+    const result = new StructureCleaner().transform(root);
+    expect(result.events).toHaveLength(1);
+    const sec = result.events[0];
+    if (sec.kind !== 'section') throw new Error('not section');
+    expect(sec.events).toHaveLength(1);
+  });
+
   it('recursively cleans nested fragments', () => {
     const innerFrag: FragmentNode = {
       kind: 'fragment',

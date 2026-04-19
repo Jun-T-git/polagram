@@ -1,8 +1,8 @@
-import type { EventNode, FragmentNode } from '../../ast';
+import type { EventNode, FragmentNode, SectionNode } from '../../ast';
 import { Walker } from '../traverse/walker';
 
 /**
- * Cleaner that removes empty fragments and branches from the AST.
+ * Cleaner that removes empty fragments, branches, and sections from the AST.
  * This runs after filters to ensure the AST structure remains valid/clean.
  */
 export class StructureCleaner extends Walker {
@@ -30,5 +30,17 @@ export class StructureCleaner extends Walker {
         branches: validBranches,
       },
     ];
+  }
+
+  protected visitSection(node: SectionNode): EventNode[] {
+    // Recurse first (super rebuilds with mapped events — which themselves
+    // may have been pruned by visitFragment above), then drop the section
+    // if its events are empty. Without this, a `merge` that collapses every
+    // intra-section message to a self-loop leaves a dangling `== name ==`.
+    const result = super.visitSection(node);
+    if (result.length === 0) return [];
+    const section = result[0] as SectionNode;
+    if (section.events.length === 0) return [];
+    return [section];
   }
 }
