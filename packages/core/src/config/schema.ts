@@ -44,22 +44,43 @@ const GroupSelectorSchema = z.object({
 // Specify EXACTLY ONE of `name` (single), `names` (any-of),
 // or `between` (contiguous range bounded by from/to section names).
 //
+// Modeled as a `z.union` of three strict sub-schemas (each requires its mode
+// field) so the Zod-inferred type IS the discriminated union — matches the
+// TypeScript `SectionSelector` shape exactly. Mixing modes is rejected at
+// parse time because no sub-schema accepts unknown extra mode keys.
+//
 // PlantUML-only: Mermaid has no native section construct, so this selector
 // matches nothing on Mermaid input.
-const SectionSelectorSchema = z
+
+const SectionByNameSchema = z
   .object({
     kind: z
       .literal('section')
       .describe('The type of element to select.\n@example "section"'),
-    name: TextMatcherSchema.optional().describe(
+    name: TextMatcherSchema.describe(
       'Match a single section by exact name or pattern. Use this when the lens targets one named phase. Mutually exclusive with `names` and `between`.\n@example "Onboarding"',
     ),
+  })
+  .strict();
+
+const SectionByNamesSchema = z
+  .object({
+    kind: z
+      .literal('section')
+      .describe('The type of element to select.\n@example "section"'),
     names: z
       .array(TextMatcherSchema)
-      .optional()
       .describe(
         'Match any section whose name matches at least one entry (any-of). Use this for non-contiguous selections. Mutually exclusive with `name` and `between`.\n@example ["Onboarding", "Diagnostic"]',
       ),
+  })
+  .strict();
+
+const SectionByBetweenSchema = z
+  .object({
+    kind: z
+      .literal('section')
+      .describe('The type of element to select.\n@example "section"'),
     between: z
       .object({
         from: TextMatcherSchema.describe(
@@ -75,27 +96,16 @@ const SectionSelectorSchema = z
             'When false, drops the from/to boundary sections from the range. Defaults to true.\n@example false',
           ),
       })
-      .optional()
       .describe(
         'Match a contiguous range of sections in source order. Mutually exclusive with `name` and `names`.\n@example { from: "Onboarding", to: "Diagnostic", inclusive: false }',
       ),
   })
-  .refine(
-    (s) => {
-      const filled = [
-        s.name !== undefined,
-        s.names !== undefined,
-        s.between !== undefined,
-      ].filter(Boolean).length;
-      return filled === 1;
-    },
-    {
-      message:
-        'Specify exactly one of `name`, `names`, or `between`. Use `name` for a single section, `names` for an any-of list, or `between { from, to }` for a contiguous range.',
-    },
-  )
+  .strict();
+
+const SectionSelectorSchema = z
+  .union([SectionByNameSchema, SectionByNamesSchema, SectionByBetweenSchema])
   .describe(
-    'Selects sections (PlantUML "== Title ==" ranges) by name, list, or contiguous range. PlantUML-only — Mermaid has no native section construct, so this selector matches nothing on Mermaid input.',
+    'Selects sections (PlantUML "== Title ==" ranges) by name, list, or contiguous range. Specify exactly one of `name`, `names`, or `between` — mixing or omitting all three is rejected. PlantUML-only — Mermaid has no native section construct, so this selector matches nothing on Mermaid input.',
   );
 
 
