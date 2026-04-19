@@ -4,12 +4,14 @@ import type {
   MessageNode,
   Participant,
   ParticipantGroup,
+  SectionNode,
 } from '../../ast';
 import type {
   FragmentSelector,
   GroupSelector,
   MessageSelector,
   ParticipantSelector,
+  SectionSelector,
   TextMatcher,
 } from '../types';
 
@@ -81,9 +83,32 @@ export class Matcher {
     return true;
   }
 
+  // -- Section --
+
+  /**
+   * Matches a SectionNode against a `name` or `names` selector. The `between`
+   * variant is range-based and resolved by the caller (selectSections), not
+   * by per-node match — passing it here returns false (defensive).
+   *
+   * Unnamed sections never match.
+   */
+  public matchSection(node: SectionNode, selector: SectionSelector): boolean {
+    if ('name' in selector && selector.name !== undefined) {
+      if (node.name === undefined) return false;
+      return this.matchText(node.name, selector.name);
+    }
+    if ('names' in selector && selector.names !== undefined) {
+      if (node.name === undefined) return false;
+      const name = node.name;
+      return selector.names.some((m) => this.matchText(name, m));
+    }
+    // `between` should be resolved by the caller before reaching here.
+    return false;
+  }
+
   // -- Helpers --
 
-  private matchText(actual: string, matcher: TextMatcher): boolean {
+  public matchText(actual: string, matcher: TextMatcher): boolean {
     if (typeof matcher === 'string') {
       return actual === matcher; // Default: Exact match
     }

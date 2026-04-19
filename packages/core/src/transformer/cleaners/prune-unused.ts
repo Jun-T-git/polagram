@@ -39,6 +39,9 @@ export class UnusedCleaner {
               scan(branch.events);
             }
             break;
+          case 'section':
+            scan(node.events);
+            break;
           case 'activation':
             used.add(node.participantId);
             break;

@@ -30,6 +30,41 @@ export interface GroupSelector {
   name?: TextMatcher;
 }
 
+export interface SectionBetween {
+  from: TextMatcher;
+  to: TextMatcher;
+  /** Defaults to true. When false, the from/to boundary sections are dropped from the range. */
+  inclusive?: boolean;
+}
+
+/**
+ * Selects top-level SectionNodes (folded from PlantUML "== Title ==" dividers).
+ *
+ * Specify EXACTLY ONE of:
+ *   - `name`: a single section by exact text or pattern
+ *   - `names`: any-of list (non-contiguous selection)
+ *   - `between { from, to, inclusive? }`: contiguous range. Order of from/to
+ *     does not matter — selection is in source order. If from === to, the
+ *     range is just that section (or empty when inclusive=false). When
+ *     multiple sections share a name, the FIRST occurrence is used.
+ *
+ * Discriminated by which mode is set — TypeScript prevents mixing modes at
+ * compile time. The Zod schema enforces the same invariant at runtime for
+ * YAML config inputs.
+ *
+ * PlantUML-only: Mermaid has no native section construct, so this selector
+ * matches nothing on Mermaid input.
+ */
+export type SectionSelector =
+  | { kind: 'section'; name: TextMatcher; names?: never; between?: never }
+  | { kind: 'section'; names: TextMatcher[]; name?: never; between?: never }
+  | {
+      kind: 'section';
+      between: SectionBetween;
+      name?: never;
+      names?: never;
+    };
+
 // -- Layers --
 
 export interface ResolveLayer {
@@ -39,12 +74,16 @@ export interface ResolveLayer {
 
 export interface FocusLayer {
   action: 'focus';
-  selector: ParticipantSelector;
+  selector: ParticipantSelector | SectionSelector;
 }
 
 export interface RemoveLayer {
   action: 'remove';
-  selector: ParticipantSelector | MessageSelector | GroupSelector;
+  selector:
+    | ParticipantSelector
+    | MessageSelector
+    | GroupSelector
+    | SectionSelector;
 }
 
 export interface MergeLayer {

@@ -104,6 +104,37 @@ describe('UnusedCleaner', () => {
     expect(result.groups[0].participantIds).toEqual(['A']);
   });
 
+  it('descends into SectionNode events when collecting used participants', () => {
+    const p1 = { id: 'A', name: 'Alice', type: 'participant' as const };
+    const p2 = { id: 'B', name: 'Bob', type: 'participant' as const };
+
+    const msg: MessageNode = {
+      kind: 'message',
+      id: 'm1',
+      text: 'Hi',
+      from: 'A',
+      to: 'B',
+      type: 'sync',
+      style: { line: 'solid', head: 'arrow' },
+    };
+
+    const root = createAst(
+      [p1, p2],
+      [
+        {
+          kind: 'section' as const,
+          id: 's1',
+          name: 'Phase 1',
+          events: [msg],
+        },
+      ],
+    );
+
+    const result = new UnusedCleaner().transform(root);
+    // Both A and B are used inside the section — neither should be pruned.
+    expect(result.participants.map((p) => p.id)).toEqual(['A', 'B']);
+  });
+
   it('removes group entirely if becomes empty', () => {
     const p2 = { id: 'B', name: 'Bob', type: 'participant' as const }; // Unused
     const group = {

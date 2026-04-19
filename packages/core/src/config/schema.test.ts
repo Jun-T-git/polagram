@@ -117,6 +117,91 @@ describe('Config Schema Validation', () => {
     expect(() => validateConfig(input)).toThrow();
   });
 
+  describe('Section selector', () => {
+    const wrap = (selector: unknown, action: 'focus' | 'remove' = 'focus') => ({
+      version: 1,
+      targets: [
+        {
+          input: ['src/*.puml'],
+          outputDir: 'dist',
+          lenses: [{ name: 'L', layers: [{ action, selector }] }],
+        },
+      ],
+    });
+
+    it('accepts focus + section selector by name', () => {
+      expect(() =>
+        validateConfig(wrap({ kind: 'section', name: 'Onboarding' })),
+      ).not.toThrow();
+    });
+
+    it('accepts focus + section selector by names list', () => {
+      expect(() =>
+        validateConfig(
+          wrap({ kind: 'section', names: ['A', { pattern: 'B' }] }),
+        ),
+      ).not.toThrow();
+    });
+
+    it('accepts focus + section selector by between range (inclusive default)', () => {
+      expect(() =>
+        validateConfig(
+          wrap({
+            kind: 'section',
+            between: { from: 'A', to: 'D' },
+          }),
+        ),
+      ).not.toThrow();
+    });
+
+    it('accepts focus + section selector by between range (inclusive=false)', () => {
+      expect(() =>
+        validateConfig(
+          wrap({
+            kind: 'section',
+            between: { from: 'A', to: 'D', inclusive: false },
+          }),
+        ),
+      ).not.toThrow();
+    });
+
+    it('accepts remove + section selector', () => {
+      expect(() =>
+        validateConfig(wrap({ kind: 'section', name: 'Webhook' }, 'remove')),
+      ).not.toThrow();
+    });
+
+    it('rejects mutually exclusive options (name + between)', () => {
+      expect(() =>
+        validateConfig(
+          wrap({
+            kind: 'section',
+            name: 'X',
+            between: { from: 'A', to: 'B' },
+          }),
+        ),
+      ).toThrow();
+    });
+
+    it('rejects mutually exclusive options (names + between)', () => {
+      expect(() =>
+        validateConfig(
+          wrap({
+            kind: 'section',
+            names: ['A'],
+            between: { from: 'A', to: 'B' },
+          }),
+        ),
+      ).toThrow();
+    });
+
+    it('rejects an empty selector ({ kind: section } with no mode)', () => {
+      // Without exactly one mode, intent is ambiguous (matches all sections?
+      // none?). Force the user to be explicit.
+      expect(() => validateConfig(wrap({ kind: 'section' }))).toThrow();
+    });
+  });
+
   it('should validate participant selector with complex matcher', () => {
     const input = {
       version: 1,

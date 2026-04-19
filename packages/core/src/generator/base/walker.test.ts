@@ -16,6 +16,7 @@ describe('Traverser', () => {
       visitDivider: vi.fn(),
       visitSpacer: vi.fn(),
       visitReference: vi.fn(),
+      visitSection: vi.fn(),
     };
 
     const traverser = new Traverser(mockVisitor);
@@ -44,6 +45,7 @@ describe('Traverser', () => {
       visitDivider: vi.fn(),
       visitSpacer: vi.fn(),
       visitReference: vi.fn(),
+      visitSection: vi.fn(),
     };
 
     const traverser = new Traverser(mockVisitor);

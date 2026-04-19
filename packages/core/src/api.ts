@@ -10,6 +10,7 @@ import type {
     Lens,
     MessageSelector,
     ParticipantSelector,
+    SectionSelector,
     TextMatcher,
 } from './transformer/types';
 
@@ -115,6 +116,48 @@ export class PolagramBuilder {
     return this;
   }
 
+  // -- Section Filtering (PlantUML only) --
+
+  /**
+   * Focus on specific sections (PlantUML "== Title ==" ranges).
+   *
+   * A bare string/RegExp/{pattern} maps to `{ kind: 'section', name }`. To
+   * select an any-of list or a contiguous range, pass a SectionSelector
+   * directly: `{ kind: 'section', names: [...] }` or
+   * `{ kind: 'section', between: { from, to, inclusive? } }`.
+   *
+   * Mermaid input has no sections, so this lens will match nothing there.
+   *
+   * @example
+   *   .focusSection('Onboarding')
+   *   .focusSection({ kind: 'section', between: { from: 'A', to: 'D' } })
+   */
+  focusSection(selector: TextMatcher | SectionSelector): this {
+    this.layers.push({
+      action: 'focus',
+      selector: this.normalizeSectionSelector(selector),
+    });
+    return this;
+  }
+
+  /**
+   * Remove specific sections (PlantUML "== Title ==" ranges).
+   *
+   * Same selector forms as {@link focusSection}. Preamble events (before the
+   * first section) and unmatched sections are preserved untouched.
+   *
+   * @example
+   *   .removeSection('Webhook')
+   *   .removeSection({ kind: 'section', names: ['Debug', 'Internal'] })
+   */
+  removeSection(selector: TextMatcher | SectionSelector): this {
+    this.layers.push({
+      action: 'remove',
+      selector: this.normalizeSectionSelector(selector),
+    });
+    return this;
+  }
+
   // -- Structural Resolution --
 
   /**
@@ -210,6 +253,15 @@ export class PolagramBuilder {
       return { kind: 'fragment', condition: selector };
     }
     return { kind: 'fragment', ...selector };
+  }
+
+  private normalizeSectionSelector(
+    selector: TextMatcher | SectionSelector,
+  ): SectionSelector {
+    if (this.isTextMatcher(selector)) {
+      return { kind: 'section', name: selector };
+    }
+    return selector;
   }
 
   private isTextMatcher(val: unknown): val is TextMatcher {

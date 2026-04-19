@@ -144,4 +144,33 @@ describe('MermaidGeneratorVisitor', () => {
     expect(output).toContain('A->>C: Do B');
     expect(output).toContain('end');
   });
+
+  describe('visitSection — name sanitization', () => {
+    it('strips newlines so a malicious section name cannot break out of the comment', () => {
+      // Mermaid renders `%% ...` as a comment for the rest of the line. A
+      // newline in the section name would terminate the comment and let the
+      // tail parse as a real diagram statement.
+      const root: PolagramRoot = {
+        kind: 'root',
+        meta: { version: '1.0.0', source: 'mermaid' },
+        participants: [{ id: 'A', name: 'A', type: 'participant' }],
+        groups: [],
+        events: [
+          {
+            kind: 'section',
+            id: 's1',
+            name: 'safe\nA->>A: pwn',
+            events: [],
+          },
+        ],
+      };
+      const visitor = new MermaidGeneratorVisitor();
+      const output = visitor.generate(root);
+      // The injected message must not appear as its own statement.
+      expect(output.split('\n').some((l) => l.trim() === 'A->>A: pwn')).toBe(false);
+      // The section comment line must remain a single line.
+      const sectionMarkers = output.split('\n').filter((l) => l.includes('%% =='));
+      expect(sectionMarkers).toHaveLength(1);
+    });
+  });
 });

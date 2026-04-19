@@ -8,10 +8,22 @@ import type {
   ParticipantGroup,
   PolagramRoot,
   ReferenceNode,
+  SectionNode,
   SpacerNode,
 } from '../../ast';
 import { Traverser } from '../base/walker';
 import type { PolagramVisitor } from '../interface';
+
+/**
+ * Collapses CR/LF to a space so a programmatically-constructed section/divider
+ * name cannot break out of the single-line `== ... ==` syntax and inject
+ * arbitrary statements on round-trip. PlantUML lexer is line-bounded, so
+ * untrusted parsed input is already safe; this protects against ad-hoc AST
+ * construction by API consumers.
+ */
+function sanitizeDividerText(text: string): string {
+  return text.replace(/\r?\n/g, ' ');
+}
 
 /**
  * Visitor implementation that generates PlantUML code.
@@ -185,10 +197,19 @@ export class PlantUMLGeneratorVisitor implements PolagramVisitor {
 
   visitDivider(node: DividerNode): void {
     if (node.text) {
-      this.add(`== ${node.text} ==`);
+      this.add(`== ${sanitizeDividerText(node.text)} ==`);
     } else {
       this.add('====');
     }
+  }
+
+  visitSection(node: SectionNode): void {
+    if (node.name) {
+      this.add(`== ${sanitizeDividerText(node.name)} ==`);
+    } else {
+      this.add('====');
+    }
+    this.traverser.dispatchEvents(node.events);
   }
 
   visitSpacer(_node: SpacerNode): void {

@@ -8,11 +8,22 @@ import type {
   ParticipantGroup,
   PolagramRoot,
   ReferenceNode,
+  SectionNode,
   SpacerNode,
 } from '../../ast';
 import { getArrowString } from '../../common/mermaid/constants';
 import { Traverser } from '../base/walker';
 import type { PolagramVisitor } from '../interface';
+
+/**
+ * Collapses CR/LF to a space so a section/divider name cannot terminate
+ * the surrounding `%%` comment and inject arbitrary statements on round-trip.
+ * Mermaid lexer is line-bounded so parsed input is already safe; this protects
+ * against ad-hoc AST construction by API consumers.
+ */
+function sanitizeCommentText(text: string): string {
+  return text.replace(/\r?\n/g, ' ');
+}
 
 /**
  * Visitor implementation that generates Mermaid code.
@@ -194,7 +205,17 @@ export class MermaidGeneratorVisitor implements PolagramVisitor {
   }
 
   visitDivider(node: DividerNode): void {
-    this.add(`%% == ${node.text || ''} ==`);
+    this.add(`%% == ${sanitizeCommentText(node.text || '')} ==`);
+  }
+
+  // Mermaid has no native section construct. Emit a comment marker for the
+  // section name (renderer ignores it) and descend into the section's events
+  // so they render as normal — lossy but content-preserving. Sanitization
+  // prevents a programmatically-built name with embedded newlines from
+  // terminating the `%%` comment and injecting diagram statements.
+  visitSection(node: SectionNode): void {
+    this.add(`%% == ${sanitizeCommentText(node.name || '')} ==`);
+    this.traverser.dispatchEvents(node.events);
   }
 
   visitSpacer(node: SpacerNode): void {

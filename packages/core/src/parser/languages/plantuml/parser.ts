@@ -8,6 +8,7 @@ import type {
     Participant,
     ParticipantGroup,
     PolagramRoot,
+    SectionNode,
 } from '../../../ast';
 import { BaseParser } from '../../base/parser';
 import type { Lexer } from './lexer';
@@ -31,6 +32,19 @@ export class Parser extends BaseParser<Token> {
       events: [],
     };
 
+    // Top-level "== Title ==" dividers are folded into SectionNodes.
+    // Once the first divider is seen, all subsequent events are pushed into
+    // the currently open section's events array instead of root.events.
+    let currentSection: SectionNode | null = null;
+    const pushEvent = (event: EventNode) => {
+      if (currentSection) {
+        currentSection.events.push(event);
+      } else {
+        root.events.push(event);
+      }
+    };
+    let sectionCount = 0;
+
     while (this.currToken.type !== 'EOF') {
       if (this.currToken.type === 'START_UML') {
         this.advance();
@@ -51,14 +65,16 @@ export class Parser extends BaseParser<Token> {
         continue;
       }
 
-      // Handle dividers
+      // Top-level dividers open a new SectionNode (closing the previous one).
       if (this.currToken.type === 'DIVIDER') {
-        const divider: DividerNode = {
-          kind: 'divider',
-          id: `div_${root.events.length + 1}`,
-          text: this.currToken.literal || undefined,
+        sectionCount += 1;
+        currentSection = {
+          kind: 'section',
+          id: `sec_${sectionCount}`,
+          name: this.currToken.literal || undefined,
+          events: [],
         };
-        root.events.push(divider);
+        root.events.push(currentSection);
         this.advance();
         continue;
       }
@@ -69,7 +85,7 @@ export class Parser extends BaseParser<Token> {
       if (this.isParticipantToken(this.currToken)) {
         const probMsg = this.parseMessage(root);
         if (probMsg) {
-          root.events.push(probMsg);
+          pushEvent(probMsg);
           continue;
         }
       }
@@ -79,19 +95,19 @@ export class Parser extends BaseParser<Token> {
         this.currToken.type === 'DEACTIVATE'
       ) {
         const act = this.parseActivation(root);
-        if (act) root.events.push(act);
+        if (act) pushEvent(act);
         continue;
       }
 
       if (this.currToken.type === 'NOTE') {
         const note = this.parseNote(root);
-        if (note) root.events.push(note);
+        if (note) pushEvent(note);
         continue;
       }
 
       if (['ALT', 'OPT', 'LOOP'].includes(this.currToken.type)) {
         const fragment = this.parseFragment(root);
-        if (fragment) root.events.push(fragment);
+        if (fragment) pushEvent(fragment);
         continue;
       }
 
@@ -296,6 +312,18 @@ export class Parser extends BaseParser<Token> {
 
     if (['ALT', 'OPT', 'LOOP'].includes(this.currToken.type)) {
       return this.parseFragment(root);
+    }
+
+    // Inside a fragment, a "==" divider stays as a DividerNode.
+    // (Section folding is a top-level-only normalization.)
+    if (this.currToken.type === 'DIVIDER') {
+      const divider: DividerNode = {
+        kind: 'divider',
+        id: `div_${root.events.length + 1}`,
+        text: this.currToken.literal || undefined,
+      };
+      this.advance();
+      return divider;
     }
 
     this.advance();

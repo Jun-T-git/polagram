@@ -231,4 +231,33 @@ describe('PlantUML Generator', () => {
     expect(code).toContain('end box');
     expect(code).toContain('participant C');
   });
+
+  describe('visitSection — name sanitization', () => {
+    it('strips newlines from section name to prevent injection on round-trip', () => {
+      // A programmatically constructed AST could carry a name with a newline.
+      // Without sanitization the divider line would split into two and the
+      // tail would be parsed as a new statement (e.g. another divider, or
+      // worse, a `!include`).
+      const ast: PolagramRoot = {
+        kind: 'root',
+        meta: { version: '1.0.0', source: 'plantuml' },
+        participants: [],
+        groups: [],
+        events: [
+          {
+            kind: 'section',
+            id: 's1',
+            name: 'safe\n!include http://attacker',
+            events: [],
+          },
+        ],
+      };
+      const code = generator.generate(ast);
+      // The injected payload must not appear on its own line.
+      expect(code.split('\n').some((l) => l.trim() === '!include http://attacker')).toBe(false);
+      // The section header must remain a single line.
+      const dividerLines = code.split('\n').filter((l) => /^==.*==$/.test(l.trim()));
+      expect(dividerLines).toHaveLength(1);
+    });
+  });
 });

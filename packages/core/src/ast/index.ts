@@ -72,7 +72,8 @@ export type EventNode =
   | DividerNode
   | ActivationNode
   | ReferenceNode
-  | SpacerNode;
+  | SpacerNode
+  | SectionNode;
 
 // --- A. Message (Communication & Lifecycle) ---
 
@@ -180,6 +181,18 @@ export interface DividerNode {
   kind: 'divider';
   id: string;
   text?: string; // "== Title =="
+}
+
+/**
+ * A named, ordered range of events bounded by source-language section
+ * separators (currently PlantUML "== Title ==" only). Top-level only —
+ * separators inside fragments stay as DividerNode.
+ */
+export interface SectionNode {
+  kind: 'section';
+  id: string;
+  name?: string;
+  events: EventNode[];
 }
 
 export interface SpacerNode {

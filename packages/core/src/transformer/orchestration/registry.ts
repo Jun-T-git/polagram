@@ -1,6 +1,8 @@
 import { FocusFilter } from '../filters/focus';
+import { FocusSectionFilter } from '../filters/focus-section';
 import { MergeFilter } from '../filters/merge';
 import { RemoveFilter } from '../filters/remove';
+import { RemoveSectionFilter } from '../filters/remove-section';
 import { ResolveFilter } from '../filters/resolve';
 import type {
     FocusLayer,
@@ -18,7 +20,9 @@ type TransformerFactory<T extends Layer = Layer> = (layer: T) => Transformer;
 
 /**
  * Registry for transformer factories.
- * Provides type-safe registration and retrieval of transformers.
+ * Dispatches primarily by `action`; for actions that accept polymorphic
+ * selectors (`focus`, `remove`), the matching factory inspects the
+ * selector's `kind` to pick a concrete filter implementation.
  */
 class TransformerRegistry {
   private factories = new Map<string, TransformerFactory>();
@@ -26,8 +30,18 @@ class TransformerRegistry {
   constructor() {
     // Register built-in transformers with type-safe wrappers
     this.registerTyped<ResolveLayer>('resolve', (layer) => new ResolveFilter(layer));
-    this.registerTyped<FocusLayer>('focus', (layer) => new FocusFilter(layer));
-    this.registerTyped<RemoveLayer>('remove', (layer) => new RemoveFilter(layer));
+    this.registerTyped<FocusLayer>('focus', (layer) => {
+      if (layer.selector.kind === 'section') {
+        return new FocusSectionFilter(layer);
+      }
+      return new FocusFilter(layer);
+    });
+    this.registerTyped<RemoveLayer>('remove', (layer) => {
+      if (layer.selector.kind === 'section') {
+        return new RemoveSectionFilter(layer);
+      }
+      return new RemoveFilter(layer);
+    });
     this.registerTyped<MergeLayer>('merge', (layer) => new MergeFilter(layer));
   }
 
