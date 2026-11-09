@@ -1,6 +1,6 @@
 version: 1
 targets:
-  - input: ["docs/sequence/sequence.mmd"]
+  - input: ["sequence.mmd"]
     outputDir: "generated"
     lenses:
       - name: "simple"
