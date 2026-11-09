@@ -59,6 +59,26 @@
             "optional": true
           }
         }
+      },
+      "react-router-dom@6.30.3": {
+        "peerDependencies": {
+          "@types/react": "*"
+        },
+        "peerDependenciesMeta": {
+          "@types/react": {
+            "optional": true
+          }
+        }
+      },
+      "react-router@6.30.3": {
+        "peerDependencies": {
+          "@types/react": "*"
+        },
+        "peerDependenciesMeta": {
+          "@types/react": {
+            "optional": true
+          }
+        }
       }
     }
   }
