@@ -1,103 +1,99 @@
-
-import type { TargetConfig } from '@polagram/core';
-import { validateConfig } from '@polagram/core';
-import { glob } from 'glob';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import picocolors from 'picocolors';
+import { isWithin, loadPreviewConfig, resolveInput } from './boundary.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const marker = '.polagram-preview-build';
 
 export interface BuildOptions {
-  config: string; // "polagram.yml"
+  config: string;
   outDir?: string;
+}
+
+// Resolve existing ancestors too: an output reached through a symlink must not
+// turn a seemingly harmless directory into the project or one of its parents.
+async function outputRealPath(candidate: string): Promise<string> {
+  try {
+    return await fs.realpath(candidate);
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+    return path.join(
+      await outputRealPath(path.dirname(candidate)),
+      path.basename(candidate),
+    );
+  }
 }
 
 export async function buildStatic(options: BuildOptions) {
   const configPath = path.resolve(process.cwd(), options.config);
   const outDir = path.resolve(process.cwd(), options.outDir || 'dist-preview');
-  const projectRoot = path.dirname(configPath); // Assuming config is at root of what we want to preview
-
-  console.log(picocolors.blue(`Building Polagram Preview to ${outDir}...`));
-
-  // 1. Copy Client Artifacts
-  // dist/node/index.js -> ../client
+  const projectRoot = path.dirname(configPath);
   const clientDist = path.resolve(__dirname, '../client');
-
-  try {
-    await fs.stat(clientDist);
-  } catch (_e) {
+  const realRoot = await fs.realpath(projectRoot);
+  const realClient = await fs.realpath(clientDist);
+  const realOut = await outputRealPath(outDir);
+  if (
+    isWithin(realOut, realRoot) ||
+    isWithin(realOut, realClient) ||
+    isWithin(realClient, realOut)
+  ) {
     throw new Error(
-      `Client build not found at ${clientDist}. Please run "pnpm build" in packages/preview.`,
+      'Unsafe preview output directory: overlaps project root or client build',
     );
   }
 
-  // Clean & Create outDir
-  await fs.rm(outDir, { recursive: true, force: true });
-  await fs.mkdir(outDir, { recursive: true });
-
-  // Copy everything from dist/client to outDir
-  await fs.cp(clientDist, outDir, { recursive: true });
-
-  // 2. Generate config.json (Expanded)
-  // Logic duplicated from server.ts - ideally shared.
-  // For now duplicating for speed, but refactor later.
-  const content = await fs.readFile(configPath, 'utf-8');
-  // Dynamic import js-yaml (should be in deps)
-  const yaml = await import('js-yaml');
-  const parsed = validateConfig(yaml.load(content));
-
-  // Resolve files
-  const enrichedTargets = await Promise.all(
-    (parsed.targets || []).map(async (t: TargetConfig) => {
-      if (!t.input) return t;
-      const inputs = Array.isArray(t.input) ? t.input : [t.input];
-      const files = await glob(inputs, {
-        cwd: projectRoot,
-        ignore: ['**/node_modules/**'],
-      });
-      return { ...t, _files: files };
+  // Validate every input before modifying any output.
+  const { config, allowedFiles } = await loadPreviewConfig(
+    configPath,
+    projectRoot,
+  );
+  const files = await Promise.all(
+    [...allowedFiles].map(async (file) => {
+      const source = await resolveInput(projectRoot, projectRoot, file);
+      if (isWithin(realOut, source))
+        throw new Error(
+          'Unsafe preview output directory: contains input files',
+        );
+      return { file, source };
     }),
   );
-  parsed.targets = enrichedTargets;
+  try {
+    const stat = await fs.lstat(outDir);
+    if (!stat.isDirectory() || stat.isSymbolicLink())
+      throw new Error('Unsafe preview output directory');
+    const entries = await fs.readdir(outDir);
+    if (
+      entries.length &&
+      !(await fs.lstat(path.join(outDir, marker)).catch(() => null))?.isFile()
+    ) {
+      throw new Error(
+        'Refusing to replace a nonempty directory without a Polagram preview build marker',
+      );
+    }
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
+  }
 
-  // Write api/config.json
-  // Client attempts fetch('/__api/config') -> fail -> fetch('api/config.json') ?
-  // My useConfig hook has fallback: `fetch('api/config.json')`.
-  // Wait, `/__api/config` is root relative. Static hosting usually implies root.
-  // Let's create `api/config.json` inside outDir.
+  console.log(picocolors.blue(`Building Polagram Preview to ${outDir}...`));
+  await fs.rm(outDir, { recursive: true, force: true });
+  await fs.mkdir(outDir, { recursive: true });
+  await fs.cp(clientDist, outDir, { recursive: true });
   await fs.mkdir(path.join(outDir, 'api'), { recursive: true });
   await fs.writeFile(
     path.join(outDir, 'api', 'config.json'),
-    JSON.stringify(parsed),
+    JSON.stringify(config),
   );
-
-  // 3. Copy Input Files (Mocking /__api/file?path=...)
-  // The client fallback is: `fetch('api/file/${filePath}')`
-  // So we need to put files in `outDir/api/file/...`
-  // We need to collect ALL distinct files from all targets.
-  const allFiles = new Set<string>();
-  enrichedTargets.forEach((t: TargetConfig & { _files?: string[] }) => {
-    if (Array.isArray(t._files)) {
-      t._files.forEach((f: string) => {
-        allFiles.add(f);
-      });
-    }
-  });
-
-  console.log(picocolors.dim(`  Copying ${allFiles.size} input files...`));
-
-  for (const fileRelPath of allFiles) {
-    const src = path.resolve(projectRoot, fileRelPath);
-    // Construct dest: outDir/api/file/path/to/file.mmd
-    const dest = path.join(outDir, 'api', 'file', fileRelPath);
-
-    await fs.mkdir(path.dirname(dest), { recursive: true });
-    await fs.copyFile(src, dest);
+  for (const { file } of files) {
+    // Recheck symlink containment immediately before copying.
+    const source = await resolveInput(projectRoot, projectRoot, file);
+    const destination = path.resolve(outDir, 'api', 'file', file);
+    if (!isWithin(path.join(outDir, 'api', 'file'), destination))
+      throw new Error('Unsafe preview copy destination');
+    await fs.mkdir(path.dirname(destination), { recursive: true });
+    await fs.copyFile(source, destination);
   }
-
-  // Also copy polagram.yml itself if needed? Not really, we baked it into config.json.
-
-  console.log(picocolors.green(`Build complete.`));
+  await fs.writeFile(path.join(outDir, marker), 'Polagram preview output\n');
+  console.log(picocolors.green('Build complete.'));
 }

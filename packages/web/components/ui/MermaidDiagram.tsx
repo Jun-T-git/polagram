@@ -10,10 +10,12 @@ interface MermaidDiagramProps {
 
 export function MermaidDiagram({ chart, className = '' }: MermaidDiagramProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [svg, setSvg] = useState<string>('');
-  const [error, setError] = useState<string>('');
+  const [result, setResult] = useState({ chart: '', svg: '', error: '' });
+  const svg = result.chart === chart ? result.svg : '';
+  const error = result.chart === chart ? result.error : '';
 
   useEffect(() => {
+    let cancelled = false;
     const renderDiagram = async () => {
       if (!containerRef.current) return;
 
@@ -22,7 +24,8 @@ export function MermaidDiagram({ chart, className = '' }: MermaidDiagramProps) {
         mermaid.initialize({
           startOnLoad: false,
           theme: 'dark',
-          securityLevel: 'loose',
+          securityLevel: 'strict',
+          suppressErrorRendering: true,
           themeVariables: {
             darkMode: true,
             background: 'transparent',
@@ -41,30 +44,22 @@ export function MermaidDiagram({ chart, className = '' }: MermaidDiagramProps) {
         
         // Render the diagram
         const { svg: renderedSvg } = await mermaid.render(id, chart);
-        setSvg(renderedSvg);
-        setError('');
+        if (!cancelled) setResult({ chart, svg: renderedSvg, error: '' });
       } catch (err) {
-        console.error('Mermaid rendering error:', err);
-        setError(err instanceof Error ? err.message : 'Failed to render diagram');
+        if (!cancelled) {
+          setResult({ chart, svg: '', error: err instanceof Error ? err.message : 'Failed to render diagram' });
+        }
       }
     };
 
-    renderDiagram();
+    void renderDiagram();
+    return () => { cancelled = true; };
   }, [chart]);
 
-  if (error) {
-    return (
-      <div className={`text-red-400 text-xs p-4 bg-red-500/10 rounded border border-red-500/20 ${className}`}>
-        Error: {error}
-      </div>
-    );
-  }
-
   return (
-    <div
-      ref={containerRef}
-      className={`mermaid-container ${className}`}
-      dangerouslySetInnerHTML={{ __html: svg }}
-    />
+    <>
+      {error && <div role="alert" className={`text-red-400 text-xs p-4 bg-red-500/10 rounded border border-red-500/20 ${className}`}>Error: {error}</div>}
+      <div ref={containerRef} className={`mermaid-container ${className}`} dangerouslySetInnerHTML={{ __html: svg }} />
+    </>
   );
 }

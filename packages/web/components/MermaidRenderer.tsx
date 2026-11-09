@@ -10,6 +10,7 @@ interface MermaidRendererProps {
 // Initialize mermaid with custom theme
 mermaid.initialize({
   startOnLoad: false,
+  securityLevel: 'strict',
   suppressErrorRendering: true,
   theme: 'dark',
   themeVariables: {
@@ -41,37 +42,29 @@ export default function MermaidRenderer({ code }: MermaidRendererProps) {
   const renderIdRef = useRef(0);
 
   useEffect(() => {
-    if (!code || !containerRef.current) return;
+    let cancelled = false;
+    if (!containerRef.current) return;
+    containerRef.current.replaceChildren();
+    if (!code) return;
 
     const renderId = `mermaid-${Date.now()}-${renderIdRef.current++}`;
-    
     const renderDiagram = async () => {
       try {
-        // Clear previous content
-        if (containerRef.current) {
-          containerRef.current.innerHTML = '';
-        }
-
-        // Render the diagram
         const { svg } = await mermaid.render(renderId, code);
-        
-        if (containerRef.current) {
+        if (!cancelled && containerRef.current) {
           containerRef.current.innerHTML = svg;
         }
       } catch (error) {
-        // console.error('Mermaid rendering error:', error);
-        if (containerRef.current) {
-          containerRef.current.innerHTML = `
-            <div class="flex flex-col items-center justify-center p-6 text-destructive bg-destructive/5 rounded-lg border border-destructive/20">
-              <p class="font-semibold mb-2">Failed to render diagram</p>
-              <pre class="text-xs font-mono whitespace-pre-wrap break-all">${error instanceof Error ? error.message : 'Unknown error'}</pre>
-            </div>
-          `;
+        if (!cancelled && containerRef.current) {
+          const message = document.createElement('pre');
+          message.className = 'text-xs whitespace-pre-wrap break-all text-destructive';
+          message.textContent = `Failed to render diagram: ${error instanceof Error ? error.message : 'Unknown error'}`;
+          containerRef.current.replaceChildren(message);
         }
       }
     };
-
-    renderDiagram();
+    void renderDiagram();
+    return () => { cancelled = true; };
   }, [code]);
 
   return (

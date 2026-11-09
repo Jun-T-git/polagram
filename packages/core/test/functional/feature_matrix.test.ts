@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { Polagram } from '../../src/api';
+import { Polagram, PolagramBuilder } from '../../src/api';
+import type { PolagramRoot } from '../../src/ast';
 
 describe('Feature Matrix: Participant Selectors', () => {
   const CODE_ID_NAME = `
@@ -9,14 +10,37 @@ sequenceDiagram
     A->>B: Hello
     B->>B: Self
 `;
-  // Stereotype
-  const CODE_STEREOTYPE = `
-sequenceDiagram
-    participant A <<Service>>
-    participant B <<Database>>
-    A->>B: Query
-    A->>A: Calculation
-`;
+  // Stereotypes are supported by the AST selector. The text parsers do not
+  // currently produce them, so exercise the public AST builder directly.
+  const STEREOTYPE_AST: PolagramRoot = {
+    kind: 'root',
+    meta: { version: '1.0.0', source: 'mermaid' },
+    participants: [
+      { id: 'A', name: 'A', type: 'participant', stereotype: 'Service' },
+      { id: 'B', name: 'B', type: 'participant', stereotype: 'Database' },
+    ],
+    groups: [],
+    events: [
+      {
+        kind: 'message',
+        id: 'query',
+        from: 'A',
+        to: 'B',
+        text: 'Query',
+        type: 'sync',
+        style: { line: 'solid', head: 'arrow' },
+      },
+      {
+        kind: 'message',
+        id: 'calculation',
+        from: 'A',
+        to: 'A',
+        text: 'Calculation',
+        type: 'sync',
+        style: { line: 'solid', head: 'arrow' },
+      },
+    ],
+  };
 
   it('should select by ID (alias)', () => {
     // Remove by ID "A"
@@ -40,19 +64,12 @@ sequenceDiagram
     expect(result).toContain('B->>B: Self');
   });
 
-  it.skip('should select by Stereotype (remove)', () => {
-    // TODO: Enable when PlantUML parser is implemented.
-    // Mermaid parser does not currently support stereotypes (<<Service>>).
-    // This test preserves the AST compatibility check for the future.
-    // Remove <<Database>>
-    const result = Polagram.init(CODE_STEREOTYPE)
+  it('should select by Stereotype from the public AST builder', () => {
+    const result = new PolagramBuilder(structuredClone(STEREOTYPE_AST))
       .removeParticipant({ stereotype: 'Database' })
-      .toMermaid();
-    expect(result).not.toContain('participant B <<Database>>');
-    // B removed -> Interaction A->>B removed
-    expect(result).not.toContain('A->>B: Query');
-    expect(result).toContain('participant A <<Service>>');
-    expect(result).toContain('A->>A: Calculation');
+      .toAST();
+    expect(result.participants).toEqual([STEREOTYPE_AST.participants[0]]);
+    expect(result.events).toEqual([STEREOTYPE_AST.events[1]]);
   });
 });
 
