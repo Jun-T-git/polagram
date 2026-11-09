@@ -11,6 +11,10 @@
     "check": {
       "dependsOn": ["^build"]
     },
+    "@polagram/web#test": {
+      "dependsOn": ["build", "@polagram/cli#build"],
+      "env": ["PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH"]
+    },
     "type-check": {},
     "dev": {
       "cache": false,

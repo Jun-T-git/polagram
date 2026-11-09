@@ -28,7 +28,7 @@
     "react-resizable-panels": "^2.0.19",
     "react-zoom-pan-pinch": "^3.7.0",
     "sirv": "^2.0.4",
-    "mermaid": "^10.0.0"
+    "mermaid": "10.9.8"
   },
   "devDependencies": {
     "@types/connect": "^3.4.38",
