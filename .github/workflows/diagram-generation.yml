@@ -29,11 +29,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      - name: Build Core
-        run: pnpm --filter @polagram/core build
-
-      - name: Build CLI
-        run: pnpm --filter @polagram/cli build
+      - name: Build CLI and workspace dependencies
+        run: pnpm turbo run build --filter=@polagram/cli...
 
       - name: Generate Core Diagrams
         run: pnpm --filter @polagram/core run gen:docs
