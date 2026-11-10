@@ -33,7 +33,7 @@ export function Sidebar({ config }: { config: any }) {
             {target._files && target._files.length > 0 ? (
               <div className="flex flex-col gap-1">
                 {target._files.map((file: string) => {
-                  const isActiveFile = currentPath === file;
+                  const isActiveFile = currentPath === file || currentPath === encodeURIComponent(file);
 
                   return (
                     <div key={file}>

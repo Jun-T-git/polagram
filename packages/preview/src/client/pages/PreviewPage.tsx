@@ -57,21 +57,27 @@ export default function PreviewPage() {
 
   // Fetch file content
   useEffect(() => {
+    const controller = new AbortController();
+    let cancelled = false;
+    setContent('');
     if (!filePath) return;
     setLoading(true);
     setError(null);
-    fetch(`/__api/file?path=${encodeURIComponent(filePath)}`)
+    fetch(`/__api/file?path=${encodeURIComponent(filePath)}`, { signal: controller.signal })
       .then(async (res) => {
         if (!res.ok) {
-          const staticRes = await fetch(`api/file/${filePath}`);
-          if (!staticRes.ok) throw new Error('File not found');
+          const staticRes = await fetch(`api/file/${filePath}`, { signal: controller.signal });
+          if (!staticRes.ok || staticRes.headers.get('content-type')?.includes('text/html')) {
+            throw new Error('File not found');
+          }
           return staticRes.text();
         }
         return res.text();
       })
-      .then((text) => setContent(text))
-      .catch((err) => setError(String(err)))
-      .finally(() => setLoading(false));
+      .then((text) => { if (!cancelled) setContent(text); })
+      .catch((err) => { if (!cancelled) setError(String(err)); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; controller.abort(); };
   }, [filePath]);
 
   // Calculate target and lens
@@ -195,10 +201,13 @@ export default function PreviewPage() {
 
   // Render Mermaid
   useEffect(() => {
-    mermaid.initialize({ startOnLoad: false, theme: 'dark' });
+    mermaid.initialize({ startOnLoad: false, theme: 'dark', securityLevel: 'strict' });
   }, []);
 
   useEffect(() => {
+    let cancelled = false;
+    setSvgContent(null);
+    setError(null);
     if (previewCode) {
       (async () => {
         try {
@@ -207,15 +216,18 @@ export default function PreviewPage() {
           // mermaid.render returns strict SVG string
           // We need to make sure the element doesn't exist or is handled by mermaid internal mock
           const { svg } = await mermaid.render(id, previewCode);
-          setSvgContent(svg);
+          if (!cancelled) setSvgContent(svg);
         } catch (e) {
-          console.error('Mermaid rendering failed:', e);
-          setSvgContent(null);
+          if (!cancelled) {
+            setSvgContent(null);
+            setError(e instanceof Error ? e.message : 'Failed to render diagram');
+          }
         }
       })();
     } else {
       setSvgContent(null);
     }
+    return () => { cancelled = true; };
   }, [previewCode]);
 
   if (!filePath || filePath === '/') {
@@ -288,7 +300,7 @@ export default function PreviewPage() {
             {error && (
               <div className="absolute top-4 left-4 right-4 z-50 text-destructive bg-destructive/10 p-4 rounded-xl border border-destructive/20 backdrop-blur-xl">
                 <h3 className="font-bold flex items-center gap-2">
-                  <AlertTriangle size={18} /> Error loading file
+                  <AlertTriangle size={18} /> Unable to display diagram
                 </h3>
                 <p className="text-sm opacity-90 mt-1">{error}</p>
               </div>

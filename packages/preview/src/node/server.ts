@@ -1,14 +1,17 @@
-import type { TargetConfig } from '@polagram/core';
-import { validateConfig } from '@polagram/core';
-import connect from 'connect';
-import { glob } from 'glob';
 import { promises as fs } from 'node:fs';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import http from 'node:http';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import connect from 'connect';
 import picocolors from 'picocolors';
 import sirv from 'sirv';
+import {
+  assertRelativeInput,
+  loadPreviewConfig,
+  PreviewAccessError,
+  resolveInput,
+} from './boundary.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -24,77 +27,109 @@ export function createPreviewMiddleware(options: PreviewServerOptions) {
   const configDir = path.dirname(configPath);
   const projectRoot = options.root
     ? path.resolve(process.cwd(), options.root)
-    : process.cwd();
+    : configDir;
 
-  console.log('--- Preview Middleware Debug ---');
-  console.log('CWD:', process.cwd());
-  console.log('Options Config:', options.config);
-  console.log('Resolved Config Path:', configPath);
-  console.log('Resolved Project Root:', projectRoot);
-  console.log('--------------------------------');
+  // Local preview APIs must not expose project files to remote web pages or DNS rebinding.
+  app.use('/__api', (req: IncomingMessage, res: ServerResponse, next) => {
+    let trusted = false;
+    try {
+      const host = req.headers.host;
+      const localPort = req.socket.localPort;
+      const allowedHosts = new Set(
+        ['localhost', '127.0.0.1', '[::1]'].flatMap((name) => [
+          name,
+          `${name}:${localPort}`,
+        ]),
+      );
+      const origin = req.headers.origin;
+      trusted =
+        !!host &&
+        allowedHosts.has(host.toLowerCase()) &&
+        (!origin || origin === `http://${host}`) &&
+        req.headers['sec-fetch-site'] !== 'cross-site';
+    } catch {
+      /* Reject malformed request headers. */
+    }
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    if (!trusted) {
+      res.statusCode = 403;
+      res.end('Access denied');
+      return;
+    }
+    if (req.method !== 'GET') {
+      res.statusCode = 405;
+      res.setHeader('Allow', 'GET');
+      res.end('Method not allowed');
+      return;
+    }
+    next();
+  });
 
-  // API Middleware
   app.use(
     '/__api/config',
-    async (_req: IncomingMessage, res: ServerResponse) => {
+    async (req: IncomingMessage, res: ServerResponse) => {
+      let url: URL;
       try {
-        const content = await fs.readFile(configPath, 'utf-8');
-
-        const yaml = await import('js-yaml');
-        const parsed = validateConfig(yaml.load(content));
-
-        const enrichedTargets = await Promise.all(
-          (parsed.targets || []).map(async (t: TargetConfig) => {
-            if (!t.input) return t;
-            const inputs = Array.isArray(t.input) ? t.input : [t.input];
-            const files = await glob(inputs, {
-              cwd: configDir,
-              ignore: ['**/node_modules/**'],
-            });
-            return { ...t, _files: files };
-          }),
-        );
-
-        parsed.targets = enrichedTargets;
-
+        url = new URL(req.url || '/', 'http://localhost');
+      } catch {
+        res.statusCode = 400;
+        res.end('Invalid URL');
+        return;
+      }
+      if (url.pathname !== '/') {
+        res.statusCode = 404;
+        res.end('Not found');
+        return;
+      }
+      try {
+        const { config } = await loadPreviewConfig(configPath, projectRoot);
         res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify({ config: parsed, path: configPath }));
-      } catch (err) {
-        console.error(err); // Log error for debugging
-        res.statusCode = 500;
-        res.end(JSON.stringify({ error: String(err) }));
+        res.end(JSON.stringify({ config, path: configPath }));
+      } catch (error) {
+        res.statusCode = error instanceof PreviewAccessError ? 403 : 500;
+        res.end(
+          JSON.stringify({ error: 'Unable to load preview configuration' }),
+        );
       }
     },
   );
 
   app.use('/__api/file', async (req: IncomingMessage, res: ServerResponse) => {
-    const url = new URL(req.url || '', `http://${req.headers.host}`);
+    let url: URL;
+    try {
+      url = new URL(req.url || '/', 'http://localhost');
+    } catch {
+      res.statusCode = 400;
+      res.end('Invalid URL');
+      return;
+    }
+    if (url.pathname !== '/') {
+      res.statusCode = 404;
+      res.end('Not found');
+      return;
+    }
     const filePath = url.searchParams.get('path');
-
     if (!filePath) {
       res.statusCode = 400;
       res.end(JSON.stringify({ error: 'Missing path parameter' }));
       return;
     }
-
-    // Security check: Ensure file is within project root
-    // filePath is relative to configDir (from glob), so we resolve it from there
-    const absPath = path.resolve(configDir, filePath);
-    if (!absPath.startsWith(projectRoot)) {
-      res.statusCode = 403;
-      res.end(
-        JSON.stringify({ error: 'Access denied: File outside project root' }),
-      );
-      return;
-    }
-
     try {
+      assertRelativeInput(filePath);
+      const { allowedFiles } = await loadPreviewConfig(configPath, projectRoot);
+      if (!allowedFiles.has(filePath)) {
+        res.statusCode = 404;
+        res.end(JSON.stringify({ error: 'File not found' }));
+        return;
+      }
+      const absPath = await resolveInput(configDir, projectRoot, filePath);
       const content = await fs.readFile(absPath, 'utf-8');
       res.setHeader('Content-Type', 'text/plain');
       res.end(content);
-    } catch (_err) {
-      res.statusCode = 404;
-      res.end(JSON.stringify({ error: 'File not found' }));
+    } catch (error) {
+      res.statusCode = error instanceof PreviewAccessError ? 403 : 404;
+      res.end(JSON.stringify({ error: 'File unavailable' }));
     }
   });
 
@@ -132,7 +167,7 @@ export async function startServer(options: PreviewServerOptions) {
   const server = http.createServer(app);
 
   return new Promise<void>((resolve, reject) => {
-    server.listen(port, () => {
+    server.listen(port, '127.0.0.1', () => {
       console.log(
         picocolors.green(
           `  ➜  Polagram Preview running at: http://localhost:${port}/`,
